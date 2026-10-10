@@ -58,7 +58,7 @@ app.whenReady().then(async () => {
   const metrics = await win.webContents.executeJavaScript(`(() => ({
     title: document.querySelector('#tab-shop-company .shop-commerce-title h1')?.textContent.trim(),
     metrics: document.querySelectorAll('#shop-company-content .shop-company-metric').length,
-    progress: document.querySelector('#shop-company-content .shop-company-progress b')?.textContent.trim(),
+    profileMetric: document.querySelector('#shop-company-content .shop-company-metric.attention strong, #shop-company-content .shop-company-metric.complete strong')?.textContent.trim(),
     cards: document.querySelectorAll('#shop-company-content .shop-company-card').length,
     heroHasSvg: Boolean(document.querySelector('#tab-shop-company .shop-commerce-hero-symbol svg')),
     receiptSectionPresent: Boolean(document.querySelector('#shop-company-content .shop-receipt-locations')),
@@ -67,10 +67,13 @@ app.whenReady().then(async () => {
     pageHeight: Math.round(document.querySelector('#tab-shop-company .shop-commerce-page')?.getBoundingClientRect().height || 0),
   }))()`);
 
-  await win.webContents.executeJavaScript(`document.querySelector('#shop-company-content .shop-company-intro-action').click()`);
+  await win.webContents.executeJavaScript(`document.querySelector('#shop-company-content [data-company-open]').click()`);
   await waitFor(win, '#shop-company-modal:not([hidden])');
+  await sleep(250);
+  const editorScreenshotPath = path.join(outputDir, 'company-editor-material-3.png');
+  fs.writeFileSync(editorScreenshotPath, (await win.webContents.capturePage()).toPNG());
   const editorOpened = await win.webContents.executeJavaScript(`!document.getElementById('shop-company-modal').hidden`);
-  console.log(JSON.stringify({ ...metrics, editorOpened, errors, screenshotPath }, null, 2));
+  console.log(JSON.stringify({ ...metrics, editorOpened, errors, screenshotPath, editorScreenshotPath }, null, 2));
   await win.destroy();
   app.quit();
 }).catch((error) => {

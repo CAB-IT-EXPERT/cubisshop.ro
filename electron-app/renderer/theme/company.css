@@ -1,5 +1,5 @@
 /* Datele firmei — Material 3, isolated from the older commerce skins. */
-:root[data-theme="cubis-light"] #tab-shop-company {
+:root[data-theme="cubis-light"] :is(#tab-shop-company, #shop-company-modal) {
   --company-primary: #0b57d0;
   --company-primary-hover: #0848ae;
   --company-on-primary: #ffffff;
@@ -704,4 +704,341 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Company editor — Material 3 dialog. */
+:root[data-theme="cubis-light"] #shop-company-modal {
+  padding: 24px;
+  background: rgba(19, 37, 58, .42);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal {
+  width: min(980px, calc(100vw - 48px));
+  max-height: min(900px, calc(100vh - 48px));
+  border: 0;
+  border-radius: 32px;
+  color: var(--company-text);
+  background: var(--company-surface-low);
+  box-shadow: 0 28px 80px rgba(15, 35, 58, .28);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > header {
+  min-height: 92px;
+  padding: 22px 26px;
+  border-bottom: 0;
+  background: #fff;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > header small {
+  color: var(--company-primary);
+  font-size: 9px;
+  font-weight: 760;
+  letter-spacing: .13em;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > header h2 {
+  margin-top: 6px;
+  color: var(--company-text);
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > header > button {
+  width: 44px;
+  height: 44px;
+  padding: 0 0 3px;
+  border: 0;
+  border-radius: 15px;
+  color: var(--company-muted);
+  background: var(--company-surface-high);
+  font-size: 22px;
+  transition: transform .18s cubic-bezier(.2,0,0,1), background .18s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > header > button:hover {
+  color: var(--company-text);
+  background: #dfe4ed;
+  transform: rotate(6deg);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-commerce-modal-scroll {
+  display: grid;
+  gap: 0;
+  padding: 22px 26px 28px;
+  background: var(--company-surface-low);
+  scrollbar-color: #b8c7dc transparent;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-section {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr);
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 16px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--company-primary-container);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-section:first-child { margin-top: 0; }
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-section > b {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: var(--company-primary);
+  background: rgba(255,255,255,.72);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-section > span { gap: 3px; }
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-section strong {
+  color: var(--company-on-primary-container);
+  font-size: 13px;
+  font-weight: 690;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-section small {
+  color: #52627a;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-commerce-columns {
+  gap: 14px;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal label {
+  gap: 7px;
+  margin-bottom: 14px;
+  color: #4f5f73;
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: .055em;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal input:not([type="checkbox"]),
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal select,
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal textarea {
+  min-height: 52px;
+  border: 1px solid #c7d2e0;
+  border-radius: 15px;
+  padding: 0 15px;
+  color: var(--company-text);
+  -webkit-text-fill-color: var(--company-text);
+  background: #fff;
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 580;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal input:not([type="checkbox"]):hover,
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal select:hover,
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal textarea:hover {
+  border-color: #9eacc0;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal input:not([type="checkbox"]):focus,
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal select:focus,
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal textarea:focus {
+  border-color: var(--company-primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(11,87,208,.12);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal input::placeholder {
+  color: #8996a8;
+  -webkit-text-fill-color: #8996a8;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles > label {
+  min-height: 78px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 48px;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 13px 15px;
+  border: 0;
+  border-radius: 20px;
+  color: var(--company-text);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(25,43,65,.08);
+  cursor: pointer;
+  transition: background .2s ease, transform .2s cubic-bezier(.2,0,0,1);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles > label:hover {
+  background: #f9fbff;
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles b {
+  color: var(--company-text);
+  font-size: 11px;
+  font-weight: 680;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles small {
+  color: var(--company-muted);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.45;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"] {
+  appearance: none;
+  position: relative;
+  width: 48px;
+  min-width: 48px;
+  height: 28px;
+  min-height: 28px;
+  margin: 0;
+  border: 2px solid #747b87;
+  border-radius: 999px;
+  background: #e2e5eb;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 4px;
+  top: 4px;
+  border-radius: 50%;
+  background: #747b87;
+  transition: width .16s ease, transform .22s cubic-bezier(.2,0,0,1), background .2s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"]:active::after { width: 20px; }
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"]:checked {
+  border-color: var(--company-primary);
+  background: var(--company-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"]:checked::after {
+  background: #fff;
+  transform: translateX(20px);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"]:checked:active::after { transform: translateX(16px); }
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles input[type="checkbox"]:focus-visible {
+  outline: 3px solid rgba(11,87,208,.17);
+  outline-offset: 2px;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-vat-rate {
+  margin: 12px 0 2px;
+  border: 0;
+  border-radius: 20px;
+  padding: 15px;
+  color: var(--company-warning);
+  background: var(--company-warning-container);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-vat-rate input { max-width: 180px; }
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-vat-rate small { color: #6f573c; }
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-stamp {
+  grid-template-columns: minmax(190px, 240px) minmax(0,1fr);
+  gap: 18px;
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(25,43,65,.08);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal #shop-company-stamp-preview {
+  height: 132px;
+  border: 1px dashed #9bb4d4;
+  border-radius: 17px;
+  color: var(--company-muted);
+  background: var(--company-surface-low);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-stamp .btn-ghost {
+  min-width: 150px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-stamp .btn-ghost.danger {
+  color: var(--company-error);
+  background: var(--company-error-container);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer {
+  min-height: 78px;
+  gap: 10px;
+  padding: 15px 24px;
+  border-top: 1px solid #e1e6ee;
+  background: rgba(255,255,255,.96);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer button {
+  min-width: 132px;
+  min-height: 46px;
+  border: 0;
+  border-radius: 15px;
+  box-shadow: none;
+  font-size: 10px;
+  font-weight: 720;
+  transition: transform .18s cubic-bezier(.2,0,0,1), background .18s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer .btn-ghost {
+  color: var(--company-primary);
+  background: transparent;
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer .btn-primary {
+  color: var(--company-on-primary);
+  background: var(--company-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer button:hover { transform: translateY(-2px); }
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer .btn-ghost:hover { background: var(--company-primary-container); }
+:root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer .btn-primary:hover { background: var(--company-primary-hover); opacity: 1; }
+
+@media (max-width: 720px) {
+  :root[data-theme="cubis-light"] #shop-company-modal { padding: 8px; }
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    border-radius: 26px;
+  }
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > header { padding: 18px; }
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-commerce-modal-scroll { padding: 16px; }
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-commerce-columns,
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-commerce-columns.three,
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-editor-toggles { grid-template-columns: 1fr; }
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-company-stamp { grid-template-columns: 1fr; }
+  :root[data-theme="cubis-light"] #shop-company-modal .shop-company-modal > footer button { flex: 1; min-width: 0; }
 }
