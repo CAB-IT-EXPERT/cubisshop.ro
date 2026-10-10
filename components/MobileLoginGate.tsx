@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated as NativeAnimated,
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Switch,
   StyleSheet,
@@ -13,15 +15,17 @@ import {
   View,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, FadeInUp, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+} from 'react-native-reanimated';
 import { ArrowRight, Eye, EyeOff, LockKeyhole, User } from 'lucide-react-native';
 import { Colors, Theme } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import AppAuroraBackground from '@/components/AppAuroraBackground';
 
 const appIcon = require('../assets/images/cubis-shop-icon.png');
-const disabledActionGradient = ['#9BC8E8', '#84C3D0'] as const;
 
 export default function MobileLoginGate({ children }: { children: React.ReactNode }) {
   const { user, login, loading, initializing, rememberedUsername, rememberedLogin } = useAuth();
@@ -32,6 +36,7 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [focusedField, setFocusedField] = useState<'username' | 'password' | null>(null);
   const [error, setError] = useState('');
+  const buttonScale = useRef(new NativeAnimated.Value(1)).current;
 
   React.useEffect(() => {
     if (!username && rememberedUsername) setUsername(rememberedUsername);
@@ -80,13 +85,16 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
 
       <KeyboardAvoidingView
         style={styles.keyboard}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        enabled={Platform.OS === 'ios'}
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 18 : 0}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="always"
-          keyboardDismissMode="on-drag"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'none'}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+          contentInsetAdjustmentBehavior="never"
           showsVerticalScrollIndicator={false}>
             <Animated.View entering={FadeInDown.duration(420).delay(40)} style={styles.brandRow}>
               <View style={styles.brandIconWrap}>
@@ -100,7 +108,6 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
 
             <Animated.View
               entering={FadeInDown.duration(520).delay(90).springify().damping(18).stiffness(130)}
-              layout={LinearTransition.springify().damping(18).stiffness(120)}
               style={styles.card}>
               <Animated.View entering={FadeInUp.duration(420).delay(170)} style={styles.heading}>
                 <Text style={styles.title}>Bine ai revenit</Text>
@@ -121,6 +128,9 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                     onBlur={() => setFocusedField(null)}
                     placeholder="Numele de utilizator"
                     placeholderTextColor={Theme.colors.text.disabled}
+                    autoComplete="username"
+                    textContentType="username"
+                    importantForAutofill="yes"
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="next"
@@ -145,6 +155,9 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                     onBlur={() => setFocusedField(null)}
                     placeholder="Parola ta"
                     placeholderTextColor={Theme.colors.text.disabled}
+                    autoComplete="current-password"
+                    textContentType="password"
+                    importantForAutofill="yes"
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry={!passwordVisible}
@@ -193,15 +206,28 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
               ) : null}
 
               <Animated.View entering={FadeInUp.duration(420).delay(360)}>
-                <TouchableOpacity
-                  activeOpacity={0.86}
-                  onPress={submit}
-                  disabled={submitDisabled}>
-                  <LinearGradient
-                    colors={submitDisabled ? disabledActionGradient : Theme.gradients.action}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.button}>
+                <NativeAnimated.View style={{ transform: [{ scale: buttonScale }] }}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Intră în aplicație"
+                    android_ripple={{ color: 'rgba(255,255,255,0.16)', borderless: false }}
+                    onPress={submit}
+                    onPressIn={() => {
+                      NativeAnimated.timing(buttonScale, {
+                        toValue: 0.985,
+                        duration: 90,
+                        useNativeDriver: true,
+                      }).start();
+                    }}
+                    onPressOut={() => {
+                      NativeAnimated.timing(buttonScale, {
+                        toValue: 1,
+                        duration: 180,
+                        useNativeDriver: true,
+                      }).start();
+                    }}
+                    disabled={submitDisabled}
+                    style={[styles.button, submitDisabled && styles.buttonDisabled]}>
                     {loading ? (
                       <>
                         <ActivityIndicator size="small" color={Colors.white} />
@@ -210,11 +236,13 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                     ) : (
                       <>
                         <Text style={styles.buttonText}>Intră în aplicație</Text>
-                        <ArrowRight size={19} color={Colors.white} strokeWidth={2.2} />
+                        <View style={styles.buttonArrow}>
+                          <ArrowRight size={18} color={Colors.white} strokeWidth={2} />
+                        </View>
                       </>
                     )}
-                  </LinearGradient>
-                </TouchableOpacity>
+                  </Pressable>
+                </NativeAnimated.View>
               </Animated.View>
             </Animated.View>
         </ScrollView>
@@ -234,7 +262,7 @@ const styles = StyleSheet.create({
   keyboard: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: {
-    flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingTop: 54, paddingBottom: 42,
+    flexGrow: 1, justifyContent: 'flex-start', paddingHorizontal: 20, paddingTop: 54, paddingBottom: 42,
   },
   decorations: { ...StyleSheet.absoluteFill },
   decorativeRingLarge: {
@@ -335,11 +363,16 @@ const styles = StyleSheet.create({
   error: { color: Theme.colors.state.error, fontSize: 10, lineHeight: 15, fontFamily: Theme.typography.medium },
   button: {
     height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 10, borderRadius: 17, shadowColor: Theme.colors.brand.primary,
-    shadowOpacity: 0.25, shadowRadius: 15, shadowOffset: { width: 0, height: 8 }, elevation: 5,
+    gap: 12, overflow: 'hidden', borderRadius: 28, backgroundColor: '#086FBD',
   },
+  buttonDisabled: { backgroundColor: '#8EBFDC' },
   buttonText: {
-    color: Theme.colors.text.onBrand, fontSize: 13,
-    fontFamily: Theme.typography.bold, letterSpacing: 0.1,
+    color: Theme.colors.text.onBrand, fontSize: 14,
+    fontFamily: Theme.typography.semibold, letterSpacing: 0.15,
+  },
+  buttonArrow: {
+    position: 'absolute', right: 12, width: 32, height: 32,
+    alignItems: 'center', justifyContent: 'center', borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
 });
