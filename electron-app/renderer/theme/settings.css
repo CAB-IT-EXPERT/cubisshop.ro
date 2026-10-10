@@ -1,0 +1,628 @@
+/* Users & application — responsive Material 3 workspace. */
+:root[data-theme="cubis-light"] #tab-settings {
+  min-height: 0;
+  overflow: hidden;
+}
+
+:root[data-theme="cubis-light"] .settings-page-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(9, 201, 229, 0.1), transparent 28%),
+    radial-gradient(circle at 96% 7%, rgba(8, 127, 245, 0.08), transparent 30%);
+}
+
+:root[data-theme="cubis-light"] .settings-page-scroll::-webkit-scrollbar {
+  width: 9px;
+}
+
+:root[data-theme="cubis-light"] .settings-page-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:root[data-theme="cubis-light"] .settings-page-scroll::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-round);
+  background: rgba(49, 80, 109, 0.28);
+  background-clip: padding-box;
+}
+
+:root[data-theme="cubis-light"] .settings-page-shell {
+  width: min(1380px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 28px 0 48px;
+}
+
+:root[data-theme="cubis-light"] .settings-page-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 176px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid rgba(23, 43, 64, 0.08);
+  border-radius: 28px;
+  padding: 30px 34px;
+  color: #f6fbff;
+  background:
+    radial-gradient(circle at 86% 22%, rgba(9, 201, 229, 0.2), transparent 32%),
+    linear-gradient(120deg, #173b55 0%, #0f3652 54%, #0a6480 100%);
+  box-shadow: 0 18px 44px rgba(23, 43, 64, 0.14);
+}
+
+:root[data-theme="cubis-light"] .settings-page-hero::before,
+:root[data-theme="cubis-light"] .settings-page-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(126, 223, 235, 0.16);
+  border-radius: 50%;
+}
+
+:root[data-theme="cubis-light"] .settings-page-hero::before {
+  width: 270px;
+  height: 270px;
+  top: -142px;
+  right: 9%;
+}
+
+:root[data-theme="cubis-light"] .settings-page-hero::after {
+  width: 380px;
+  height: 380px;
+  right: -190px;
+  bottom: -300px;
+}
+
+:root[data-theme="cubis-light"] .settings-hero-copy {
+  min-width: 0;
+}
+
+:root[data-theme="cubis-light"] .settings-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+  color: #8ee7f3;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="cubis-light"] .settings-hero-kicker i,
+:root[data-theme="cubis-light"] .settings-hero-status > span,
+:root[data-theme="cubis-light"] .version-live i {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 5px rgba(52, 211, 153, 0.12);
+}
+
+:root[data-theme="cubis-light"] .settings-page-hero h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 790;
+  letter-spacing: -0.045em;
+}
+
+:root[data-theme="cubis-light"] .settings-page-hero p {
+  max-width: 620px;
+  margin: 10px 0 0;
+  color: #b9cfdf;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+:root[data-theme="cubis-light"] .settings-hero-status {
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid rgba(126, 223, 235, 0.18);
+  border-radius: 18px;
+  padding: 14px 17px;
+  background: rgba(255, 255, 255, 0.065);
+  backdrop-filter: blur(12px);
+}
+
+:root[data-theme="cubis-light"] .settings-hero-status > div {
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .settings-hero-status strong {
+  color: #f5fbff;
+  font-size: 12px;
+}
+
+:root[data-theme="cubis-light"] .settings-hero-status small {
+  color: #a8c3d5;
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.92fr) minmax(430px, 1.08fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 24px;
+  padding: 22px;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 34px rgba(31, 82, 126, 0.075);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel::before {
+  display: none;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel-title {
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel-title h2 {
+  color: var(--color-text-primary);
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel-title small {
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  letter-spacing: 0.11em;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel-icon {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .version-panel,
+:root[data-theme="cubis-light"] #tab-settings .login-system-panel {
+  order: initial;
+  overflow: hidden;
+  border-color: var(--color-border-subtle);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .version-brand-row {
+  position: relative;
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 14px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 19px;
+  padding: 13px;
+  background: linear-gradient(125deg, var(--color-surface-brand), var(--color-surface-cyan));
+}
+
+:root[data-theme="cubis-light"] #tab-settings .version-logo {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(8, 127, 245, 0.09);
+  border-radius: 17px;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 7px 18px rgba(31, 82, 126, 0.1);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .version-name {
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 760;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .version-build {
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 550;
+}
+
+:root[data-theme="cubis-light"] .version-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-round);
+  padding: 6px 9px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+:root[data-theme="cubis-light"] .version-live i {
+  width: 6px;
+  height: 6px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-data-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-data-card {
+  gap: 6px;
+  min-height: 64px;
+  justify-content: center;
+  border-color: var(--color-border-subtle);
+  border-radius: 14px;
+  padding: 10px 11px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-data-card > span:not(.data-icon) {
+  color: var(--color-text-muted);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-data-card strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-data-card .version-ok {
+  color: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .app-update-card {
+  gap: 12px;
+  margin-top: 12px;
+  border: 1px solid var(--color-border-brand);
+  border-radius: 18px;
+  padding: 13px;
+  background: linear-gradient(130deg, var(--color-surface-brand), #f8fcff 60%);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .app-update-icon {
+  border: 0;
+  color: var(--color-brand-text);
+  background: #fff;
+  box-shadow: 0 5px 14px rgba(31, 82, 126, 0.08);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .app-update-copy strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .app-update-copy small {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .app-update-badge {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: #fff;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .app-update-actions button {
+  min-height: 40px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px 12px;
+  margin-top: 20px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form > .field:nth-of-type(1) {
+  grid-column: 1 / -1;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form > .form-grid,
+:root[data-theme="cubis-light"] #tab-settings .user-form > .check-row,
+:root[data-theme="cubis-light"] #tab-settings .user-form > .error-box,
+:root[data-theme="cubis-light"] #tab-settings .user-form > .form-actions {
+  grid-column: 1 / -1;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form .field {
+  min-width: 0;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form .field label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--color-text-secondary);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form :is(input, select) {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 13px;
+  padding: 0 13px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  font-size: 12px;
+  outline: none;
+  box-shadow: none;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form :is(input, select):focus {
+  border-color: var(--color-brand-primary);
+  background: #fff;
+  box-shadow: var(--shadow-focus);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-form .form-grid {
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .check-row {
+  width: fit-content;
+  min-height: 36px;
+  gap: 9px;
+  margin: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  padding: 7px 11px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-subtle);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-brand-primary);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 1px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .form-actions button {
+  min-height: 42px;
+  border-radius: 13px;
+  padding-inline: 18px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-panel-wide {
+  padding: 0;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-list-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 86px;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 18px 20px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-mini-stats {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  width: auto;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .settings-mini-stats > span {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-round);
+  padding: 7px 10px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-subtle);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .users-list {
+  max-height: none;
+  overflow: visible;
+  gap: 9px;
+  padding: 14px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row {
+  min-height: 72px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 17px;
+  padding: 12px 14px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-main {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.8fr) minmax(230px, 1.2fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-main > strong {
+  color: var(--color-text-primary);
+  font-size: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-main > small {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-main > .status {
+  justify-self: end;
+  border-radius: var(--radius-round);
+  padding: 5px 8px;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-main > .status.active {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-main > .status.inactive {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] #tab-settings .user-row-actions button {
+  min-height: 36px;
+  border-radius: 11px;
+  padding: 0 12px;
+  box-shadow: none;
+  font-size: 10px;
+}
+
+@media (max-width: 1120px) {
+  :root[data-theme="cubis-light"] #tab-settings .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .settings-data-grid {
+    grid-template-columns: repeat(4, minmax(110px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  :root[data-theme="cubis-light"] .settings-page-shell {
+    width: min(100% - 24px, 620px);
+    padding: 14px 0 32px;
+  }
+
+  :root[data-theme="cubis-light"] .settings-page-hero {
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    border-radius: 23px;
+    padding: 24px;
+  }
+
+  :root[data-theme="cubis-light"] .settings-page-hero h1 {
+    font-size: 30px;
+  }
+
+  :root[data-theme="cubis-light"] .settings-hero-status {
+    width: 100%;
+    min-width: 0;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .settings-panel {
+    border-radius: 21px;
+    padding: 17px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .settings-data-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-form,
+  :root[data-theme="cubis-light"] #tab-settings .user-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-form > .field {
+    grid-column: 1 / -1;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .settings-list-header {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .settings-mini-stats {
+    grid-column: 1;
+    justify-content: flex-start;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-row-main {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-row-main > small {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-row-main > .status {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-row-actions {
+    width: 100%;
+  }
+
+  :root[data-theme="cubis-light"] #tab-settings .user-row-actions button {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="cubis-light"] .settings-page-scroll {
+    scroll-behavior: auto;
+  }
+}

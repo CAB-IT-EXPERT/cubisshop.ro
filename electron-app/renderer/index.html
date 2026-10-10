@@ -117,6 +117,7 @@
   <link rel="stylesheet" href="theme/tokens.css" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="theme/shell.css" />
+  <link rel="stylesheet" href="theme/settings.css" />
   <link rel="stylesheet" href="theme/commerce.css" />
   <link rel="stylesheet" href="theme/overlays.css" />
 </head>
@@ -407,11 +408,20 @@
   </div>
   <!-- TAB: SETĂRI APLICAȚIE ȘI UTILIZATORI -->
   <div class="tab-panel" id="tab-settings">
-    <div class="page-header"><h1>Utilizatori &amp; aplicație</h1></div>
-    <div class="settings-grid">
+    <div class="settings-page-scroll">
+      <main class="settings-page-shell">
+        <header class="settings-page-hero">
+          <div class="settings-hero-copy">
+            <span class="settings-hero-kicker"><i></i> Control center</span>
+            <h1>Utilizatori &amp; aplicație</h1>
+            <p>Gestionează accesul echipei și păstrează aplicația Cubis Shop actualizată.</p>
+          </div>
+          <div class="settings-hero-status"><span></span><div><strong>Sistem operațional</strong><small>Serviciile sunt disponibile</small></div></div>
+        </header>
+        <div class="settings-grid">
       <div class="settings-panel version-panel">
         <div class="settings-panel-title"><span class="settings-panel-icon"><svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 7h6M9 11h4M9 17h6"/></svg></span><div><h2>Versiune aplicație</h2><small>build &amp; runtime</small></div></div>
-        <div class="version-brand-row"><img src="../assets/cubis-shop-logo.png" alt="Cubis Shop" class="version-logo"/><div><div class="version-name">Cubis Shop CRM</div><div class="version-build">Administrare magazin online</div></div></div>
+        <div class="version-brand-row"><img src="../assets/cubis-shop-icon.png" alt="Cubis Shop" class="version-logo"/><div><div class="version-name">Cubis Shop CRM</div><div class="version-build">Control Center pentru magazinul tău</div></div><span class="version-live"><i></i> Activ</span></div>
         <div class="settings-data-grid">
           <div class="settings-data-card"><span>Versiune</span><strong id="app-current-version">1.2.69</strong></div>
           <div class="settings-data-card"><span>Platformă</span><strong>DESKTOP</strong></div>
@@ -425,7 +435,7 @@
         </div>
       </div>
       <div class="settings-panel login-system-panel" data-admin-only="true">
-        <div class="settings-panel-title"><span class="settings-panel-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span><div><h2>Utilizator</h2><small>rol și acces aplicații</small></div></div>
+        <div class="settings-panel-title"><span class="settings-panel-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span><div><h2>Adaugă utilizator</h2><small>rol și acces în aplicații</small></div></div>
         <form id="user-form" class="user-form"><input type="hidden" id="user-id"/>
           <div class="field"><label>Nume afișat</label><input type="text" id="user-display-name" required/></div>
           <div class="field"><label>Utilizator</label><input type="text" id="user-username" autocomplete="off" required/></div>
@@ -439,6 +449,8 @@
     <div class="settings-panel settings-panel-wide" data-admin-only="true">
       <div class="settings-list-header"><div class="settings-panel-title"><span class="settings-panel-icon"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><div><h2>Utilizatori creați</h2><small id="users-summary-label">baza Cubis Shop</small></div></div><div class="settings-mini-stats" id="users-mini-stats"></div></div>
       <div id="users-list" class="users-list"><div class="loading">Se încarcă...</div></div>
+    </div>
+      </main>
     </div>
   </div>
 <div class="tab-panel shop-tab-panel active" id="tab-shop-dashboard">
