@@ -7,8 +7,8 @@
   const DASHBOARD_GRANULARITY_VALUES = new Set(['hour', 'day', 'week', 'month']);
   const dashboardPreferences = readDashboardPreferences();
   const state = {
-    products: [], orders: [], invoices: [], inventory: [], inventoryMovements: [], sources: [], suppliers: [], categories: [], brands: [], manufacturers: [], shipping: [], customers: [], newsletterSubscribers: [], promotions: [], companies: [], receiptLocations: [], nirs: [], nirPermissions: [], nirWarehouses: [], nirReceiptLocations: [], smartBillSettings: null, smartBillDraft: null, smartBillBusy: '', smartBillSkuLookup: null, smartBillSkuTimer: null, smartBillSkuRequestId: 0, invoiceThemeSettings: null, invoiceAutomationSettings: null, invoiceAutomationSaving: false, selectedInvoiceTheme: 'orange', invoiceSettingsDraft: { invoice_series: '', default_warehouse_id: '', default_warehouse_name: '', due_days: 7, default_notes: '' }, invoiceThemeSaving: false, invoiceQuery: '', invoiceStatusFilter: 'all', invoiceBusy: '',
-    editingProduct: null, editingOrder: null, orderItemDrafts: [], orderProductPickerTimer: null, orderReplacementTransportConfirmed: false, orderReplacementShippingCost: 0, orderReplacementReturnPayer: '', orderReplacementReturnCost: 0, invoiceIssueOrder: null, invoiceDetail: null, shippingNoteOrder: null, shippingNoteBusy: '', editingStock: null, editingSource: null, editingSupplier: null, editingShipping: null, editingPromotion: null, editingCompany: null, editingReceiptLocation: null, customerDetail: null, companyStampBase64: null, companyStampRemove: false, promotionSelectedProductIds: new Set(), promotionAllProductIds: null, promotionSelectingAll: false, promotionProductQuery: '', promotionProductsLoading: false, promotionProductSearchTimer: null, promotionSelectedCustomerIds: new Set(), promotionCustomerQuery: '', promotionCustomersLoading: false,
+    products: [], orders: [], invoices: [], inventory: [], inventoryMovements: [], sources: [], suppliers: [], categories: [], brands: [], manufacturers: [], shipping: [], customers: [], newsletterSubscribers: [], promotions: [], companies: [], nirs: [], nirPermissions: [], nirWarehouses: [], nirReceiptLocations: [], smartBillSettings: null, smartBillDraft: null, smartBillBusy: '', smartBillSkuLookup: null, smartBillSkuTimer: null, smartBillSkuRequestId: 0, invoiceThemeSettings: null, invoiceAutomationSettings: null, invoiceAutomationSaving: false, selectedInvoiceTheme: 'orange', invoiceSettingsDraft: { invoice_series: '', default_warehouse_id: '', default_warehouse_name: '', due_days: 7, default_notes: '' }, invoiceThemeSaving: false, invoiceQuery: '', invoiceStatusFilter: 'all', invoiceBusy: '',
+    editingProduct: null, editingOrder: null, orderItemDrafts: [], orderProductPickerTimer: null, orderReplacementTransportConfirmed: false, orderReplacementShippingCost: 0, orderReplacementReturnPayer: '', orderReplacementReturnCost: 0, invoiceIssueOrder: null, invoiceDetail: null, shippingNoteOrder: null, shippingNoteBusy: '', editingStock: null, editingSource: null, editingSupplier: null, editingShipping: null, editingPromotion: null, editingCompany: null, customerDetail: null, companyStampBase64: null, companyStampRemove: false, promotionSelectedProductIds: new Set(), promotionAllProductIds: null, promotionSelectingAll: false, promotionProductQuery: '', promotionProductsLoading: false, promotionProductSearchTimer: null, promotionSelectedCustomerIds: new Set(), promotionCustomerQuery: '', promotionCustomersLoading: false,
     productImages: [], productSpecifications: [], productQuestions: [], productDetail: null, productTotal: 0, productSearchTimer: null, productLoadRequestId: 0, slugTouched: false, productQuery: '', orderQuery: '', orderSearchTimer: null, orderStatusFilter: 'all', orderPaymentMethodFilter: 'all', orderPaymentStatusFilter: 'all', richRange: null, richImage: null, richDragging: null, richResize: null,
     customerQuery: '', newsletterQuery: '', newsletterStatus: 'all', productSaveProgressTimer: null, inventoryQuery: '', inventoryMovementsLoading: false, supplierProductsBySupplier: {}, supplierProductPages: {}, nirEditor: null, nirCorrectionOriginal: null, nirStornoDocument: null, nirSupplierReturnContext: null, nirSearch: '', nirStatus: '', nirSupplierQuery: '', nirProductQuery: '', nirProductLineIndex: -1, nirSavePromise: null, nirEditRevision: 0, nirRegistryRequestId: 0, nirBootstrapped: false, nirCreateInFlight: false, nirResolveTimers: new Map(), nirResolveRequestIds: new Map(), nirPendingFiles: [], nirStornoPendingFiles: [], nirRateLoading: '', nirReversing: false, nirBundleDownloading: '', nirRegistryDownloadPeriod: 'current_month', nirRegistryDownloadContent: 'complete', nirRegistryDownloading: false, nirExportProgressTimer: null,
     pages: { products: 1, orders: 1, invoices: 1, inventory: 1, stockFlow: 1, stockMovements: 1, productSales: 1, productReviews: 1, productPurchases: 1, customers: 1, newsletter: 1, customerOrders: 1, nirs: 1 },
@@ -232,7 +232,7 @@
 
   function commercePage(title, description, contentId, hasAdd = false) {
     const kind = contentId.replace('shop-', '').replace('-content', '');
-    const symbols = { products: '◇', orders: '✓', invoices: '<svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>', inventory: '▦', sources: '◎', suppliers: '⌁', nirs: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 12h7m-7 4h7"/><path d="m9 8 1.2 1.2L12.7 7"/></svg>', payments: '▣', automations: '<svg viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-7Z"/></svg>', shipping: '⇢', customers: '◉', newsletter: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m5 8 7 5 7-5"/><path d="m16 17 2 2 4-4"/></svg>', discounts: '%', company: '▤' };
+    const symbols = { products: '◇', orders: '✓', invoices: '<svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>', inventory: '▦', sources: '◎', suppliers: '⌁', nirs: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 12h7m-7 4h7"/><path d="m9 8 1.2 1.2L12.7 7"/></svg>', payments: '▣', automations: '<svg viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-7Z"/></svg>', shipping: '⇢', customers: '◉', newsletter: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m5 8 7 5 7-5"/><path d="m16 17 2 2 4-4"/></svg>', discounts: '%', company: '<svg viewBox="0 0 24 24"><path d="M5 21V5.8c0-.7.4-1.3 1.1-1.6l8-3.1A1.4 1.4 0 0 1 16 2.4V21M3 21h18M9 8h3m-3 4h3m-3 4h3m4-8h2v3h-2m0 3h2v3h-2"/></svg>' };
     return `<div class="shop-commerce-page"><button type="button" class="shop-back-btn" data-shop-open="shop-dashboard" aria-label="Înapoi la Panoul SHOP" title="Panou SHOP"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><header class="shop-commerce-head shop-commerce-hero" data-commerce-kind="${kind}"><span class="shop-commerce-hero-glow"></span><div class="shop-commerce-title"><span>CUBIS SHOP CRM</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div><div class="shop-commerce-hero-symbol" aria-hidden="true">${symbols[kind] || '◇'}</div><div class="shop-commerce-head-actions"><button type="button" class="shop-commerce-refresh" data-commerce-refresh="${contentId}" title="Reincarca" aria-label="Reincarca datele"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0 2 5"/><path d="M20 4v7h-7"/></svg></button>${hasAdd ? `<button type="button" class="shop-commerce-add" data-commerce-add="${contentId}" ${contentId === 'shop-company-content' ? 'hidden' : ''}>${contentId === 'shop-nirs-content' ? '<span class="shop-nir-add-icon">+</span> NIR nou' : '+ Adauga'}</button>` : ''}</div></header><main id="${contentId}" class="shop-commerce-content"><div class="shop-commerce-loading">Se incarca...</div></main></div>`;
   }
   function dashboardCard(target, tone, kicker, title, description) {
@@ -427,14 +427,7 @@
       <div class="shop-commerce-columns"><label>Banca<input id="shop-company-bank" /></label><label>IBAN<input id="shop-company-iban" /></label></div><label>Capital social<input id="shop-company-capital" /></label>
       ${section('05', 'Stampila firmei', 'Imaginea poate fi folosita pe documentele generate.')}
       <div class="shop-company-stamp"><div id="shop-company-stamp-preview"><span>Fara stampila</span></div><div><input id="shop-company-stamp-input" type="file" accept="image/png,image/jpeg,image/webp" hidden /><button type="button" class="btn-ghost" id="shop-company-stamp-pick">Alege stampila</button><button type="button" class="btn-ghost danger" id="shop-company-stamp-remove">Sterge stampila</button></div></div>
-    </div><footer><button type="button" class="btn-ghost" data-commerce-close="shop-company-modal">Renunta</button><button type="submit" class="btn-primary" id="shop-company-save">Salveaza firma</button></footer></form></div>
-    <div class="shop-commerce-overlay" id="shop-receipt-location-modal" hidden><form class="shop-commerce-modal mini shop-receipt-location-modal" id="shop-receipt-location-form"><header><div><small>PUNCT DE RECEPȚIE</small><h2 id="shop-receipt-location-title">Punct nou</h2></div><button type="button" data-commerce-close="shop-receipt-location-modal">×</button></header><div class="shop-commerce-modal-scroll">
-      ${section('01', 'Identificare', 'Denumirea și adresa care vor apărea în selectorul NIR.')}
-      <label>Denumire *<input id="shop-receipt-location-name" required placeholder="Gestiune principală" /></label>
-      <label>Adresă<input id="shop-receipt-location-address" /></label>
-      <div class="shop-commerce-columns three"><label>Localitate<input id="shop-receipt-location-city" /></label><label>Județ<input id="shop-receipt-location-county" /></label><label>Cod poștal<input id="shop-receipt-location-postal" /></label></div>
-      <div class="shop-editor-toggles"><label><span><b>Punct implicit</b><small>Va fi selectat automat pe orice NIR nou.</small></span><input id="shop-receipt-location-default" type="checkbox" /></label></div>
-    </div><footer><button type="button" class="btn-ghost" data-commerce-close="shop-receipt-location-modal">Renunță</button><button type="submit" class="btn-primary" id="shop-receipt-location-save">Salvează punctul</button></footer></form></div>`;
+    </div><footer><button type="button" class="btn-ghost" data-commerce-close="shop-company-modal">Renunta</button><button type="submit" class="btn-primary" id="shop-company-save">Salveaza firma</button></footer></form></div>`;
   }
   function section(number, title, text) { return `<div class="shop-editor-section"><b>${number}</b><span><strong>${title}</strong><small>${text}</small></span></div>`; }
 
@@ -692,7 +685,6 @@
     $('shop-shipping-form').addEventListener('submit', saveShipping);
     $('shop-promotion-form').addEventListener('submit', savePromotion);
     $('shop-company-form').addEventListener('submit', saveCompany);
-    $('shop-receipt-location-form').addEventListener('submit', saveReceiptLocation);
     $('shop-company-stamp-pick').addEventListener('click', () => $('shop-company-stamp-input').click());
     $('shop-company-stamp-input').addEventListener('change', readCompanyStamp);
     $('shop-company-stamp-remove').addEventListener('click', removeCompanyStamp);
@@ -4166,9 +4158,8 @@
   async function loadCompanies() {
     loading('shop-company-content', 'Se incarca firmele...');
     try {
-      const [companies, receiptLocations] = await Promise.all([window.SHOP_API.listCompanySettings(), window.SHOP_API.listReceiptLocations()]);
+      const companies = await window.SHOP_API.listCompanySettings();
       state.companies = Array.isArray(companies) ? companies : [];
-      state.receiptLocations = Array.isArray(receiptLocations) ? receiptLocations : [];
       renderCompanies();
     } catch (error) { failure('shop-company-content', error); }
   }
@@ -4176,10 +4167,13 @@
   function renderCompanies() {
     const addButton = document.querySelector('[data-commerce-add="shop-company-content"]');
     if (addButton) {
-      addButton.hidden = state.companies.length > 0;
-      addButton.textContent = '+ Configureaza firma';
+      addButton.hidden = false;
+      addButton.innerHTML = '<span aria-hidden="true">+</span> Configurează firma';
     }
-    const completeCompanies = state.companies.filter(company => [company.legal_name, company.cui, company.address, company.email, company.phone, company.iban].filter(Boolean).length >= 5).length;
+    const requiredCompanyFields = ['legal_name', 'cui', 'address', 'email', 'phone', 'iban'];
+    const primaryCompany = state.companies.find(company => company.is_default) || state.companies[0] || null;
+    const completedFields = primaryCompany ? requiredCompanyFields.filter(field => primaryCompany[field]).length : 0;
+    const profileCompletion = Math.round((completedFields / requiredCompanyFields.length) * 100);
     const cards = state.companies.map((company, index) => {
       const displayName = company.trade_name || company.legal_name || 'Firma fara nume';
       const registeredLocation = [company.address, company.city, company.county].filter(Boolean).join(', ');
@@ -4206,18 +4200,18 @@
         </aside>
       </article>`;
     }).join('');
-    const pinIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>';
-    const receiptCards = state.receiptLocations.map(location => {
-      const address = [location.address, location.city, location.county, location.postal_code].filter(Boolean).join(', ');
-      return `<article class="shop-receipt-location-card ${location.is_default ? 'is-default' : ''}"><span class="shop-receipt-location-pin">${pinIcon}</span><div><span><strong>${esc(location.name)}</strong>${location.is_default ? '<em>IMPLICIT</em>' : ''}</span><small>${esc(address || 'Fără adresă detaliată')}</small></div><aside><button type="button" data-receipt-location-open="${esc(location.id)}" aria-label="Editează ${esc(location.name)}" title="Editează">✎</button><button type="button" class="danger" data-receipt-location-delete="${esc(location.id)}" aria-label="Șterge ${esc(location.name)}" title="Șterge">×</button></aside></article>`;
-    }).join('');
-    const receiptSection = `<section class="shop-receipt-locations"><header><div><small>LOCURI PENTRU NIR</small><strong>Puncte de recepție</strong><p>Gestionează locurile fizice disponibile în selectorul NIR. Punctul implicit este ales automat.</p></div><button type="button" data-receipt-location-add><span>+</span> Adaugă punct</button></header><div>${receiptCards || '<p class="shop-receipt-location-empty">Nu există niciun punct de recepție configurat.</p>'}</div></section>`;
-    $('shop-company-content').innerHTML = `<section class="shop-customer-metrics shop-company-metrics">${detailMetric('Firma configurata', state.companies.length ? 'Da' : 'Nu')}${detailMetric('Societatea folosita', state.companies.find(item => item.is_default)?.trade_name || state.companies.find(item => item.is_default)?.legal_name || '—', true)}${detailMetric('Profil complet', completeCompanies ? 'Da' : 'Nu')}${detailMetric('Regim TVA', state.companies.some(item => item.vat_payer) ? 'Platitoare' : 'Neplatitoare')}</section><section class="shop-company-intro"><span>▤</span><div><small>IDENTITATEA COMPANIEI</small><strong>Date pregatite pentru documente si comenzi</strong><p>Completeaza datele juridice, contactul, banca si stampila societatii folosite in fluxurile SHOP.</p></div></section><div class="shop-company-list">${cards || empty('Nicio firma configurata', 'Configureaza societatea folosita pentru documentele Cubis Shop.')}</div>${receiptSection}`;
+    const buildingIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M2 21h20M8 8h2m4 0h2M8 12h2m4 0h2M8 16h2m4 0h2"/></svg>';
+    const checkIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+    const profileIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 21a7 7 0 0 1 14 0M19 8v4m-2-2h4"/></svg>';
+    const vatIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/><path d="m19 5-14 14"/></svg>';
+    const metric = (tone, icon, label, value, hint) => `<article class="shop-company-metric ${tone}"><span>${icon}</span><div><small>${esc(label)}</small><strong>${esc(value)}</strong><em>${esc(hint)}</em></div></article>`;
+    const defaultName = primaryCompany?.trade_name || primaryCompany?.legal_name || 'Nicio societate';
+    const companyMetrics = `<section class="shop-company-metrics">${metric('configured', buildingIcon, 'Configurare', state.companies.length ? 'Firmă activă' : 'Necesită configurare', state.companies.length ? `${state.companies.length} ${state.companies.length === 1 ? 'societate salvată' : 'societăți salvate'}` : 'Adaugă prima societate')}${metric('primary', checkIcon, 'Societate implicită', defaultName, 'Folosită automat în fluxurile SHOP')}${metric(profileCompletion >= 83 ? 'complete' : 'attention', profileIcon, 'Completare profil', `${profileCompletion}%`, profileCompletion >= 83 ? 'Date esențiale pregătite' : `${requiredCompanyFields.length - completedFields} câmpuri de completat`)}${metric('vat', vatIcon, 'Regim TVA', state.companies.some(item => item.vat_payer) ? 'Plătitoare de TVA' : 'Neplătitoare de TVA', 'Aplicat documentelor comerciale')}</section>`;
+    const introAction = primaryCompany ? `<button type="button" class="shop-company-intro-action" data-company-open="${esc(primaryCompany.id)}"><span>Completează profilul</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>` : '<button type="button" class="shop-company-intro-action" data-company-open=""><span>Configurează firma</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+    const companyIntro = `<section class="shop-company-intro"><span class="shop-company-intro-icon">${buildingIcon}</span><div><small>IDENTITATEA COMPANIEI</small><strong>${profileCompletion >= 83 ? 'Profilul firmei este pregătit' : 'Finalizează profilul companiei'}</strong><p>Datele juridice, contactul, banca și ștampila sunt folosite automat în documente și comenzi.</p></div><span class="shop-company-progress" style="--company-progress:${profileCompletion}" aria-label="Profil completat ${profileCompletion}%"><b>${profileCompletion}%</b><small>complet</small></span>${introAction}</section>`;
+    $('shop-company-content').innerHTML = `${companyMetrics}${companyIntro}<div class="shop-company-list">${cards || empty('Nicio firmă configurată', 'Configurează societatea folosită pentru documentele Cubis Shop.')}</div>`;
     $('shop-company-content').querySelectorAll('[data-company-open]').forEach(button => button.addEventListener('click', () => openCompany(button.dataset.companyOpen)));
     $('shop-company-content').querySelectorAll('[data-company-delete]').forEach(button => button.addEventListener('click', () => deleteCompany(button.dataset.companyDelete)));
-    $('shop-company-content').querySelector('[data-receipt-location-add]')?.addEventListener('click', () => openReceiptLocation());
-    $('shop-company-content').querySelectorAll('[data-receipt-location-open]').forEach(button => button.addEventListener('click', () => openReceiptLocation(button.dataset.receiptLocationOpen)));
-    $('shop-company-content').querySelectorAll('[data-receipt-location-delete]').forEach(button => button.addEventListener('click', () => deleteReceiptLocation(button.dataset.receiptLocationDelete)));
   }
 
   function companyValue(id, value = undefined) { const input = $(id); if (value === undefined) return input.value; input.value = value ?? ''; }
@@ -4265,43 +4259,6 @@
     if (!company || !confirm(`Stergi firma „${company.trade_name || company.legal_name}”?`)) return;
     try { await window.SHOP_API.deleteCompanySettings(company.id); toast('Firma a fost stearsa.'); await loadCompanies(); }
     catch (error) { toast(error.message || 'Firma nu a putut fi stearsa.', 'error'); }
-  }
-
-  function openReceiptLocation(id = '') {
-    const location = state.receiptLocations.find(item => String(item.id) === String(id)) || null;
-    const company = state.companies.find(item => item.is_default) || state.companies[0];
-    if (!company) return toast('Salvează mai întâi datele firmei.', 'error');
-    state.editingReceiptLocation = location;
-    $('shop-receipt-location-title').textContent = location ? 'Editează punctul' : 'Punct nou';
-    companyValue('shop-receipt-location-name', location?.name || '');
-    companyValue('shop-receipt-location-address', location?.address || '');
-    companyValue('shop-receipt-location-city', location?.city || '');
-    companyValue('shop-receipt-location-county', location?.county || '');
-    companyValue('shop-receipt-location-postal', location?.postal_code || '');
-    $('shop-receipt-location-default').checked = location?.is_default ?? state.receiptLocations.length === 0;
-    openModal('shop-receipt-location-modal');
-  }
-
-  async function saveReceiptLocation(event) {
-    event.preventDefault();
-    const company = state.companies.find(item => item.is_default) || state.companies[0];
-    if (!company) return toast('Salvează mai întâi datele firmei.', 'error');
-    const button = $('shop-receipt-location-save'); button.disabled = true;
-    try {
-      const payload = { company_id: company.id, name: companyValue('shop-receipt-location-name').trim(), address: companyValue('shop-receipt-location-address').trim(), city: companyValue('shop-receipt-location-city').trim(), county: companyValue('shop-receipt-location-county').trim(), postal_code: companyValue('shop-receipt-location-postal').trim(), is_default: $('shop-receipt-location-default').checked, sort_order: state.editingReceiptLocation?.sort_order ?? state.receiptLocations.length };
-      if (!payload.name) throw new Error('Completează denumirea punctului de recepție.');
-      if (state.editingReceiptLocation) await window.SHOP_API.updateReceiptLocation(state.editingReceiptLocation.id, payload); else await window.SHOP_API.createReceiptLocation(payload);
-      closeModal('shop-receipt-location-modal'); toast('Punctul de recepție a fost salvat.'); await loadCompanies();
-      state.nirBootstrapped = false;
-    } catch (error) { toast(error.message || 'Punctul de recepție nu a putut fi salvat.', 'error'); }
-    finally { button.disabled = false; }
-  }
-
-  async function deleteReceiptLocation(id) {
-    const location = state.receiptLocations.find(item => String(item.id) === String(id));
-    if (!location || !confirm(`Ștergi punctul de recepție „${location.name}”? Documentele NIR existente își păstrează locul salvat.`)) return;
-    try { await window.SHOP_API.deleteReceiptLocation(location.id); toast('Punctul de recepție a fost șters.'); await loadCompanies(); state.nirBootstrapped = false; }
-    catch (error) { toast(error.message || 'Punctul de recepție nu a putut fi șters.', 'error'); }
   }
 
   const nirToday = () => new Date().toISOString().slice(0, 10);

@@ -1,0 +1,707 @@
+/* Datele firmei — Material 3, isolated from the older commerce skins. */
+:root[data-theme="cubis-light"] #tab-shop-company {
+  --company-primary: #0b57d0;
+  --company-primary-hover: #0848ae;
+  --company-on-primary: #ffffff;
+  --company-primary-container: #d9e7ff;
+  --company-on-primary-container: #001a41;
+  --company-secondary-container: #dce6f7;
+  --company-success: #146c43;
+  --company-success-container: #d8f5e5;
+  --company-warning: #8a4f00;
+  --company-warning-container: #ffddb3;
+  --company-error: #ba1a1a;
+  --company-error-container: #ffdad6;
+  --company-surface: #f8f9ff;
+  --company-surface-low: #f2f4fb;
+  --company-surface-high: #e9edf6;
+  --company-text: #1a1c1e;
+  --company-muted: #5d6470;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-page {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding-bottom: 34px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero[data-commerce-kind="company"] {
+  min-height: 190px;
+  grid-template-columns: minmax(360px, 1fr) 250px;
+  grid-template-areas: "title actions";
+  padding: 34px 38px;
+  border: 0;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 85% 35%, rgba(255,255,255,.9) 0 4%, transparent 4.3%),
+    radial-gradient(circle at 80% 42%, rgba(11,87,208,.12) 0 12%, transparent 12.3%),
+    linear-gradient(120deg, #f9fbff 0%, #edf4ff 48%, #d9f7f4 100%);
+  box-shadow: 0 1px 2px rgba(18,42,70,.08), 0 12px 34px rgba(42,77,120,.1);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero[data-commerce-kind="company"]::before {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  right: -74px;
+  bottom: -154px;
+  border: 1px solid rgba(11,87,208,.15);
+  border-radius: 50%;
+  opacity: 1;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero[data-commerce-kind="company"]::after {
+  content: "COMPANIE · DOCUMENTE · IDENTITATE";
+  inset: auto auto 32px 38px;
+  width: auto;
+  color: var(--company-primary);
+  background: none;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .12em;
+  mask-image: none;
+  opacity: .72;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero-glow {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: 120px;
+  top: -260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.56);
+  opacity: 1;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-title { padding-bottom: 20px; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-title > span {
+  color: var(--company-primary);
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: .14em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-title h1 {
+  margin: 8px 0 7px;
+  color: var(--company-text);
+  font-size: clamp(38px, 4vw, 56px);
+  font-weight: 720;
+  letter-spacing: -.045em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-title p {
+  max-width: 590px;
+  color: var(--company-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero-symbol {
+  right: 148px;
+  width: 104px;
+  height: 104px;
+  border: 0;
+  border-radius: 32px;
+  color: var(--company-primary);
+  background: rgba(255,255,255,.84);
+  box-shadow: 0 10px 30px rgba(11,87,208,.12);
+  transform: translateY(-50%) rotate(-6deg);
+  animation: company-hero-float 5s ease-in-out infinite;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero-symbol svg {
+  width: 49px;
+  height: 49px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-head-actions {
+  z-index: 2;
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-refresh,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-add {
+  min-height: 48px;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 730;
+  transition: transform .2s cubic-bezier(.2,0,0,1), background .2s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-refresh {
+  width: 48px;
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-add {
+  padding: 0 19px;
+  color: var(--company-on-primary);
+  background: var(--company-primary);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-add > span {
+  margin-right: 6px;
+  font-size: 18px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-refresh:hover,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-add:hover { transform: translateY(-2px); }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-refresh:hover { background: #c9dcff; }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-add:hover { background: var(--company-primary-hover); }
+
+:root[data-theme="cubis-light"] #shop-company-content {
+  display: grid;
+  gap: 16px;
+  padding-top: 18px;
+}
+
+:root[data-theme="cubis-light"] #shop-company-content > * { margin: 0; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric {
+  min-width: 0;
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  padding: 17px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--company-surface);
+  box-shadow: 0 1px 2px rgba(25,43,65,.09);
+  animation: company-rise .42s cubic-bezier(.2,0,0,1) both;
+  transition: transform .24s cubic-bezier(.2,0,0,1), box-shadow .24s ease, background .24s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric:nth-child(2) { animation-delay: 45ms; }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric:nth-child(3) { animation-delay: 90ms; }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric:nth-child(4) { animation-delay: 135ms; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric:hover {
+  transform: translateY(-3px);
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(35,65,100,.11);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric > span {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric > span svg,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric small,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric em {
+  overflow: hidden;
+  color: var(--company-muted);
+  font-size: 9px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric small {
+  font-weight: 720;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric strong {
+  overflow: hidden;
+  color: var(--company-text);
+  font-size: 16px;
+  font-weight: 690;
+  letter-spacing: -.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric.primary > span,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric.complete > span {
+  color: var(--company-success);
+  background: var(--company-success-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric.attention > span {
+  color: var(--company-warning);
+  background: var(--company-warning-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-metric.vat > span {
+  color: #6750a4;
+  background: #eaddff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro {
+  min-height: 116px;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 74px auto;
+  align-items: center;
+  gap: 17px;
+  padding: 19px 22px;
+  border: 0;
+  border-radius: 28px;
+  background: var(--company-primary-container);
+  box-shadow: none;
+  animation: company-rise .45s cubic-bezier(.2,0,0,1) both;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 19px;
+  color: var(--company-primary);
+  background: rgba(255,255,255,.72);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-icon svg { width: 27px; height: 27px; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro small {
+  color: var(--company-primary);
+  font-size: 9px;
+  font-weight: 760;
+  letter-spacing: .11em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro strong {
+  color: var(--company-on-primary-container);
+  font-size: 18px;
+  font-weight: 690;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro p {
+  max-width: 720px;
+  margin: 0;
+  color: #43536b;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-progress {
+  --progress-angle: calc(var(--company-progress) * 3.6deg);
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--company-primary-container) 58%, transparent 59%), conic-gradient(var(--company-primary) var(--progress-angle), rgba(11,87,208,.14) 0);
+  text-align: center;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-progress b {
+  color: var(--company-on-primary-container);
+  font-size: 14px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-progress small {
+  margin-top: 1px;
+  color: #53647d;
+  font-size: 7px;
+  letter-spacing: .03em;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 15px;
+  color: var(--company-on-primary);
+  background: var(--company-primary);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 720;
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.2,0,0,1), background .2s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-action svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .2s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-action:hover {
+  background: var(--company-primary-hover);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-action:hover svg { transform: translateX(3px); }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-list { display: grid; gap: 12px; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card {
+  min-height: 176px;
+  grid-template-columns: 66px minmax(0,1fr) auto;
+  gap: 18px;
+  padding: 22px;
+  border: 0;
+  border-radius: 28px;
+  color: var(--company-text);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(25,43,65,.1), 0 7px 24px rgba(45,72,104,.07);
+  animation: company-rise .46s cubic-bezier(.2,0,0,1) both;
+  transition: transform .24s cubic-bezier(.2,0,0,1), box-shadow .24s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card::before {
+  width: 5px;
+  inset: 22px auto 22px 0;
+  border-radius: 0 6px 6px 0;
+  background: var(--company-primary);
+  transform: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card:hover {
+  transform: translateY(-3px);
+  border: 0;
+  box-shadow: 0 2px 5px rgba(25,43,65,.1), 0 14px 34px rgba(45,72,104,.12);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card:hover::before { transform: none; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card.is-default {
+  border: 0;
+  background: linear-gradient(100deg, rgba(216,245,229,.55), #fff 32%);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card.is-default::before { background: var(--company-success); }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-icon {
+  width: 66px;
+  height: 66px;
+  border: 0;
+  border-radius: 21px;
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-icon::after { display: none; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-icon svg {
+  width: 30px;
+  height: 30px;
+  stroke-dasharray: none;
+  animation: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card.is-default .shop-company-card-icon {
+  border: 0;
+  color: var(--company-success);
+  background: var(--company-success-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-body { gap: 11px; }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-identity { gap: 4px; }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-title-line { gap: 10px; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-identity strong {
+  color: var(--company-text);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-identity em {
+  color: var(--company-muted);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-default-dot,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-saved-dot {
+  min-height: 25px;
+  padding: 0 10px;
+  border: 0;
+  color: var(--company-success);
+  background: var(--company-success-container);
+  font-size: 8px;
+  font-weight: 760;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-saved-dot {
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-default-dot i,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-saved-dot i {
+  box-shadow: none;
+  animation: company-dot 2.2s ease-in-out infinite;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges { gap: 7px; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span {
+  min-height: 29px;
+  padding: 5px 11px 5px 7px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--company-muted);
+  background: var(--company-surface-low);
+  box-shadow: none;
+  animation: none;
+  transition: background .2s ease, transform .2s cubic-bezier(.2,0,0,1);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span:hover {
+  border: 0;
+  background: var(--company-surface-high);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span.missing {
+  color: var(--company-error);
+  background: var(--company-error-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span.no-vat {
+  color: #4d5c71;
+  background: var(--company-secondary-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span svg {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid > span {
+  width: auto;
+  max-width: none;
+  min-height: 48px;
+  grid-template-columns: 34px minmax(0,1fr);
+  grid-template-rows: auto auto;
+  gap: 0 8px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--company-surface-low);
+  box-shadow: none;
+  animation: none;
+  transition: transform .2s cubic-bezier(.2,0,0,1), background .2s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid > span:hover {
+  border: 0;
+  background: var(--company-surface-high);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid i {
+  grid-row: 1 / 3;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 11px;
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid small {
+  align-self: end;
+  color: var(--company-muted);
+  font-size: 7px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid strong {
+  align-self: start;
+  color: var(--company-text);
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-side {
+  min-width: 218px;
+  align-self: stretch;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-stamp-state {
+  color: var(--company-muted);
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-stamp-state img,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-stamp-state i {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 11px;
+  color: var(--company-muted);
+  background: var(--company-surface-high);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete {
+  min-width: 104px;
+  height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: none;
+  font-size: 9px;
+  font-weight: 730;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit {
+  color: var(--company-primary);
+  background: var(--company-primary-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete {
+  min-width: 42px;
+  width: 42px;
+  padding: 0;
+  color: var(--company-error);
+  background: var(--company-error-container);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete > span { display: none; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit svg,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete svg {
+  width: 17px !important;
+  height: 17px !important;
+  filter: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit:hover,
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete:hover {
+  border: 0;
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit:hover { background: #c9dcff; }
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete:hover { background: #ffc7c1; }
+
+@keyframes company-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes company-hero-float {
+  0%, 100% { transform: translateY(-50%) rotate(-6deg); }
+  50% { transform: translateY(calc(-50% - 5px)) rotate(-3deg); }
+}
+
+@keyframes company-dot {
+  0%, 100% { opacity: .55; transform: scale(.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (max-width: 1180px) {
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-card { grid-template-columns: 60px minmax(0,1fr); }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-side {
+    grid-column: 1 / -1;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid rgba(67,75,88,.1);
+  }
+}
+
+@media (max-width: 900px) {
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero[data-commerce-kind="company"] {
+    grid-template-columns: 1fr auto;
+    padding: 28px;
+  }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero-symbol { display: none; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro { grid-template-columns: 52px minmax(0,1fr) auto; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-action { grid-column: 2 / -1; justify-self: start; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-hero[data-commerce-kind="company"] {
+    min-height: 230px;
+    grid-template-columns: 1fr;
+    grid-template-areas: "title" "actions";
+    padding: 26px 22px;
+  }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-commerce-head-actions { justify-self: start; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-metrics { grid-template-columns: 1fr; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro { grid-template-columns: 48px minmax(0,1fr); padding: 17px; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-progress { grid-column: 1; grid-row: 2; width: 52px; height: 52px; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-intro-action { grid-column: 2; width: 100%; justify-content: center; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-card { grid-template-columns: 52px minmax(0,1fr); padding: 17px; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-icon { width: 52px; height: 52px; border-radius: 17px; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-title-line { align-items: flex-start; flex-direction: column; }
+  :root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="cubis-light"] #tab-shop-company :is(.shop-commerce-hero-symbol, .shop-company-metric, .shop-company-intro, .shop-company-card, .shop-company-default-dot i, .shop-company-saved-dot i) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
