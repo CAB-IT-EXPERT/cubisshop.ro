@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,7 +10,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AppAuroraBackground from '@/components/AppAuroraBackground';
 
 const appIcon = require('../assets/images/cubis-shop-icon.png');
+const disabledActionGradient = ['#9BC8E8', '#84C3D0'] as const;
 
 export default function MobileLoginGate({ children }: { children: React.ReactNode }) {
   const { user, login, loading, initializing, rememberedUsername, rememberedLogin } = useAuth();
@@ -68,6 +67,8 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
     }
   };
 
+  const submitDisabled = !username.trim() || !password.trim() || loading;
+
   return (
     <AppAuroraBackground>
       <StatusBar style="dark" />
@@ -81,13 +82,12 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
         style={styles.keyboard}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 18 : 0}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="always"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}>
             <Animated.View entering={FadeInDown.duration(420).delay(40)} style={styles.brandRow}>
               <View style={styles.brandIconWrap}>
                 <Image source={appIcon} style={styles.brandIcon} resizeMode="cover" accessibilityLabel="Cubis Shop" />
@@ -194,12 +194,11 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
 
               <Animated.View entering={FadeInUp.duration(420).delay(360)}>
                 <TouchableOpacity
-                  style={(!username.trim() || !password.trim() || loading) && styles.buttonDisabled}
                   activeOpacity={0.86}
                   onPress={submit}
-                  disabled={!username.trim() || !password.trim() || loading}>
+                  disabled={submitDisabled}>
                   <LinearGradient
-                    colors={Theme.gradients.action}
+                    colors={submitDisabled ? disabledActionGradient : Theme.gradients.action}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.button}>
@@ -218,8 +217,7 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                 </TouchableOpacity>
               </Animated.View>
             </Animated.View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
+        </ScrollView>
       </KeyboardAvoidingView>
     </AppAuroraBackground>
   );
@@ -340,7 +338,6 @@ const styles = StyleSheet.create({
     gap: 10, borderRadius: 17, shadowColor: Theme.colors.brand.primary,
     shadowOpacity: 0.25, shadowRadius: 15, shadowOffset: { width: 0, height: 8 }, elevation: 5,
   },
-  buttonDisabled: { opacity: 0.48 },
   buttonText: {
     color: Theme.colors.text.onBrand, fontSize: 13,
     fontFamily: Theme.typography.bold, letterSpacing: 0.1,
