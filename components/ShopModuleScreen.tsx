@@ -896,10 +896,8 @@ export default function ShopModuleScreen() {
             <Reanimated.View style={[styles.homeHeroChartIcon, homeIconMotionStyle]}><Svg width={48} height={44} viewBox="0 0 48 44"><ReanimatedSvgPath animatedProps={homeIconLineAnimatedProps} d="M5 35 17 23l9 7 16-19" fill="none" stroke="#EEF6FF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="60 60" /><ReanimatedSvgPath animatedProps={homeIconArrowAnimatedProps} d="M31 11h11v11" fill="none" stroke="#EEF6FF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="24 24" /></Svg></Reanimated.View>
           </Animated.View>
           <Animated.View style={[styles.homeSheet, { transform: [{ translateY: homeEntranceMotion.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
-            <View pointerEvents="none" style={styles.homeSheetTopShadow} />
-            <View style={styles.homeSheetAccent} />
             <View style={[styles.content, styles.homeContent, { paddingBottom: 94 + insets.bottom }]}>
-          <View style={styles.homeOverviewHeader}><View style={styles.homeOverviewIcon}><Sparkles size={20} color="#4C8DFF" /></View><View><Text style={styles.homeOverviewTitle}>Privire de ansamblu</Text><Text style={styles.homeOverviewText}>Indicatorii esențiali ai magazinului</Text></View></View>
+          <View style={styles.homeOverviewHeader}><View style={styles.homeOverviewIcon}><Sparkles size={18} color="#087FF5" strokeWidth={2.35} /></View><View style={styles.homeOverviewCopy}><Text style={styles.homeOverviewTitle}>Privire de ansamblu</Text><Text style={styles.homeOverviewText}>Indicatorii esențiali ai magazinului</Text></View></View>
           <View style={styles.newOrdersBanner}><View style={styles.newOrdersIcon}><ShoppingCart size={21} color="#087FF5" /></View><View style={styles.newOrdersCopy}><Text style={styles.newOrdersValue}>{dashboard?.new_orders_count || 0}</Text><Text style={styles.newOrdersLabel}>comenzi noi</Text></View><TouchableOpacity style={styles.newOrdersButton} onPress={() => openOrders('new')}><Text style={styles.newOrdersButtonText}>Vezi comenzile</Text><ChevronRight size={16} color={Colors.white} /></TouchableOpacity></View>
           <View style={styles.mobileAnalytics}>
             <View style={styles.analyticsToolbar}>
@@ -1664,36 +1662,20 @@ const styles = StyleSheet.create({
   homeSheet: {
     zIndex: 2,
     borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: Theme.colors.border.default,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -28,
-    backgroundColor: Theme.colors.surface.subtle,
+    borderColor: '#DCE8F3',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30,
+    overflow: 'hidden',
+    backgroundColor: '#F8FBFE',
   },
-  homeSheetTopShadow: {
-    height: 46,
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    backgroundColor: Theme.colors.surface.subtle,
-    shadowColor: Theme.colors.shadow.color,
-    shadowOpacity: 0.34,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: -6 },
-    elevation: 10,
-  },
-  homeSheetAccent: { width: 52, height: 4, zIndex: 1, alignSelf: 'center', borderRadius: 2, backgroundColor: Theme.colors.surface.brandSoft, marginTop: 10 },
   homeScroll: { flex: 1 },
-  homeContent: { paddingTop: 8 },
-  homeOverviewHeader: { minHeight: 62, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 2 },
-  homeOverviewIcon: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 14, borderWidth: 1, borderColor: '#4285F42B', backgroundColor: '#4285F414' },
-  homeOverviewTitle: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 18 },
-  homeOverviewText: { color: '#8D9AB1', fontFamily: 'Inter-Regular', fontSize: 10, marginTop: 4 },
+  homeContent: { paddingTop: 18 },
+  homeOverviewHeader: { minHeight: 54, flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 2, marginBottom: 5 },
+  homeOverviewIcon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20, backgroundColor: '#E8F3FF' },
+  homeOverviewCopy: { minWidth: 0, flex: 1 },
+  homeOverviewTitle: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 20, lineHeight: 25, letterSpacing: -0.4 },
+  homeOverviewText: { color: '#74869A', fontFamily: 'Inter-Regular', fontSize: 12, lineHeight: 17, marginTop: 1 },
   hero: { overflow: 'hidden', borderWidth: 0, borderRadius: 28, padding: 24, backgroundColor: Theme.colors.surface.base },
   heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }, heroIcon: { width: 44, height: 44, borderWidth: 1, borderColor: 'rgba(56,189,248,0.30)', borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(56,189,248,0.10)' }, heroRefresh: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: Theme.colors.surface.muted },
   kicker: { color: Theme.colors.brand.primaryText, fontSize: 9, fontFamily: 'Inter-Bold', letterSpacing: 1.5 },
