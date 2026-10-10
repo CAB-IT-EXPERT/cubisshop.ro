@@ -72,8 +72,24 @@ app.whenReady().then(async () => {
   await sleep(250);
   const editorScreenshotPath = path.join(outputDir, 'company-editor-material-3.png');
   fs.writeFileSync(editorScreenshotPath, (await win.webContents.capturePage()).toPNG());
-  const editorOpened = await win.webContents.executeJavaScript(`!document.getElementById('shop-company-modal').hidden`);
-  console.log(JSON.stringify({ ...metrics, editorOpened, errors, screenshotPath, editorScreenshotPath }, null, 2));
+  const editorMetrics = await win.webContents.executeJavaScript(`(() => {
+    const scroll = document.querySelector('#shop-company-modal .shop-commerce-modal-scroll');
+    scroll.scrollTop = scroll.scrollHeight;
+    const stamp = document.querySelector('#shop-company-modal .shop-company-stamp');
+    const stampPreview = document.getElementById('shop-company-stamp-preview');
+    const stampActions = stamp?.lastElementChild;
+    const footer = document.querySelector('#shop-company-modal .shop-company-modal > footer');
+    const rect = (node) => node ? Object.fromEntries(['top','bottom','height'].map(key => [key, Math.round(node.getBoundingClientRect()[key])])) : null;
+    return { editorOpened: !document.getElementById('shop-company-modal').hidden, scrollHeight: scroll.scrollHeight, clientHeight: scroll.clientHeight, scrollTop: scroll.scrollTop, stamp: rect(stamp), stampPreview: rect(stampPreview), stampActions: rect(stampActions), stampDisplay: getComputedStyle(stamp).display, stampOverflow: getComputedStyle(stamp).overflow, previewDisplay: getComputedStyle(stampPreview).display, previewHeight: getComputedStyle(stampPreview).height, footer: rect(footer) };
+  })()`);
+  await sleep(120);
+  const editorBottomScreenshotPath = path.join(outputDir, 'company-editor-stamp.png');
+  fs.writeFileSync(editorBottomScreenshotPath, (await win.webContents.capturePage()).toPNG());
+  if (metrics.receiptSectionPresent || metrics.receiptModalPresent) throw new Error('Secțiunea veche pentru punctele de recepție este încă prezentă.');
+  if (metrics.bodyHorizontalOverflow) throw new Error('Pagina firmei are overflow orizontal.');
+  if (!editorMetrics.editorOpened || editorMetrics.stamp.height < 150 || editorMetrics.stamp.bottom >= editorMetrics.footer.top) throw new Error(`Zona ștampilei este tăiată: ${JSON.stringify(editorMetrics)}`);
+  if (errors.length) throw new Error(`Erori în consolă: ${errors.join(' | ')}`);
+  console.log(JSON.stringify({ ...metrics, ...editorMetrics, errors, screenshotPath, editorScreenshotPath, editorBottomScreenshotPath }, null, 2));
   await win.destroy();
   app.quit();
 }).catch((error) => {

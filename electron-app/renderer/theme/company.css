@@ -642,6 +642,134 @@
 :root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit:hover { background: #c9dcff; }
 :root[data-theme="cubis-light"] #tab-shop-company .shop-company-delete:hover { background: #ffc7c1; }
 
+/* Company summary card — clear Material 3 hierarchy. */
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card {
+  min-height: 200px;
+  grid-template-columns: 72px minmax(0,1fr) 176px;
+  align-items: start;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid #e0e6ee;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(38,65,96,.07);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card::before { display: none; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card:hover {
+  border-color: #cbd8e8;
+  box-shadow: 0 10px 28px rgba(38,65,96,.11);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card.is-default {
+  border-color: #cbe9d9;
+  background: linear-gradient(115deg, #f5fcf8 0%, #fff 32%);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 23px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-body { gap: 13px; }
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-identity strong {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-identity em {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span {
+  min-height: 31px;
+  border-radius: 11px;
+  padding: 6px 12px 6px 7px;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-badges span.missing {
+  color: #9f2d35;
+  background: #fff0f1;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid {
+  grid-template-columns: repeat(4, minmax(132px,1fr));
+  gap: 9px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid > span {
+  min-height: 62px;
+  grid-template-columns: 40px minmax(0,1fr);
+  padding: 9px 10px;
+  border: 1px solid #e6eaf1;
+  border-radius: 17px;
+  background: #f7f9fd;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid > span:hover {
+  border-color: #d3deec;
+  background: #f1f5fb;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid i {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid .contact i {
+  color: #006a61;
+  background: #d8f3ef;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid .bank i {
+  color: #6750a4;
+  background: #eaddff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid .web i {
+  color: #146c43;
+  background: #d8f5e5;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid small {
+  font-size: 7.5px;
+  letter-spacing: .065em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-info-grid strong {
+  font-size: 10px;
+  font-weight: 660;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-card-side {
+  min-width: 176px;
+  padding-left: 15px;
+  border-left: 1px solid #e8ecf2;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-stamp-state {
+  padding: 7px 9px;
+  border-radius: 12px;
+  color: var(--company-muted);
+  background: var(--company-surface-low);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-company .shop-company-edit {
+  min-width: 118px;
+  height: 44px;
+}
+
 @keyframes company-rise {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
@@ -764,8 +892,7 @@
 }
 
 :root[data-theme="cubis-light"] #shop-company-modal .shop-commerce-modal-scroll {
-  display: grid;
-  gap: 0;
+  display: block;
   padding: 22px 26px 28px;
   background: var(--company-surface-low);
   scrollbar-color: #b8c7dc transparent;
@@ -961,6 +1088,7 @@
 :root[data-theme="cubis-light"] #shop-company-modal .shop-company-vat-rate small { color: #6f573c; }
 
 :root[data-theme="cubis-light"] #shop-company-modal .shop-company-stamp {
+  min-height: 164px;
   grid-template-columns: minmax(190px, 240px) minmax(0,1fr);
   gap: 18px;
   margin: 0;

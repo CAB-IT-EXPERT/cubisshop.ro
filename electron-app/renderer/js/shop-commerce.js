@@ -425,8 +425,8 @@
       <label>Adresa fizica / zona deservita<input id="shop-company-physical-address" placeholder="Bucuresti-Ilfov" /><small>Pana cand exista un punct fix, poti afisa doar zona deservita.</small></label>
       ${section('04', 'Date bancare', 'Informatii folosite in documentele financiare.')}
       <div class="shop-commerce-columns"><label>Banca<input id="shop-company-bank" /></label><label>IBAN<input id="shop-company-iban" /></label></div><label>Capital social<input id="shop-company-capital" /></label>
-      ${section('05', 'Stampila firmei', 'Imaginea poate fi folosita pe documentele generate.')}
-      <div class="shop-company-stamp"><div id="shop-company-stamp-preview"><span>Fara stampila</span></div><div><input id="shop-company-stamp-input" type="file" accept="image/png,image/jpeg,image/webp" hidden /><button type="button" class="btn-ghost" id="shop-company-stamp-pick">Alege stampila</button><button type="button" class="btn-ghost danger" id="shop-company-stamp-remove">Sterge stampila</button></div></div>
+      ${section('05', 'Ștampila firmei', 'Imaginea poate fi folosită pe documentele generate.')}
+      <div class="shop-company-stamp"><div id="shop-company-stamp-preview"><span>Fără ștampilă</span></div><div><input id="shop-company-stamp-input" type="file" accept="image/png,image/jpeg,image/webp" hidden /><button type="button" class="btn-ghost" id="shop-company-stamp-pick">Alege ștampila</button><button type="button" class="btn-ghost danger" id="shop-company-stamp-remove">Șterge ștampila</button></div></div>
     </div><footer><button type="button" class="btn-ghost" data-commerce-close="shop-company-modal">Renunta</button><button type="submit" class="btn-primary" id="shop-company-save">Salveaza firma</button></footer></form></div>`;
   }
   function section(number, title, text) { return `<div class="shop-editor-section"><b>${number}</b><span><strong>${title}</strong><small>${text}</small></span></div>`; }
@@ -4185,7 +4185,7 @@
       return `<article class="shop-company-card ${company.is_default ? 'is-default' : ''}" style="--company-index:${index}">
         <span class="shop-company-card-icon">${companyIcon}</span>
         <div class="shop-company-card-body">
-          <header><span class="shop-company-identity"><span class="shop-company-title-line"><strong>${esc(displayName)}</strong>${company.is_default ? '<span class="shop-company-default-dot"><i></i> Implicita</span>' : '<span class="shop-company-saved-dot"><i></i> Salvata</span>'}</span><em>${esc(company.legal_name || 'Denumirea legala nu este completata')}</em></span></header>
+          <header><span class="shop-company-identity"><span class="shop-company-title-line"><strong>${esc(displayName)}</strong>${company.is_default ? '<span class="shop-company-default-dot"><i></i> Implicită</span>' : '<span class="shop-company-saved-dot"><i></i> Salvată</span>'}</span><em>${esc(company.legal_name || 'Denumirea legală nu este completată')}</em></span></header>
           <div class="shop-company-badges">${company.cui ? `<span class="identity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 6 21M18 3l-2 18M3 9h18M2 15h18"/></svg><b>CUI</b>${esc(company.cui)}</span>` : '<span class="missing"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 4h.01"/></svg><b>CUI</b> necompletat</span>'}${company.registration_number ? `<span class="registry"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M8 9h2m4 0h2M8 13h2m4 0h2M8 17h2m4 0h2"/></svg><b>RC</b>${esc(company.registration_number)}</span>` : ''}${company.vat_payer ? `<span class="vat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/><path d="m19 5-14 14"/></svg><b>TVA</b>${esc(Number(company.vat_rate || 0).toLocaleString('ro-RO'))}%</span>` : '<span class="no-vat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 8 8 8"/></svg>Neplătitoare TVA</span>'}</div>
           <div class="shop-company-info-grid">
             <span class="location" title="${esc(`${publicLocation} · Sediu social: ${registeredLocation || 'necompletat'}`)}"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></i><small>Adresa publica</small><strong>${esc(publicLocation)}</strong></span>
@@ -4195,8 +4195,8 @@
           </div>
         </div>
         <aside class="shop-company-card-side">
-          <span class="shop-company-stamp-state">${company.stamp_url ? `<img src="${esc(company.stamp_url)}" alt="Stampila ${esc(displayName)}" /><b>Cu stampila</b>` : '<i>◇</i><b>Fara stampila</b>'}</span>
-          <span class="shop-company-actions"><button type="button" class="shop-company-edit" data-company-open="${esc(company.id)}" aria-label="Editeaza firma" title="Editeaza firma">${editIcon}<span>Editeaza</span></button>${state.companies.length > 1 ? `<button type="button" class="shop-company-delete" data-company-delete="${esc(company.id)}" aria-label="Sterge firma" title="Sterge firma">${deleteIcon}<span>Sterge</span></button>` : ''}</span>
+          <span class="shop-company-stamp-state">${company.stamp_url ? `<img src="${esc(company.stamp_url)}" alt="Ștampila ${esc(displayName)}" /><b>Cu ștampilă</b>` : '<i>◇</i><b>Fără ștampilă</b>'}</span>
+          <span class="shop-company-actions"><button type="button" class="shop-company-edit" data-company-open="${esc(company.id)}" aria-label="Editează firma" title="Editează firma">${editIcon}<span>Editează</span></button>${state.companies.length > 1 ? `<button type="button" class="shop-company-delete" data-company-delete="${esc(company.id)}" aria-label="Șterge firma" title="Șterge firma">${deleteIcon}<span>Șterge</span></button>` : ''}</span>
         </aside>
       </article>`;
     }).join('');
@@ -4214,7 +4214,7 @@
 
   function companyValue(id, value = undefined) { const input = $(id); if (value === undefined) return input.value; input.value = value ?? ''; }
   function renderCompanyStamp(url = '') {
-    $('shop-company-stamp-preview').innerHTML = url ? `<img src="${esc(url)}" alt="Stampila firmei" />` : '<span>Fara stampila</span>';
+    $('shop-company-stamp-preview').innerHTML = url ? `<img src="${esc(url)}" alt="Ștampila firmei" />` : '<span>Fără ștampilă</span>';
     $('shop-company-stamp-remove').hidden = !url;
   }
   function openCompany(id = '') {
