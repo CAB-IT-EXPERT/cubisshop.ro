@@ -6,9 +6,9 @@
   <p><strong>Platformă omnichannel pentru magazin, operațiuni și integrare fiscală prin SmartBill.</strong></p>
 
   <p>
-    <a href="https://github.com/CAB-IT-EXPERT/cubisshop.ro/wiki"><strong>Wiki</strong></a>
+    <a href="docs/wiki/Home.md"><strong>Wiki complet</strong></a>
     ·
-    <a href="docs/wiki/Home.md"><strong>Wiki în repository</strong></a>
+    <a href="docs/wiki/Architecture.md"><strong>Arhitectură</strong></a>
     ·
     <a href="docs/wiki/Local-Development.md"><strong>Pornire locală</strong></a>
     ·
