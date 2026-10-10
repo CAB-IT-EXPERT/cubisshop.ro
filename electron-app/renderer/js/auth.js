@@ -25,6 +25,7 @@
   const passwordToggle = document.getElementById('auth-password-toggle');
   const rememberInput = document.getElementById('auth-remember-me');
   const submitButton = document.getElementById('auth-submit-btn');
+  const developerCredit = document.getElementById('auth-developer-credit');
   const errorBox = document.getElementById('auth-error');
   const userLabel = document.getElementById('auth-user-label');
   const logoutBtn = document.getElementById('auth-logout-btn');
@@ -254,6 +255,19 @@
 
   rememberInput?.addEventListener('change', () => {
     saveRememberPreference(Boolean(rememberInput.checked), usernameInput?.value || '');
+  });
+
+  developerCredit?.addEventListener('click', (event) => {
+    event.preventDefault();
+    const target = 'https://cab-it.ro/';
+    try {
+      if (typeof require === 'function') {
+        const { shell } = require('electron');
+        void shell.openExternal(target);
+        return;
+      }
+    } catch {}
+    window.open(target, '_blank', 'noopener,noreferrer');
   });
 
   logoutBtn?.addEventListener('click', () => {

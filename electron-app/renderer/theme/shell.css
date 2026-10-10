@@ -952,33 +952,86 @@
 .auth-login-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
   margin-top: 22px;
   color: #8093a5;
 }
 
-.auth-login-footer span {
-  display: inline-flex;
+.auth-login-footer .auth-developer-credit {
+  display: inline-grid;
+  grid-template-columns: 34px auto 14px;
   align-items: center;
-  gap: 6px;
-  font-size: 9px;
-  font-weight: 650;
+  column-gap: 9px;
+  padding: 2px 0;
+  color: #6f8498;
+  text-decoration: none;
+  transition:
+    color .2s cubic-bezier(.2,0,0,1),
+    transform .2s cubic-bezier(.2,0,0,1);
 }
 
-.auth-login-footer span svg {
-  width: 12px;
-  height: 12px;
+.auth-login-footer .auth-developer-credit:hover {
+  color: #0b6f82;
+  transform: translateX(2px);
+}
+
+.auth-login-footer .auth-developer-credit:focus-visible {
+  outline: 3px solid rgba(0, 187, 176, .22);
+  outline-offset: 2px;
+}
+
+.auth-login-footer .auth-developer-logo {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(222, 250, 247, .9), rgba(235, 247, 255, .62));
+}
+
+.auth-developer-logo img {
+  width: 27px;
+  height: 27px;
+  object-fit: contain;
+}
+
+.auth-login-footer .auth-developer-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.auth-login-footer .auth-developer-credit small {
+  color: #91a1b0;
+  font-size: 7.5px;
+  font-weight: 620;
+  line-height: 1.2;
+  letter-spacing: .01em;
+}
+
+.auth-login-footer .auth-developer-credit strong {
+  color: #08768a;
+  font-size: 10px;
+  font-weight: 780;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+
+.auth-login-footer .auth-developer-credit .auth-external-icon {
+  width: 13px;
+  height: 13px;
   fill: none;
-  stroke: #20a870;
+  stroke: #12a69e;
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: transform .2s cubic-bezier(.2,0,0,1);
 }
 
-.auth-login-footer small {
-  color: #9aaabb;
-  font-size: 9px;
+.auth-login-footer .auth-developer-credit:hover .auth-external-icon {
+  transform: translate(1px, -1px);
 }
 
 @keyframes authSubmitSpin {
