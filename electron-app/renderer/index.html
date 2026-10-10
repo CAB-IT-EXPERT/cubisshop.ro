@@ -356,17 +356,23 @@
           <span class="topbar-badge" id="topbar-notifications-badge" hidden>0</span>
         </button>
         <div class="business-dropdown topbar-notifications-menu" id="topbar-notifications-menu" hidden>
-          <div class="business-dropdown-head"><strong>Notificari</strong><span id="topbar-notifications-summary">Totul este la zi</span></div>
+          <div class="business-dropdown-head notifications-menu-head">
+            <div class="notifications-menu-heading">
+              <span class="notifications-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M13.7 21h-3.4"/></svg></span>
+              <span><small>ACTIVITATE</small><strong>Notificări</strong></span>
+            </div>
+            <span class="notifications-menu-status" id="topbar-notifications-summary">Totul este la zi</span>
+          </div>
           <button type="button" class="business-dropdown-item shop-notification-menu-item" id="topbar-open-shop-notifications">
             <span class="dropdown-item-icon orange"><svg viewBox="0 0 24 24"><path d="M5 7h14l-1 13H6L5 7Z"/><path d="M9 9V5a3 3 0 0 1 6 0v4"/></svg></span>
-            <span><strong>Notificări SHOP</strong><small id="topbar-shop-notifications-summary">Se verifică activitatea magazinului…</small></span>
+            <span><strong>Activitate SHOP</strong><small id="topbar-shop-notifications-summary">Se verifică activitatea magazinului…</small></span>
             <svg class="shop-notification-menu-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
           </button>
           <section class="topbar-shop-notifications-panel" id="topbar-shop-notifications-panel" hidden>
             <header>
               <div class="topbar-shop-notifications-title">
-                <span aria-hidden="true"><i></i></span>
-                <div><small>CENTRU DE ALERTE</small><strong>Activitate magazin</strong></div>
+                <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9m5 10V5m6 14v-7m5 7V8"/></svg></span>
+                <div><small>CENTRU DE ALERTE</small><strong>Activitatea magazinului</strong></div>
               </div>
               <button type="button" id="topbar-shop-notifications-read-all"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span>Toate citite</span></button>
             </header>

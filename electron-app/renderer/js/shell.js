@@ -131,8 +131,14 @@
     const visible = notificationCount > 0;
     notificationsBadge.hidden = !visible;
     notificationsBadge.textContent = notificationCount > 9 ? '9+' : String(notificationCount);
-    notificationsSummary.textContent = visible ? `${notificationCount} notificari noi` : 'Totul este la zi';
-    if (shopNotificationsSummary) shopNotificationsSummary.textContent = shopUnreadCount > 0 ? `${shopUnreadCount} alerte necitite` : 'Activitatea magazinului este la zi';
+    notificationsSummary.textContent = visible
+      ? `${notificationCount} ${notificationCount === 1 ? 'notificare nouă' : 'notificări noi'}`
+      : 'Totul este la zi';
+    if (shopNotificationsSummary) {
+      shopNotificationsSummary.textContent = shopUnreadCount > 0
+        ? `${shopUnreadCount} ${shopUnreadCount === 1 ? 'alertă necitită' : 'alerte necitite'}`
+        : 'Activitatea magazinului este la zi';
+    }
     if (openUpdateButton) openUpdateButton.hidden = true;
   }
 
@@ -271,9 +277,16 @@
     const items = Array.isArray(feed?.items) ? feed.items.filter(item => !item.read) : [];
     shopNotificationsList.replaceChildren();
     if (!items.length) {
-      const empty = document.createElement('small');
+      const empty = document.createElement('div');
       empty.className = 'topbar-shop-notifications-empty';
-      empty.textContent = 'Nu există alerte SHOP.';
+      const emptyIcon = document.createElement('span');
+      emptyIcon.setAttribute('aria-hidden', 'true');
+      emptyIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 1-3-6.2"/><path d="m16 5 2 2 4-4"/></svg>';
+      const emptyTitle = document.createElement('strong');
+      emptyTitle.textContent = 'Totul este în regulă';
+      const emptyCopy = document.createElement('small');
+      emptyCopy.textContent = 'Nu ai alerte noi pentru magazin.';
+      empty.append(emptyIcon, emptyTitle, emptyCopy);
       shopNotificationsList.appendChild(empty);
       return;
     }

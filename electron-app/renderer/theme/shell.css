@@ -501,6 +501,349 @@
   background: var(--color-error-soft);
 }
 
+/* Material 3 notification center */
+:root[data-theme="cubis-light"] .topbar-notifications-menu {
+  width: min(440px, calc(100vw - 24px));
+  max-height: min(760px, calc(100vh - 88px));
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface-elevated);
+  box-shadow: var(--shadow-modal);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-head {
+  min-height: 64px;
+  padding: 4px 4px 12px;
+  border-bottom: 0;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-heading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-heading > span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 15px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-heading small {
+  color: var(--color-brand-text);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-heading strong {
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 760;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-status {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-round);
+  padding: 0 11px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  font-size: 8px;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] .notifications-menu-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-success-bright);
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item {
+  min-height: 72px;
+  grid-template-columns: 44px minmax(0, 1fr) 32px;
+  gap: 12px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  cursor: pointer;
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item:hover,
+:root[data-theme="cubis-light"] .shop-notification-menu-item:has(+ .topbar-shop-notifications-panel:not([hidden])) {
+  transform: translateY(-1px);
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item .dropdown-item-icon {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 15px;
+  color: var(--color-brand-action);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item:hover .dropdown-item-icon,
+:root[data-theme="cubis-light"] .shop-notification-menu-item:has(+ .topbar-shop-notifications-panel:not([hidden])) .dropdown-item-icon {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item strong {
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item small {
+  margin-top: 3px;
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item .shop-notification-menu-chevron {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  padding: 8px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-notification-menu-item:has(+ .topbar-shop-notifications-panel:not([hidden])) .shop-notification-menu-chevron {
+  color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-panel {
+  margin: 10px 0 0;
+  padding: 12px;
+  border: 1px solid var(--color-border-brand);
+  border-radius: var(--radius-xl);
+  color: var(--color-text-primary);
+  background: var(--color-surface-brand);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-panel > header {
+  min-height: 52px;
+  padding: 0 0 12px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-title {
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-title > span {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--color-brand-text);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-title > span svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-title > div {
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-title small {
+  color: var(--color-brand-text);
+  font-size: 7.5px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-title strong {
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-panel > header button {
+  min-height: 34px;
+  border: 0;
+  border-radius: var(--radius-round);
+  padding: 0 12px;
+  color: var(--color-brand-text);
+  background: var(--color-surface);
+  font-size: 8px;
+  font-weight: 760;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-panel > header button[hidden] {
+  display: none;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-panel > header button:hover {
+  border-color: transparent;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-list {
+  gap: 8px;
+  max-height: 430px;
+  padding-right: 0;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification {
+  min-height: 68px;
+  grid-template-columns: 42px minmax(0, 1fr) 30px;
+  gap: 11px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 11px;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification::before {
+  inset: 12px auto 12px 0;
+  width: 3px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--notice-rgb), 0.32);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification.unread::after {
+  top: 10px;
+  right: 10px;
+  border-color: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification > i {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification strong {
+  color: var(--color-text-primary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification time {
+  color: var(--color-text-muted);
+  font-size: 7.5px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification small {
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notification-arrow {
+  width: 30px;
+  height: 30px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-empty {
+  min-height: 170px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  border: 1px dashed var(--color-border-brand);
+  border-radius: var(--radius-lg);
+  padding: 24px 18px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-empty > span {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 3px;
+  border-radius: 18px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-empty svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-empty strong {
+  color: var(--color-text-primary);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+:root[data-theme="cubis-light"] .topbar-shop-notifications-empty small {
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+}
+
 :root[data-theme="cubis-light"] :is(.auth-overlay, .startup-loader) {
   color: var(--color-text-primary);
   background:
