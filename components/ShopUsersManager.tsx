@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Pencil, Plus, ShieldCheck, Trash2, X } from 'lucide-react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { CheckCircle2, KeyRound, MonitorSmartphone, Pencil, Plus, ShieldCheck, Trash2, UserRound, UsersRound, X } from 'lucide-react-native';
 import { Colors, Theme } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { createAppUser, deleteAppUser, getAppUsers, updateAppUser, type AppUserPayload } from '@/services/api';
@@ -96,35 +97,157 @@ export default function ShopUsersManager() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.heading}><View><Text style={styles.kicker}>ACCES APLICAȚII</Text><Text style={styles.title}>Utilizatori</Text></View><TouchableOpacity style={styles.add} onPress={startCreate}><Plus size={17} color={Colors.white} /><Text style={styles.addText}>Adaugă</Text></TouchableOpacity></View>
-      {loading ? <View style={styles.state}><ActivityIndicator color={Colors.orange} /></View> : error ? <View style={styles.state}><Text style={styles.error}>{error}</Text><TouchableOpacity onPress={() => void load()}><Text style={styles.retry}>Reîncearcă</Text></TouchableOpacity></View> : rows.map((row) => (
-        <View key={row.id} style={styles.row}>
-          <View style={styles.avatar}><Text style={styles.avatarText}>{(row.display_name || row.username).slice(0, 2).toUpperCase()}</Text></View>
-          <View style={styles.copy}><Text style={styles.name}>{row.display_name}</Text><Text style={styles.meta}>@{row.username} · {roleLabels[row.role]} · {platformLabels[row.platform_access]}</Text><Text style={[styles.status, !row.is_active && styles.inactive]}>{row.is_active ? 'ACTIV' : 'INACTIV'}</Text></View>
-          <TouchableOpacity style={styles.iconButton} onPress={() => startEdit(row)}><Pencil size={16} color={Colors.orange} /></TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} disabled={row.username.toLowerCase() === 'admin' || row.id === user.id} onPress={() => remove(row)}><Trash2 size={16} color={row.username.toLowerCase() === 'admin' || row.id === user.id ? Colors.textMuted : Colors.error} /></TouchableOpacity>
+      <LinearGradient colors={Theme.gradients.action} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+        <View style={styles.heroTop}>
+          <View style={styles.heroIcon}><UsersRound size={24} color={Theme.colors.brand.primaryAction} /></View>
+          <View style={styles.heroBadge}><View style={styles.onlineDot} /><Text style={styles.heroBadgeText}>ACCES SECURIZAT</Text></View>
         </View>
-      ))}
+        <Text style={styles.heroTitle}>Echipa ta</Text>
+        <Text style={styles.heroSubtitle}>Creează conturi și controlează simplu accesul în aplicațiile Cubis Shop.</Text>
+      </LinearGradient>
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <View style={styles.backdrop}><View style={styles.modal}>
-          <View style={styles.modalHead}><Text style={styles.modalTitle}>{editing ? 'Editează utilizatorul' : 'Utilizator nou'}</Text><TouchableOpacity onPress={() => setOpen(false)}><X size={20} color={Colors.textSecondary} /></TouchableOpacity></View>
-          <Text style={styles.label}>UTILIZATOR</Text><TextInput style={styles.input} value={form.username} editable={!editing || editing.username.toLowerCase() !== 'admin'} autoCapitalize="none" onChangeText={(username) => setForm({ ...form, username })} />
-          <Text style={styles.label}>NUME AFIȘAT</Text><TextInput style={styles.input} value={form.display_name} onChangeText={(display_name) => setForm({ ...form, display_name })} />
-          <Text style={styles.label}>{editing ? 'PAROLĂ NOUĂ (OPȚIONAL)' : 'PAROLĂ'}</Text><TextInput style={styles.input} value={form.password} secureTextEntry onChangeText={(password) => setForm({ ...form, password })} />
-          <Text style={styles.label}>ROL</Text><View style={styles.choices}>{(['admin', 'manager', 'user'] as UserRole[]).map((role) => <TouchableOpacity key={role} style={[styles.choice, form.role === role && styles.choiceActive]} onPress={() => setForm({ ...form, role })}><Text style={[styles.choiceText, form.role === role && styles.choiceTextActive]}>{roleLabels[role]}</Text></TouchableOpacity>)}</View>
-          <Text style={styles.label}>PLATFORMĂ</Text><View style={styles.choices}>{(['desktop', 'mobile', 'both'] as PlatformAccess[]).map((platform_access) => <TouchableOpacity key={platform_access} style={[styles.choice, form.platform_access === platform_access && styles.choiceActive]} onPress={() => setForm({ ...form, platform_access })}><Text style={[styles.choiceText, form.platform_access === platform_access && styles.choiceTextActive]}>{platformLabels[platform_access]}</Text></TouchableOpacity>)}</View>
-          <View style={styles.switchRow}><Text style={styles.switchText}>Cont activ</Text><Switch value={form.is_active} onValueChange={(is_active) => setForm({ ...form, is_active })} disabled={editing?.username.toLowerCase() === 'admin'} /></View>
-          <TouchableOpacity style={[styles.save, saving && styles.disabled]} disabled={saving} onPress={() => void save()}>{saving ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.saveText}>Salvează</Text>}</TouchableOpacity>
-        </View></View>
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryCard}><Text style={styles.summaryValue}>{rows.length}</Text><Text style={styles.summaryLabel}>CONTURI</Text></View>
+        <View style={styles.summaryCard}><Text style={[styles.summaryValue, styles.summaryValueSuccess]}>{rows.filter((row) => row.is_active).length}</Text><Text style={styles.summaryLabel}>ACTIVE</Text></View>
+        <View style={styles.summaryCard}><Text style={styles.summaryValue}>{rows.filter((row) => row.role === 'admin').length}</Text><Text style={styles.summaryLabel}>ADMIN</Text></View>
+      </View>
+
+      <View style={styles.heading}>
+        <View><Text style={styles.kicker}>UTILIZATORI CREAȚI</Text><Text style={styles.title}>Conturi și acces</Text></View>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Adaugă utilizator" style={styles.add} onPress={startCreate}><Plus size={18} color={Colors.white} /><Text style={styles.addText}>Adaugă</Text></TouchableOpacity>
+      </View>
+
+      {loading ? <View style={styles.state}><ActivityIndicator color={Colors.orange} /><Text style={styles.stateText}>Se încarcă utilizatorii…</Text></View> : error ? <View style={styles.state}><ShieldCheck size={28} color={Colors.error} /><Text style={styles.error}>{error}</Text><TouchableOpacity style={styles.retryButton} onPress={() => void load()}><Text style={styles.retry}>Reîncearcă</Text></TouchableOpacity></View> : rows.length === 0 ? <View style={styles.state}><UserRound size={30} color={Colors.textMuted} /><Text style={styles.stateTitle}>Niciun utilizator încă</Text><Text style={styles.stateText}>Adaugă primul cont pentru echipa ta.</Text></View> : rows.map((row) => {
+        const removeDisabled = row.username.toLowerCase() === 'admin' || row.id === user.id;
+        return (
+          <View key={row.id} style={styles.row}>
+            <View style={styles.rowHead}>
+              <View style={styles.avatar}><Text style={styles.avatarText}>{(row.display_name || row.username).slice(0, 2).toUpperCase()}</Text></View>
+              <View style={styles.copy}>
+                <View style={styles.nameLine}><Text numberOfLines={1} style={styles.name}>{row.display_name}</Text><View style={[styles.statusPill, !row.is_active && styles.statusPillInactive]}><View style={[styles.statusDot, !row.is_active && styles.statusDotInactive]} /><Text style={[styles.statusText, !row.is_active && styles.statusTextInactive]}>{row.is_active ? 'Activ' : 'Inactiv'}</Text></View></View>
+                <Text numberOfLines={1} style={styles.meta}>@{row.username}</Text>
+              </View>
+            </View>
+            <View style={styles.rowDetails}>
+              <View style={styles.detailChip}><ShieldCheck size={13} color={Theme.colors.brand.primaryText} /><Text style={styles.detailText}>{roleLabels[row.role]}</Text></View>
+              <View style={styles.detailChip}><MonitorSmartphone size={13} color={Theme.colors.brand.cyanStrong} /><Text style={styles.detailText}>{platformLabels[row.platform_access]}</Text></View>
+            </View>
+            <View style={styles.rowActions}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Editează ${row.display_name}`} style={styles.editButton} onPress={() => startEdit(row)}><Pencil size={15} color={Theme.colors.brand.primaryText} /><Text style={styles.editButtonText}>Editează</Text></TouchableOpacity>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Șterge ${row.display_name}`} style={[styles.deleteButton, removeDisabled && styles.buttonDisabled]} disabled={removeDisabled} onPress={() => remove(row)}><Trash2 size={15} color={removeDisabled ? Theme.colors.text.disabled : Theme.colors.state.error} /></TouchableOpacity>
+            </View>
+          </View>
+        );
+      })}
+
+      <Modal visible={open} transparent animationType="slide" statusBarTranslucent onRequestClose={() => setOpen(false)}>
+        <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.modal}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.modalHead}>
+              <View style={styles.modalTitleWrap}><View style={styles.modalIcon}>{editing ? <Pencil size={18} color={Theme.colors.brand.primaryText} /> : <UserRound size={19} color={Theme.colors.brand.primaryText} />}</View><View><Text style={styles.modalTitle}>{editing ? 'Editează utilizatorul' : 'Utilizator nou'}</Text><Text style={styles.modalSubtitle}>Date de acces și permisiuni</Text></View></View>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Închide" style={styles.closeButton} onPress={() => setOpen(false)}><X size={20} color={Colors.textSecondary} /></TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              <View style={styles.fieldGroup}><Text style={styles.label}>NUME AFIȘAT</Text><View style={styles.inputShell}><UserRound size={17} color={Colors.textMuted} /><TextInput style={styles.input} value={form.display_name} placeholder="Ex. Maria Popescu" placeholderTextColor={Theme.colors.text.disabled} returnKeyType="next" onChangeText={(display_name) => setForm({ ...form, display_name })} /></View></View>
+              <View style={styles.fieldGroup}><Text style={styles.label}>UTILIZATOR</Text><View style={styles.inputShell}><UserRound size={17} color={Colors.textMuted} /><TextInput style={styles.input} value={form.username} editable={!editing || editing.username.toLowerCase() !== 'admin'} autoCapitalize="none" autoCorrect={false} placeholder="nume.utilizator" placeholderTextColor={Theme.colors.text.disabled} returnKeyType="next" onChangeText={(username) => setForm({ ...form, username })} /></View></View>
+              <View style={styles.fieldGroup}><Text style={styles.label}>{editing ? 'PAROLĂ NOUĂ (OPȚIONAL)' : 'PAROLĂ'}</Text><View style={styles.inputShell}><KeyRound size={17} color={Colors.textMuted} /><TextInput style={styles.input} value={form.password} secureTextEntry autoCapitalize="none" placeholder="Minimum 6 caractere" placeholderTextColor={Theme.colors.text.disabled} returnKeyType="done" onChangeText={(password) => setForm({ ...form, password })} /></View></View>
+
+              <Text style={styles.label}>ROL</Text>
+              <View style={styles.choices}>{(['admin', 'manager', 'user'] as UserRole[]).map((role) => <TouchableOpacity key={role} style={[styles.choice, form.role === role && styles.choiceActive]} onPress={() => setForm({ ...form, role })}><Text style={[styles.choiceText, form.role === role && styles.choiceTextActive]}>{roleLabels[role]}</Text>{form.role === role ? <CheckCircle2 size={14} color={Theme.colors.brand.primaryText} /> : null}</TouchableOpacity>)}</View>
+
+              <Text style={styles.label}>ACCES PLATFORMĂ</Text>
+              <View style={styles.choices}>{(['desktop', 'mobile', 'both'] as PlatformAccess[]).map((platform_access) => <TouchableOpacity key={platform_access} style={[styles.choice, form.platform_access === platform_access && styles.choiceActive]} onPress={() => setForm({ ...form, platform_access })}><Text style={[styles.choiceText, form.platform_access === platform_access && styles.choiceTextActive]}>{platformLabels[platform_access]}</Text>{form.platform_access === platform_access ? <CheckCircle2 size={14} color={Theme.colors.brand.primaryText} /> : null}</TouchableOpacity>)}</View>
+
+              <View style={styles.switchRow}><View style={styles.switchCopy}><Text style={styles.switchText}>Cont activ</Text><Text style={styles.switchHint}>Utilizatorul se poate autentifica imediat.</Text></View><Switch value={form.is_active} onValueChange={(is_active) => setForm({ ...form, is_active })} disabled={editing?.username.toLowerCase() === 'admin'} trackColor={{ false: Theme.colors.border.strong, true: Theme.colors.brand.secondary }} thumbColor={Theme.colors.surface.base} /></View>
+            </ScrollView>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setOpen(false)}><Text style={styles.cancelText}>Renunță</Text></TouchableOpacity>
+              <TouchableOpacity style={[styles.save, saving && styles.disabled]} disabled={saving} onPress={() => void save()}>{saving ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.saveText}>Salvează utilizatorul</Text>}</TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, gap: 10 }, heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }, kicker: { color: Colors.orange, fontSize: 10, fontFamily: 'Inter-Bold', letterSpacing: 1 }, title: { color: Colors.textPrimary, fontSize: 23, fontFamily: 'Inter-Bold', marginTop: 3 }, add: { flexDirection: 'row', gap: 6, alignItems: 'center', backgroundColor: Colors.orange, borderRadius: 12, paddingHorizontal: 13, paddingVertical: 10 }, addText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 15, backgroundColor: Theme.colors.surface.muted, borderWidth: 1, borderColor: Theme.colors.border.default }, avatar: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.orangeDim }, avatarText: { color: Colors.orange, fontFamily: 'Inter-Bold' }, copy: { flex: 1 }, name: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 14 }, meta: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 10, marginTop: 3 }, status: { color: Colors.success, fontFamily: 'Inter-Bold', fontSize: 9, marginTop: 4 }, inactive: { color: Colors.error }, iconButton: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted },
-  state: { minHeight: 130, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 20 }, stateText: { color: Colors.textMuted, textAlign: 'center', fontFamily: 'Inter-Regular' }, error: { color: Colors.error, textAlign: 'center' }, retry: { color: Colors.orange, fontFamily: 'Inter-Bold' },
-  backdrop: { flex: 1, backgroundColor: Theme.colors.overlay.scrim, justifyContent: 'center', padding: 18 }, modal: { backgroundColor: Theme.colors.surface.base, borderRadius: 22, padding: 18, borderWidth: 1, borderColor: Theme.colors.border.default }, modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }, modalTitle: { color: Colors.textPrimary, fontSize: 18, fontFamily: 'Inter-Bold' }, label: { color: Colors.textMuted, fontSize: 9, fontFamily: 'Inter-Bold', letterSpacing: 0.8, marginTop: 10, marginBottom: 5 }, input: { height: 44, borderRadius: 12, paddingHorizontal: 12, color: Colors.textPrimary, backgroundColor: Theme.colors.surface.subtle, borderWidth: 1, borderColor: Theme.colors.border.default }, choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 }, choice: { paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, backgroundColor: Theme.colors.surface.muted }, choiceActive: { backgroundColor: Colors.orangeDim, borderWidth: 1, borderColor: Colors.orangeMid }, choiceText: { color: Colors.textMuted, fontSize: 10, fontFamily: 'Inter-SemiBold' }, choiceTextActive: { color: Colors.orange }, switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }, switchText: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold' }, save: { height: 48, borderRadius: 14, backgroundColor: Colors.orange, alignItems: 'center', justifyContent: 'center', marginTop: 16 }, saveText: { color: Colors.white, fontFamily: 'Inter-Bold' }, disabled: { opacity: 0.55 },
+  container: { padding: Theme.spacing.md, gap: Theme.spacing.sm },
+  hero: { minHeight: 194, justifyContent: 'flex-end', overflow: 'hidden', borderRadius: Theme.radius.xl, padding: Theme.spacing.lg, ...Theme.shadow.card },
+  heroTop: { position: 'absolute', top: Theme.spacing.lg, left: Theme.spacing.lg, right: Theme.spacing.lg, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroIcon: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: Theme.radius.md, backgroundColor: Theme.colors.surface.base },
+  heroBadge: { flexDirection: 'row', alignItems: 'center', gap: Theme.spacing.xs, borderRadius: Theme.radius.round, paddingHorizontal: Theme.spacing.sm, paddingVertical: 7, backgroundColor: Theme.colors.overlay.softScrim },
+  onlineDot: { width: 7, height: 7, borderRadius: Theme.radius.round, backgroundColor: Theme.colors.state.successBright },
+  heroBadgeText: { color: Theme.colors.text.onBrand, fontSize: 9, fontFamily: Theme.typography.bold, letterSpacing: 0.7 },
+  heroTitle: { color: Theme.colors.text.onBrand, fontSize: 31, fontFamily: Theme.typography.bold, letterSpacing: -0.8 },
+  heroSubtitle: { maxWidth: 320, marginTop: 7, color: Theme.colors.surface.cyanSoft, fontSize: 13, lineHeight: 19, fontFamily: Theme.typography.regular },
+  summaryRow: { flexDirection: 'row', gap: Theme.spacing.xs },
+  summaryCard: { flex: 1, minHeight: 68, justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: Theme.radius.md, paddingHorizontal: Theme.spacing.sm, backgroundColor: Theme.colors.surface.base },
+  summaryValue: { color: Theme.colors.text.primary, fontSize: 21, fontFamily: Theme.typography.bold },
+  summaryValueSuccess: { color: Theme.colors.state.success },
+  summaryLabel: { marginTop: 2, color: Theme.colors.text.muted, fontSize: 8, fontFamily: Theme.typography.bold, letterSpacing: 0.8 },
+  heading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: Theme.spacing.xs, marginBottom: Theme.spacing.xs },
+  kicker: { color: Theme.colors.brand.primaryText, fontSize: 9, fontFamily: Theme.typography.bold, letterSpacing: 1 },
+  title: { marginTop: 4, color: Theme.colors.text.primary, fontSize: 22, fontFamily: Theme.typography.bold, letterSpacing: -0.35 },
+  add: { minHeight: 43, flexDirection: 'row', alignItems: 'center', gap: 7, borderRadius: Theme.radius.md, paddingHorizontal: Theme.spacing.md, backgroundColor: Theme.colors.brand.primaryAction },
+  addText: { color: Theme.colors.text.onBrand, fontFamily: Theme.typography.bold, fontSize: 12 },
+  row: { gap: Theme.spacing.sm, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: Theme.radius.lg, padding: Theme.spacing.md, backgroundColor: Theme.colors.surface.base, ...Theme.shadow.card },
+  rowHead: { flexDirection: 'row', alignItems: 'center', gap: Theme.spacing.sm },
+  avatar: { width: 48, height: 48, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: Theme.radius.md, backgroundColor: Theme.colors.surface.brandSoft },
+  avatarText: { color: Theme.colors.brand.primaryText, fontSize: 14, fontFamily: Theme.typography.bold },
+  copy: { minWidth: 0, flex: 1 },
+  nameLine: { flexDirection: 'row', alignItems: 'center', gap: Theme.spacing.xs },
+  name: { minWidth: 0, flex: 1, color: Theme.colors.text.primary, fontFamily: Theme.typography.semibold, fontSize: 15 },
+  meta: { marginTop: 4, color: Theme.colors.text.muted, fontFamily: Theme.typography.regular, fontSize: 11 },
+  statusPill: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: Theme.radius.round, paddingHorizontal: 8, paddingVertical: 5, backgroundColor: Theme.colors.state.successSoft },
+  statusPillInactive: { backgroundColor: Theme.colors.state.errorSoft },
+  statusDot: { width: 6, height: 6, borderRadius: Theme.radius.round, backgroundColor: Theme.colors.state.successBright },
+  statusDotInactive: { backgroundColor: Theme.colors.state.errorBright },
+  statusText: { color: Theme.colors.state.success, fontSize: 9, fontFamily: Theme.typography.bold },
+  statusTextInactive: { color: Theme.colors.state.error },
+  rowDetails: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+  detailChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: Theme.radius.round, paddingHorizontal: 9, paddingVertical: 6, backgroundColor: Theme.colors.surface.muted },
+  detailText: { color: Theme.colors.text.secondary, fontSize: 10, fontFamily: Theme.typography.semibold },
+  rowActions: { flexDirection: 'row', gap: Theme.spacing.xs },
+  editButton: { minHeight: 38, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: Theme.radius.sm, backgroundColor: Theme.colors.surface.brandSoft },
+  editButtonText: { color: Theme.colors.brand.primaryText, fontSize: 11, fontFamily: Theme.typography.semibold },
+  deleteButton: { width: 42, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.state.errorSoft, borderRadius: Theme.radius.sm, backgroundColor: Theme.colors.state.errorSoft },
+  buttonDisabled: { borderColor: Theme.colors.border.subtle, backgroundColor: Theme.colors.surface.muted, opacity: 0.55 },
+  state: { minHeight: 170, alignItems: 'center', justifyContent: 'center', gap: Theme.spacing.sm, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: Theme.radius.lg, padding: Theme.spacing.lg, backgroundColor: Theme.colors.surface.base },
+  stateTitle: { color: Theme.colors.text.primary, textAlign: 'center', fontFamily: Theme.typography.semibold },
+  stateText: { color: Theme.colors.text.muted, textAlign: 'center', fontFamily: Theme.typography.regular },
+  error: { color: Theme.colors.state.error, textAlign: 'center', fontFamily: Theme.typography.regular },
+  retryButton: { borderRadius: Theme.radius.sm, paddingHorizontal: Theme.spacing.md, paddingVertical: 9, backgroundColor: Theme.colors.surface.brandSoft },
+  retry: { color: Theme.colors.brand.primaryText, fontFamily: Theme.typography.bold },
+  backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: Theme.colors.overlay.scrim },
+  modal: { maxHeight: '92%', overflow: 'hidden', borderTopLeftRadius: Theme.radius.xxl, borderTopRightRadius: Theme.radius.xxl, backgroundColor: Theme.colors.surface.base, ...Theme.shadow.modal },
+  sheetHandle: { width: 42, height: 4, alignSelf: 'center', marginTop: 9, borderRadius: Theme.radius.round, backgroundColor: Theme.colors.border.strong },
+  modalHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: Theme.colors.border.subtle, paddingHorizontal: Theme.spacing.lg, paddingTop: Theme.spacing.sm, paddingBottom: Theme.spacing.md },
+  modalTitleWrap: { minWidth: 0, flex: 1, flexDirection: 'row', alignItems: 'center', gap: Theme.spacing.sm },
+  modalIcon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: Theme.radius.sm, backgroundColor: Theme.colors.surface.brandSoft },
+  modalTitle: { color: Theme.colors.text.primary, fontSize: 17, fontFamily: Theme.typography.bold },
+  modalSubtitle: { marginTop: 2, color: Theme.colors.text.muted, fontSize: 10, fontFamily: Theme.typography.regular },
+  closeButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: Theme.radius.sm, backgroundColor: Theme.colors.surface.muted },
+  modalScroll: { flexGrow: 0 },
+  modalContent: { padding: Theme.spacing.lg, paddingBottom: Theme.spacing.xl },
+  fieldGroup: { marginBottom: Theme.spacing.sm },
+  label: { marginTop: Theme.spacing.sm, marginBottom: 7, color: Theme.colors.text.muted, fontSize: 9, fontFamily: Theme.typography.bold, letterSpacing: 0.75 },
+  inputShell: { height: 50, flexDirection: 'row', alignItems: 'center', gap: Theme.spacing.xs, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: Theme.radius.md, paddingHorizontal: Theme.spacing.sm, backgroundColor: Theme.colors.surface.subtle },
+  input: { minWidth: 0, height: '100%', flex: 1, paddingVertical: 0, color: Theme.colors.text.primary, fontSize: 13, fontFamily: Theme.typography.regular },
+  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+  choice: { minHeight: 39, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: Theme.radius.sm, paddingHorizontal: Theme.spacing.sm, backgroundColor: Theme.colors.surface.muted },
+  choiceActive: { borderColor: Theme.colors.border.brandSoft, backgroundColor: Theme.colors.surface.brandSoft },
+  choiceText: { color: Theme.colors.text.muted, fontSize: 10, fontFamily: Theme.typography.semibold },
+  choiceTextActive: { color: Theme.colors.brand.primaryText },
+  switchRow: { minHeight: 68, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Theme.spacing.md, marginTop: Theme.spacing.lg, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: Theme.radius.md, paddingHorizontal: Theme.spacing.md, backgroundColor: Theme.colors.surface.subtle },
+  switchCopy: { minWidth: 0, flex: 1 },
+  switchText: { color: Theme.colors.text.primary, fontFamily: Theme.typography.semibold },
+  switchHint: { marginTop: 3, color: Theme.colors.text.muted, fontSize: 10, lineHeight: 14, fontFamily: Theme.typography.regular },
+  modalActions: { flexDirection: 'row', gap: Theme.spacing.xs, borderTopWidth: 1, borderTopColor: Theme.colors.border.subtle, paddingHorizontal: Theme.spacing.lg, paddingTop: Theme.spacing.sm, paddingBottom: Theme.spacing.lg, backgroundColor: Theme.colors.surface.base },
+  cancelButton: { height: 50, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: Theme.radius.md, paddingHorizontal: Theme.spacing.md, backgroundColor: Theme.colors.surface.base },
+  cancelText: { color: Theme.colors.text.secondary, fontSize: 12, fontFamily: Theme.typography.semibold },
+  save: { height: 50, flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: Theme.radius.md, backgroundColor: Theme.colors.brand.primaryAction },
+  saveText: { color: Theme.colors.text.onBrand, fontFamily: Theme.typography.bold, fontSize: 12 },
+  disabled: { opacity: 0.55 },
 });
