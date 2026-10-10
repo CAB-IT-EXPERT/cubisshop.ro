@@ -54,6 +54,7 @@ import {
   House,
   ImageIcon,
   LockKeyhole,
+  LogOut,
   MailCheck,
   Package,
   Pencil,
@@ -86,6 +87,7 @@ import ShopInvoicesManager from '@/components/ShopInvoicesManager';
 import ShopAutomationsManager from '@/components/ShopAutomationsManager';
 import ShopUsersManager from '@/components/ShopUsersManager';
 import ShopNotificationsButton from '@/components/ShopNotificationsButton';
+import LogoutConfirmModal from '@/components/logout-confirm-modal';
 import type { ShopNotification } from '@/services/shopApi';
 import { ShopPaymentMethodsManager, ShopProductSourcesManager, ShopShippingManager } from '@/components/ShopMoreManagers';
 import { Colors, Theme } from '@/constants/colors';
@@ -338,7 +340,7 @@ const moreAreaGroups = [
 ] as const;
 
 export default function ShopModuleScreen() {
-  const { token, user } = useAuth();
+  const { token, user, logout } = useAuth();
   const { pendingShopOrderId, consumePendingShopOrder } = useShopNavigation();
   const insets = useSafeAreaInsets();
   const { width: viewportWidth, height: viewportHeight } = useWindowDimensions();
@@ -361,6 +363,8 @@ export default function ShopModuleScreen() {
     return hour < 12 ? 'Bună dimineața' : hour < 18 ? 'Bună ziua' : 'Bună seara';
   });
   const [view, setView] = useState<ShopView>(persistedShopView);
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const viewRef = useRef<ShopView>(persistedShopView);
   const settingsScrollRef = useRef<ScrollView | null>(null);
   const revealSettingsField = useCallback((target: number) => {
@@ -369,6 +373,15 @@ export default function ShopModuleScreen() {
       responder?.scrollResponderScrollNativeHandleToKeyboard?.(target, 150, true);
     }, 180);
   }, []);
+  const confirmLogout = useCallback(async () => {
+    setLogoutLoading(true);
+    try {
+      await logout();
+      setLogoutConfirmVisible(false);
+    } finally {
+      setLogoutLoading(false);
+    }
+  }, [logout]);
   const [ordersInitialFilter, setOrdersInitialFilter] = useState<'all' | 'new'>('all');
   const [initialOrderId, setInitialOrderId] = useState<string | null>(null);
   const [initialNirId, setInitialNirId] = useState<string | null>(null);
@@ -1034,6 +1047,26 @@ export default function ShopModuleScreen() {
                   </View>
                 ))}
               </View>
+              <View style={styles.sessionSection}>
+                <View style={styles.moreGroupHeader}>
+                  <View style={styles.sessionGroupIcon}><LogOut size={14} color={Theme.colors.state.error} /></View>
+                  <Text style={styles.sessionGroupTitle}>SESIUNE</Text>
+                  <View style={styles.sessionGroupLine} />
+                </View>
+                <TouchableOpacity
+                  style={styles.logoutCard}
+                  activeOpacity={0.76}
+                  accessibilityRole="button"
+                  accessibilityLabel="Delogare din aplicație"
+                  onPress={() => setLogoutConfirmVisible(true)}>
+                  <View style={styles.logoutCardIcon}><LogOut size={21} color={Theme.colors.state.error} /></View>
+                  <View style={styles.moreCardCopy}>
+                    <Text style={styles.logoutCardTitle}>Delogare</Text>
+                    <Text style={styles.moreCardDescription}>Închide în siguranță sesiunea de pe acest telefon.</Text>
+                  </View>
+                  <View style={styles.logoutCardAction}><ChevronRight size={18} color={Theme.colors.state.error} /></View>
+                </TouchableOpacity>
+              </View>
             </>
           ) : (
             <View style={styles.primaryEmpty}>
@@ -1048,6 +1081,14 @@ export default function ShopModuleScreen() {
             </View>
           )}
         </ScrollView>
+
+        <LogoutConfirmModal
+          visible={logoutConfirmVisible}
+          loading={logoutLoading}
+          userName={user?.display_name || user?.username}
+          onCancel={() => setLogoutConfirmVisible(false)}
+          onConfirm={() => void confirmLogout()}
+        />
 
         <ShopBottomNavigation activeTab={view} onSelect={(tab) => tab === 'orders' ? openOrders() : setView(tab)} bottomInset={insets.bottom} />
       </View>
@@ -1779,6 +1820,14 @@ const styles = StyleSheet.create({
   moreCardTitle: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 13 },
   moreCardDescription: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 15, marginTop: 3 },
   moreCardArrow: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 17 },
+  sessionSection: { gap: 10, marginTop: 24 },
+  sessionGroupIcon: { width: 28, height: 24, alignItems: 'center', justifyContent: 'center', borderRadius: 9, backgroundColor: Theme.colors.state.errorSoft },
+  sessionGroupTitle: { color: Theme.colors.state.error, fontFamily: 'Inter-Bold', fontSize: 9, letterSpacing: 1.25 },
+  sessionGroupLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: Colors.errorDim },
+  logoutCard: { minHeight: 78, flexDirection: 'row', alignItems: 'center', gap: 13, borderWidth: 1, borderColor: Colors.errorDim, borderRadius: 20, padding: 13, backgroundColor: Theme.colors.state.errorSoft },
+  logoutCardIcon: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: Theme.colors.surface.base },
+  logoutCardTitle: { color: Theme.colors.state.error, fontFamily: 'Inter-SemiBold', fontSize: 13 },
+  logoutCardAction: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 17, backgroundColor: Theme.colors.surface.base },
   soonBadge: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 5, backgroundColor: 'rgba(245,158,11,0.11)' },
   soonBadgeText: { color: Theme.colors.state.warningBright, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.7 },
   primaryEmpty: { minHeight: 280, alignItems: 'center', justifyContent: 'center', borderRadius: 26, padding: 28, backgroundColor: Theme.colors.surface.base, marginTop: 16 },
