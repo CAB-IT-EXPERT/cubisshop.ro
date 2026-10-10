@@ -3,7 +3,9 @@ import {
   ActivityIndicator,
   Animated as NativeAnimated,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -15,26 +17,22 @@ import {
   View,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-} from 'react-native-reanimated';
-import { ArrowRight, Eye, EyeOff, LockKeyhole, User } from 'lucide-react-native';
+import { ArrowRight, ExternalLink, Eye, EyeOff, LockKeyhole, User } from 'lucide-react-native';
 import { Colors, Theme } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import AppAuroraBackground from '@/components/AppAuroraBackground';
 
 const appIcon = require('../assets/images/cubis-shop-icon.png');
+const cabItLogo = require('../assets/images/cab-it-logo.png');
 
 export default function MobileLoginGate({ children }: { children: React.ReactNode }) {
   const { user, login, loading, initializing, rememberedUsername, rememberedLogin } = useAuth();
+  const usernameRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
   const [username, setUsername] = useState(rememberedUsername);
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(rememberedLogin);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [focusedField, setFocusedField] = useState<'username' | 'password' | null>(null);
   const [error, setError] = useState('');
   const buttonScale = useRef(new NativeAnimated.Value(1)).current;
 
@@ -63,6 +61,7 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
 
   const submit = async () => {
     if (!username.trim() || !password.trim() || loading) return;
+    Keyboard.dismiss();
     try {
       setError('');
       await login(username, password, rememberMe);
@@ -73,6 +72,11 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
   };
 
   const submitDisabled = !username.trim() || !password.trim() || loading;
+
+  const openCabIt = () => {
+    Keyboard.dismiss();
+    void Linking.openURL('https://cab-it.ro/');
+  };
 
   return (
     <AppAuroraBackground>
@@ -95,8 +99,11 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
           keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'none'}
           automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
           contentInsetAdjustmentBehavior="never"
+          onScrollBeginDrag={Keyboard.dismiss}
           showsVerticalScrollIndicator={false}>
-            <Animated.View entering={FadeInDown.duration(420).delay(40)} style={styles.brandRow}>
+            <Pressable style={styles.dismissSpacer} onPress={Keyboard.dismiss} />
+            <View style={styles.loginContent}>
+            <Pressable style={styles.brandRow} onPress={Keyboard.dismiss}>
               <View style={styles.brandIconWrap}>
                 <Image source={appIcon} style={styles.brandIcon} resizeMode="cover" accessibilityLabel="Cubis Shop" />
               </View>
@@ -104,33 +111,31 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                 <Text style={styles.brandName}>Cubis Shop</Text>
                 <Text style={styles.brandMeta}>Administrare magazin</Text>
               </View>
-            </Animated.View>
+            </Pressable>
 
-            <Animated.View
-              entering={FadeInDown.duration(520).delay(90).springify().damping(18).stiffness(130)}
-              style={styles.card}>
-              <Animated.View entering={FadeInUp.duration(420).delay(170)} style={styles.heading}>
+            <View style={styles.card}>
+              <Pressable style={styles.heading} onPress={Keyboard.dismiss}>
                 <Text style={styles.title}>Bine ai revenit</Text>
                 <Text style={styles.subtitle}>Conectează-te pentru a continua.</Text>
-              </Animated.View>
+              </Pressable>
 
-              <Animated.View entering={FadeInUp.duration(420).delay(230)} style={styles.field}>
-                <Text style={styles.label}>Utilizator</Text>
-                <View style={[styles.inputWrap, focusedField === 'username' && styles.inputWrapFocused]}>
-                  <View style={[styles.inputIcon, focusedField === 'username' && styles.inputIconFocused]}>
-                    <User size={18} color={focusedField === 'username' ? Theme.colors.brand.primary : '#71869A'} strokeWidth={1.9} />
+              <View style={styles.field}>
+                <Text style={styles.label} onPress={Keyboard.dismiss}>Utilizator</Text>
+                <View style={styles.inputWrap}>
+                  <View style={styles.inputIcon}>
+                    <User size={18} color="#71869A" strokeWidth={1.9} />
                   </View>
                   <TextInput
+                    ref={usernameRef}
                     style={styles.input}
                     value={username}
                     onChangeText={setUsername}
-                    onFocus={() => setFocusedField('username')}
-                    onBlur={() => setFocusedField(null)}
                     placeholder="Numele de utilizator"
                     placeholderTextColor={Theme.colors.text.disabled}
-                    autoComplete="username"
-                    textContentType="username"
-                    importantForAutofill="yes"
+                    autoComplete="off"
+                    textContentType="none"
+                    importantForAutofill="no"
+                    showSoftInputOnFocus
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="next"
@@ -138,26 +143,25 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                     onSubmitEditing={() => passwordRef.current?.focus()}
                   />
                 </View>
-              </Animated.View>
+              </View>
 
-              <Animated.View entering={FadeInUp.duration(420).delay(280)} style={styles.field}>
-                <Text style={styles.label}>Parolă</Text>
-                <View style={[styles.inputWrap, focusedField === 'password' && styles.inputWrapFocused]}>
-                  <View style={[styles.inputIcon, focusedField === 'password' && styles.inputIconFocused]}>
-                    <LockKeyhole size={18} color={focusedField === 'password' ? Theme.colors.brand.primary : '#71869A'} strokeWidth={1.9} />
+              <View style={styles.field}>
+                <Text style={styles.label} onPress={Keyboard.dismiss}>Parolă</Text>
+                <View style={styles.inputWrap}>
+                  <View style={styles.inputIcon}>
+                    <LockKeyhole size={18} color="#71869A" strokeWidth={1.9} />
                   </View>
                   <TextInput
                     ref={passwordRef}
                     style={styles.input}
                     value={password}
                     onChangeText={setPassword}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
                     placeholder="Parola ta"
                     placeholderTextColor={Theme.colors.text.disabled}
-                    autoComplete="current-password"
-                    textContentType="password"
-                    importantForAutofill="yes"
+                    autoComplete="off"
+                    textContentType="none"
+                    importantForAutofill="no"
+                    showSoftInputOnFocus
                     autoCapitalize="none"
                     autoCorrect={false}
                     secureTextEntry={!passwordVisible}
@@ -168,44 +172,53 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                     accessibilityRole="button"
                     accessibilityLabel={passwordVisible ? 'Ascunde parola' : 'Afișează parola'}
                     activeOpacity={0.7}
-                    onPress={() => setPasswordVisible((current) => !current)}
+                    onPress={() => {
+                      Keyboard.dismiss();
+                      setPasswordVisible((current) => !current);
+                    }}
                     style={styles.passwordToggle}>
                     {passwordVisible ? (
-                      <Animated.View key="eye-off" entering={FadeIn.duration(160)}>
+                      <View>
                         <EyeOff size={19} color={Theme.colors.brand.primary} strokeWidth={1.9} />
-                      </Animated.View>
+                      </View>
                     ) : (
-                      <Animated.View key="eye-on" entering={FadeIn.duration(160)}>
+                      <View>
                         <Eye size={19} color="#71869A" strokeWidth={1.9} />
-                      </Animated.View>
+                      </View>
                     )}
                   </TouchableOpacity>
                 </View>
-              </Animated.View>
+              </View>
 
-              <Animated.View entering={FadeInUp.duration(420).delay(320)} style={[styles.rememberRow, rememberMe && styles.rememberRowActive]}>
+              <View style={[styles.rememberRow, rememberMe && styles.rememberRowActive]}>
                 <TouchableOpacity
                   style={styles.rememberCopy}
                   activeOpacity={0.8}
-                  onPress={() => setRememberMe((current) => !current)}>
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setRememberMe((current) => !current);
+                  }}>
                   <Text style={styles.rememberTitle}>Ține-mă minte</Text>
                 </TouchableOpacity>
                 <Switch
                   value={rememberMe}
-                  onValueChange={setRememberMe}
+                  onValueChange={(value) => {
+                    Keyboard.dismiss();
+                    setRememberMe(value);
+                  }}
                   trackColor={{ false: '#CBD8E4', true: '#86DDEA' }}
                   thumbColor="#FFFFFF"
                   ios_backgroundColor="#CBD8E4"
                 />
-              </Animated.View>
+              </View>
 
               {error ? (
-                <Animated.View entering={FadeIn.duration(180)} style={styles.errorBox}>
+                <View style={styles.errorBox}>
                   <Text style={styles.error} selectable>{error}</Text>
-                </Animated.View>
+                </View>
               ) : null}
 
-              <Animated.View entering={FadeInUp.duration(420).delay(360)}>
+              <View>
                 <NativeAnimated.View style={{ transform: [{ scale: buttonScale }] }}>
                   <Pressable
                     accessibilityRole="button"
@@ -243,8 +256,25 @@ export default function MobileLoginGate({ children }: { children: React.ReactNod
                     )}
                   </Pressable>
                 </NativeAnimated.View>
-              </Animated.View>
-            </Animated.View>
+              </View>
+
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Deschide site-ul cab-it.ro"
+                onPress={openCabIt}
+                style={({ pressed }) => [styles.developerCredit, pressed && styles.developerCreditPressed]}>
+                <View style={styles.developerLogo}>
+                  <Image source={cabItLogo} style={styles.developerLogoImage} resizeMode="contain" />
+                </View>
+                <View style={styles.developerCopy}>
+                  <Text style={styles.developerKicker}>Dezvoltat și administrat de</Text>
+                  <Text style={styles.developerName}>echipa cab-it.ro</Text>
+                </View>
+                <ExternalLink size={14} color="#12A69E" strokeWidth={1.8} />
+              </Pressable>
+            </View>
+            </View>
+            <Pressable style={styles.dismissSpacer} onPress={Keyboard.dismiss} />
         </ScrollView>
       </KeyboardAvoidingView>
     </AppAuroraBackground>
@@ -262,8 +292,10 @@ const styles = StyleSheet.create({
   keyboard: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: {
-    flexGrow: 1, justifyContent: 'flex-start', paddingHorizontal: 20, paddingTop: 54, paddingBottom: 42,
+    flexGrow: 1, paddingHorizontal: 20, paddingTop: 42, paddingBottom: 42,
   },
+  dismissSpacer: { flexGrow: 1, minHeight: 16 },
+  loginContent: { width: '100%' },
   decorations: { ...StyleSheet.absoluteFill },
   decorativeRingLarge: {
     position: 'absolute', top: 86, right: -104, width: 218, height: 218,
@@ -323,16 +355,10 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.border.default, borderRadius: 17,
     paddingHorizontal: 9, backgroundColor: Theme.colors.surface.subtle,
   },
-  inputWrapFocused: {
-    borderColor: Theme.colors.border.focus, backgroundColor: Theme.colors.surface.base,
-    shadowColor: Theme.colors.brand.primary, shadowOpacity: 0.10,
-    shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2,
-  },
   inputIcon: {
     width: 36, height: 36, alignItems: 'center', justifyContent: 'center',
     borderRadius: 11, backgroundColor: Theme.colors.surface.muted,
   },
-  inputIconFocused: { backgroundColor: Theme.colors.surface.brandSoft },
   input: {
     flex: 1, height: 54, paddingHorizontal: 11, color: Theme.colors.text.primary,
     fontSize: 14, fontFamily: Theme.typography.medium,
@@ -374,5 +400,24 @@ const styles = StyleSheet.create({
     position: 'absolute', right: 12, width: 32, height: 32,
     alignItems: 'center', justifyContent: 'center', borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  developerCredit: {
+    alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 9,
+    marginTop: 18, paddingVertical: 2,
+  },
+  developerCreditPressed: { opacity: 0.72, transform: [{ translateX: 2 }] },
+  developerLogo: {
+    width: 34, height: 34, alignItems: 'center', justifyContent: 'center',
+    borderRadius: 11, backgroundColor: 'rgba(226,249,247,0.86)',
+  },
+  developerLogoImage: { width: 27, height: 27 },
+  developerCopy: { alignItems: 'flex-start', gap: 1 },
+  developerKicker: {
+    color: '#91A1B0', fontSize: 8, lineHeight: 10,
+    fontFamily: Theme.typography.semibold,
+  },
+  developerName: {
+    color: '#08768A', fontSize: 11, lineHeight: 14,
+    fontFamily: Theme.typography.bold, letterSpacing: -0.1,
   },
 });
