@@ -1,0 +1,80 @@
+{
+  "name": "cubisshop-desktop",
+  "version": "1.2.69",
+  "description": "Cubis Shop CRM Desktop",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win",
+    "dist:win:ci": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "ro.cabit.cubisshop.desktop",
+    "productName": "Cubis Shop CRM",
+    "protocols": [
+      {
+        "name": "Cubis Shop Order",
+        "schemes": [
+          "cubisshop"
+        ]
+      }
+    ],
+    "artifactName": "CubisShopSetup-${version}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "window-bounds.js",
+      "preload.js",
+      "package.json",
+      "renderer/**/*",
+      "assets/**/*",
+      "!assets/icon.ico",
+      "!assets/icon.png",
+      "!assets/logo.png",
+      "node_modules/**/*",
+      "!node_modules/electron/**",
+      "!node_modules/electron-builder/**",
+      "!node_modules/.cache/**",
+      "!node_modules/**/{test,tests,__tests__,example,examples,docs,doc}/**",
+      "!node_modules/**/*.{md,map,ts,flow}",
+      "!node_modules/**/{.bin,.github}/**",
+      "!win64-installer/**",
+      "!win64-installer.zip",
+      "!release/**",
+      "!release-*/**",
+      "!*.exe",
+      "!*.zip",
+      "!*.apk",
+      "!*.blockmap",
+      "!builder-debug.yml"
+    ],
+    "afterPack": "scripts/after-pack.js",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/cubis-shop-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}

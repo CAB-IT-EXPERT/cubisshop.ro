@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+    <script id="gt-theme-bootstrap">(()=>{const r=document.documentElement;try{const k='g-trots-color-theme-v1',s=localStorage.getItem(k),t=s==='light'||s==='dark'?s:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');r.dataset.theme=t;r.style.colorScheme=t}catch{const t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';r.dataset.theme=t;r.style.colorScheme=t}if(location.pathname.includes('/magazin/produs/')){r.classList.add('gt-product-booting');addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>requestAnimationFrame(()=>r.classList.remove('gt-product-booting'))),{once:true});setTimeout(()=>r.classList.remove('gt-product-booting'),3000)}})();</script>
+<style id="gt-theme-critical">html[data-theme="light"],html[data-theme="light"] body{background:#f7f8fb;color:#171b24}html[data-theme="dark"],html[data-theme="dark"] body{background:#071a36;color:#f7f9ff}html.gt-product-booting body{opacity:0!important}html[data-theme="light"] .product-static-seo,html[data-theme="light"] .product-static-seo img{background:#fff!important;color:#171b24!important}html[data-theme="dark"] .product-static-seo,html[data-theme="dark"] .product-static-seo img{background:#0c274d!important;color:#f7f9ff!important}html[data-theme="light"] body.contact-body{background:#f7f8fb!important;color:#171b24!important}html[data-theme="light"] .contact-stage{background:radial-gradient(circle at 18% 34%,rgba(255,133,0,.13),transparent 29rem),linear-gradient(132deg,#fffaf5,#fff 55%,#f7f9fc)!important}html[data-theme="light"] .contact-whatsapp{background:rgba(255,255,255,.96)!important;color:#171b24!important}html[data-theme="light"] .contact-scooter{opacity:.18!important}</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0a09">
+  <meta name="robots" content="noindex,follow">
+  <title>Urmărire comandă | G-Trots România</title>
+  <meta name="description" content="Urmărește în siguranță statusul comenzii tale G-Trots România.">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700;8..144,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="urmarire-comanda.css?v=20260905-return-v4">
+                  <link rel="stylesheet" href="/order-experience.css?v=20260920-v1">
+  <script src="/theme.js?v=20260920-public-theme-v11"></script>
+  <link rel="stylesheet" href="/theme.css?v=20260920-public-theme-v11">
+</head>
+<body class="tracking-page">
+  <div class="tracking-ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+  <header class="tracking-header">
+    <a class="tracking-brand" href="/" aria-label="G-Trots România, pagina principală">
+      <img src="assets/logo.png" alt="G-Trots România">
+      <span><strong>G-Trots România</strong><small>SERVICE &amp; MAGAZIN</small></span>
+    </a>
+    <a class="tracking-shop-link" href="/magazin"><span>Înapoi la magazin</span><b aria-hidden="true">→</b></a>
+  </header>
+
+  <main>
+    <section class="tracking-hero">
+      <div class="tracking-hero-copy">
+        <span class="tracking-eyebrow"><i></i> COMANDA TA, PAS CU PAS</span>
+        <h1>Vezi unde este<br><em>comanda ta.</em></h1>
+        <p>Primești statusul actual, istoricul și produsele comandate într-o singură pagină securizată.</p>
+        <div class="tracking-trust"><span>✓</span><p><strong>Date protejate</strong><small>Căutarea manuală verifică și adresa de e-mail.</small></p></div>
+      </div>
+      <form id="tracking-form" class="tracking-search" novalidate>
+        <div class="tracking-search-head"><span>01</span><div><small>CĂUTARE MANUALĂ</small><h2>Găsește comanda</h2></div></div>
+        <label for="tracking-order-number">Cod comandă <b>*</b></label>
+        <div class="tracking-field"><span aria-hidden="true">#</span><input id="tracking-order-number" name="order_number" autocomplete="off" placeholder="GT-20260826-AB12CD34" required></div>
+        <label for="tracking-email">E-mail <b>*</b></label>
+        <div class="tracking-field"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span><input id="tracking-email" name="email" type="email" autocomplete="email" placeholder="adresa@exemplu.ro" required></div>
+        <button id="tracking-submit" type="submit"><span>Verifică statusul</span><b aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></b></button>
+        <p class="tracking-form-note"><span>i</span> Ai primit un e-mail de la noi? Butonul „Urmărește comanda” te aduce aici automat, fără să mai completezi formularul.</p>
+      </form>
+    </section>
+
+    <section id="tracking-state" class="tracking-state" aria-live="polite" hidden></section>
+    <section id="tracking-result" class="tracking-result" hidden></section>
+  </main>
+
+  <footer class="tracking-footer"><img src="assets/logo.png" alt=""><p><strong>G-Trots România</strong><span>Ai o întrebare? Scrie-ne la contact@cubisshop.ro</span></p><div class="tracking-footer-actions"><a href="/magazin">Continuă cumpărăturile →</a><button id="tracking-footer-cancel" class="tracking-footer-cancel" type="button" hidden>Anulează comanda</button><button id="tracking-footer-return" class="tracking-footer-return" type="button" hidden>Solicită returul</button></div></footer>
+  <div id="cancellation-modal" class="cancellation-modal" hidden>
+    <button class="cancellation-backdrop" type="button" data-cancel-close aria-label="Închide"></button>
+    <section class="cancellation-sheet" role="dialog" aria-modal="true" aria-labelledby="cancellation-title">
+      <header><span><b>!</b></span><div><small>ANULARE COMANDĂ</small><h2 id="cancellation-title">Spune-ne motivul.</h2></div><button type="button" data-cancel-close aria-label="Închide">×</button></header>
+      <p>Comanda va fi oprită imediat. Anularea nu mai este disponibilă după predarea coletului către curier.</p>
+      <label for="cancellation-reason">Motivul anulării <b>*</b></label>
+      <textarea id="cancellation-reason" maxlength="1000" rows="5" placeholder="De exemplu: am comandat din greșeală produsul..." required></textarea>
+      <span id="cancellation-error" class="cancellation-error" role="alert"></span>
+      <div class="cancellation-actions"><button type="button" data-cancel-close>Renunță</button><button id="cancellation-confirm" type="button">Anulează comanda</button></div>
+    </section>
+  </div>
+  <div id="return-modal" class="return-modal" hidden>
+    <button class="return-backdrop" type="button" data-return-close aria-label="Închide"></button>
+    <section class="return-sheet" role="dialog" aria-modal="true" aria-labelledby="return-title">
+      <header><span>↶</span><div><small>SOLICITARE RETUR</small><h2 id="return-title">Spune-ne detaliile.</h2></div><button type="button" data-return-close aria-label="Închide">×</button></header>
+      <p>După trimitere, cererea va fi înregistrată imediat. Costul returului prin curier va fi scăzut din suma restituită.</p>
+      <div id="return-deadline" class="return-deadline" aria-live="polite"></div>
+      <div class="return-product-picker"><b>Alege produsele și cantitățile</b><div id="return-product-list"></div></div>
+      <label for="return-reason">Motivul returului <b id="return-reason-required">*</b></label>
+      <textarea id="return-reason" maxlength="1000" rows="4" placeholder="De exemplu: produsul nu corespunde nevoilor mele..."></textarea>
+      <small id="return-reason-help" class="return-field-feedback"></small>
+      <div class="return-fields"><label for="return-holder">Titularul contului <b>*</b><input id="return-holder" maxlength="180" autocomplete="name" placeholder="Nume și prenume"></label><label for="return-iban">IBAN pentru rambursare <b>*</b><input id="return-iban" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="return-iban-feedback" placeholder="RO49 AAAA 1B31 0075 9384 0000"><small id="return-iban-feedback" class="return-field-feedback">IBAN-ul este verificat înainte de trimitere.</small></label></div>
+      <div class="return-estimate"><span><i id="return-courier-label">Cost retur curier</i> <b id="return-cost">0,00 RON</b></span><span>Estimare restituire <strong id="return-refund">0,00 RON</strong></span></div>
+      <label class="return-consent"><input id="return-refund-consent" type="checkbox"> <span>Sunt de acord ca rambursarea să fie făcută în IBAN-ul indicat, în maximum 14 zile calendaristice.</span></label>
+      <span id="return-error" class="return-error" role="alert"></span>
+      <div class="return-actions"><button type="button" data-return-close>Renunță</button><button id="return-confirm" type="button">Trimite solicitarea</button></div>
+    </section>
+  </div>
+<script src="urmarire-comanda.js?v=20260920-order-experience-v1" defer></script>
+<script src="/legal-footer.js?v=20260920-public-theme-v11" defer></script>
+</body>
+</html>

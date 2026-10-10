@@ -1,0 +1,1247 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  AppState,
+  Easing,
+  Modal,
+  PanResponder,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { runWhenIdle } from '@/utils/runWhenIdle';
+import * as ImagePicker from 'expo-image-picker';
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  GripVertical,
+  ImagePlus,
+  MessageSquare,
+  Package,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Save,
+  Search,
+  Star,
+  Trash2,
+  X,
+} from 'lucide-react-native';
+import { Colors, Theme } from '@/constants/colors';
+import { useAuth } from '@/contexts/AuthContext';
+import RichTextEditor from '@/components/RichTextEditor';
+import ShopPagination from '@/components/ShopPagination';
+import ShopProductPicture from '@/components/ShopProductPicture';
+import ShopProductExportButton from '@/components/ShopProductExportButton';
+import AutoScrollProductName from '@/components/AutoScrollProductName';
+import useAndroidSearchBack from '@/hooks/useAndroidSearchBack';
+import {
+  shopApi,
+  ShopBrand,
+  ShopCategory,
+  ShopManufacturer,
+  ShopProduct,
+  ShopProductImage,
+  ShopProductManagerBootstrap,
+  ShopProductPayload,
+  ShopProductQuestion,
+  ShopProductReview,
+  ShopProductSource,
+  ShopProductSpecification,
+  ShopProductStats,
+  ShopSmartBillSettings,
+  ShopSmartBillSkuLookup,
+} from '@/services/shopApi';
+
+type EditorImage = ShopProductImage & { key: string; preview_uri: string };
+type EditorSpecification = ShopProductSpecification & { key: string };
+type EditorQuestion = ShopProductQuestion & { key: string };
+
+const MOBILE_GALLERY_STEP = 182;
+const DETAIL_REVIEWS_PAGE_SIZE = 5;
+
+function detailPaginationItems(totalPages: number, currentPage: number): (number | 'ellipsis')[] {
+  if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+  if (currentPage <= 2) [2, 3].forEach((page) => pages.add(page));
+  if (currentPage >= totalPages - 1) [totalPages - 2, totalPages - 1].forEach((page) => pages.add(page));
+  const ordered = [...pages].filter((page) => page > 0 && page <= totalPages).sort((a, b) => a - b);
+  return ordered.flatMap((page, index) => index && page - ordered[index - 1] > 1 ? ['ellipsis', page] : [page]);
+}
+
+function DraggableGalleryImage({ image, index, total, isMain, onRemove, onMakeMain, onDrop, onDragStateChange }: {
+  image: EditorImage;
+  index: number;
+  total: number;
+  isMain: boolean;
+  onRemove: () => void;
+  onMakeMain: () => void;
+  onDrop: (from: number, to: number) => void;
+  onDragStateChange: (dragging: boolean) => void;
+}) {
+  const dragX = useRef(new Animated.Value(0)).current;
+  const [dragging, setDragging] = useState(false);
+  const indexRef = useRef(index);
+  const totalRef = useRef(total);
+  const onDropRef = useRef(onDrop);
+  const onDragStateRef = useRef(onDragStateChange);
+  indexRef.current = index;
+  totalRef.current = total;
+  onDropRef.current = onDrop;
+  onDragStateRef.current = onDragStateChange;
+
+  const finishDrag = (dx: number, shouldReorder: boolean) => {
+    const from = indexRef.current;
+    const target = shouldReorder ? Math.max(0, Math.min(totalRef.current - 1, from + Math.round(dx / MOBILE_GALLERY_STEP))) : from;
+    Animated.spring(dragX, { toValue: 0, useNativeDriver: true, speed: 24, bounciness: 5 }).start(() => {
+      setDragging(false);
+      onDragStateRef.current(false);
+      if (target !== from) onDropRef.current(from, target);
+    });
+  };
+
+  const panResponder = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_event, gesture) => Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy),
+    onMoveShouldSetPanResponderCapture: (_event, gesture) => Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy),
+    onPanResponderGrant: () => { dragX.stopAnimation(); dragX.setValue(0); setDragging(true); onDragStateRef.current(true); },
+    onPanResponderMove: (_event, gesture) => dragX.setValue(gesture.dx),
+    onPanResponderRelease: (_event, gesture) => finishDrag(gesture.dx, true),
+    onPanResponderTerminate: (_event, gesture) => finishDrag(gesture.dx, false),
+    onShouldBlockNativeResponder: () => true,
+  })).current;
+
+  return <Animated.View {...panResponder.panHandlers} style={[styles.galleryCard, isMain && styles.galleryMain, dragging && styles.galleryDragging, { transform: [{ translateX: dragX }, { scale: dragging ? 1.035 : 1 }] }]}>
+    <View style={styles.galleryPhoto}>
+      <ShopProductPicture image={image} width={164} height={148} borderRadius={14} />
+      <TouchableOpacity style={styles.galleryRemove} onPress={onRemove}><X size={16} color="#111" /></TouchableOpacity>
+      {isMain ? <View style={styles.mainBadge}><Text style={styles.mainBadgeText}>PRINCIPALA</Text></View> : null}
+    </View>
+    <View style={styles.galleryFooter}>
+      <View style={styles.dragHint}><GripVertical size={17} color={Colors.textMuted} /><Text style={styles.dragHintText}>Tine si trage</Text></View>
+      <TouchableOpacity disabled={isMain} onPress={onMakeMain} style={[styles.makeMain, isMain && styles.makeMainActive]}><Star size={14} color={isMain ? Colors.orange : Colors.textSecondary} fill={isMain ? Colors.orange : 'transparent'} /><Text style={[styles.makeMainText, isMain && styles.makeMainTextActive]}>{isMain ? 'Principala' : 'Alege'}</Text></TouchableOpacity>
+    </View>
+  </Animated.View>;
+}
+
+type FormState = {
+  id: string | null;
+  source_id: string | null;
+  source_domain: string;
+  name: string;
+  slug: string;
+  sku: string;
+  smartbill_product_id: string;
+  smartbill_sku: string;
+  smartbill_warehouse_id: string;
+  smartbill_warehouse_name: string;
+  smartbill_stock_quantity: string;
+  smartbill_link_status: 'unlinked' | 'linked' | 'stale' | 'error';
+  smartbill_last_synced_at: string;
+  smartbill_last_error: string;
+  supplier_product_code: string;
+  ean: string;
+  short_description: string;
+  description_title: string;
+  description_html: string;
+  meta_title: string;
+  meta_description: string;
+  cost_price: string;
+  price: string;
+  supplier_base_price: string;
+  supplier_price_difference: string;
+  discount_type: 'percent' | 'fixed';
+  discount_value: string;
+  unit_of_measure: string;
+  category_id: string | null;
+  category_ids: string[];
+  manufacturer_id: string | null;
+  manufacturer_address: string;
+  manufacturer_email: string;
+  eu_responsible_person_name: string;
+  eu_responsible_person_address: string;
+  eu_responsible_person_email: string;
+  product_model: string;
+  product_identifier: string;
+  safety_warnings_ro: string;
+  safety_documents: string;
+  ce_marking_applicable: boolean | null;
+  compliance_documents: string;
+  legal_warranty_months: string;
+  commercial_warranty_months: string;
+  software_updates_until: string;
+  repairability_info: string;
+  spare_parts_info: string;
+  brand_ids: string[];
+  stock_mode: 'tracked' | 'unlimited';
+  stock_quantity: string;
+  supplier_stock_quantity: string;
+  accounting_stock_quantity: string;
+  is_accounting_stock_tracked: boolean;
+  low_stock_threshold: string;
+  is_active: boolean;
+  is_featured: boolean;
+  images: EditorImage[];
+  specifications: EditorSpecification[];
+  questions: EditorQuestion[];
+};
+
+function emptyForm(): FormState {
+  return {
+    id: null,
+    source_id: null,
+    source_domain: 'cubisshop.ro',
+    name: '',
+    slug: '',
+    sku: '',
+    smartbill_product_id: '',
+    smartbill_sku: '',
+    smartbill_warehouse_id: '',
+    smartbill_warehouse_name: '',
+    smartbill_stock_quantity: '',
+    smartbill_link_status: 'unlinked',
+    smartbill_last_synced_at: '',
+    smartbill_last_error: '',
+    supplier_product_code: '',
+    ean: '',
+    short_description: '',
+    description_title: '',
+    description_html: '',
+    meta_title: '',
+    meta_description: '',
+    cost_price: '0',
+    price: '',
+    supplier_base_price: '',
+    supplier_price_difference: '',
+    discount_type: 'percent',
+    discount_value: '',
+    unit_of_measure: 'buc',
+    category_id: null,
+    category_ids: [],
+    manufacturer_id: null,
+    manufacturer_address: '',
+    manufacturer_email: '',
+    eu_responsible_person_name: '',
+    eu_responsible_person_address: '',
+    eu_responsible_person_email: '',
+    product_model: '',
+    product_identifier: '',
+    safety_warnings_ro: '',
+    safety_documents: '',
+    ce_marking_applicable: null,
+    compliance_documents: '',
+    legal_warranty_months: '',
+    commercial_warranty_months: '',
+    software_updates_until: '',
+    repairability_info: '',
+    spare_parts_info: '',
+    brand_ids: [],
+    stock_mode: 'tracked',
+    stock_quantity: '0',
+    supplier_stock_quantity: '0',
+    accounting_stock_quantity: '0',
+    is_accounting_stock_tracked: true,
+    low_stock_threshold: '3',
+    is_active: true,
+    is_featured: false,
+    images: [],
+    specifications: [],
+    questions: [],
+  };
+}
+
+function slugify(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 200);
+}
+
+function money(value: number) {
+  return new Intl.NumberFormat('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + ' lei';
+}
+
+const DETAIL_SALES_PAGE_SIZE = 5;
+type ProductManagerSnapshot = { data: ShopProductManagerBootstrap; cachedAt: number };
+const PRODUCT_MANAGER_SNAPSHOT_TTL_MS = 30_000;
+const PRODUCT_MANAGER_SNAPSHOT_TOKEN_LIMIT = 2;
+const productManagerSnapshots = new Map<string, ProductManagerSnapshot>();
+let persistedProductManagerUi = { query: '', page: 1, pageSize: 10, scrollY: 0 };
+
+function readProductManagerSnapshot(token: string) {
+  if (!token) return undefined;
+  const snapshot = productManagerSnapshots.get(token);
+  if (!snapshot) return undefined;
+  productManagerSnapshots.delete(token);
+  productManagerSnapshots.set(token, snapshot);
+  return snapshot;
+}
+
+function rememberProductManagerSnapshot(token: string, bootstrap: ShopProductManagerBootstrap) {
+  if (!token) return;
+  const previous = productManagerSnapshots.get(token)?.data;
+  const data: ShopProductManagerBootstrap = {
+    ...bootstrap,
+    categories: bootstrap.categories.length ? bootstrap.categories : (previous?.categories || []),
+    brands: bootstrap.brands.length ? bootstrap.brands : (previous?.brands || []),
+    manufacturers: bootstrap.manufacturers.length ? bootstrap.manufacturers : (previous?.manufacturers || []),
+    sources: bootstrap.sources.length ? bootstrap.sources : (previous?.sources || []),
+  };
+  productManagerSnapshots.delete(token);
+  while (productManagerSnapshots.size >= PRODUCT_MANAGER_SNAPSHOT_TOKEN_LIMIT) {
+    const oldestToken = productManagerSnapshots.keys().next().value;
+    if (!oldestToken) break;
+    productManagerSnapshots.delete(oldestToken);
+  }
+  productManagerSnapshots.set(token, { data, cachedAt: Date.now() });
+}
+
+export default function ShopProductsManager({ onOpenOrder, header, bottomInset = 0 }: { onOpenOrder?: (orderId: string) => void; header?: React.ReactNode; bottomInset?: number }) {
+  const { token } = useAuth();
+  const insets = useSafeAreaInsets();
+  const initialSnapshot = useMemo(() => readProductManagerSnapshot(token || ''), [token]);
+  const initialBootstrap = initialSnapshot?.data;
+  const [products, setProducts] = useState<ShopProduct[]>(() => initialBootstrap?.products || []);
+  const [categories, setCategories] = useState<ShopCategory[]>(() => initialBootstrap?.categories || []);
+  const [brands, setBrands] = useState<ShopBrand[]>(() => initialBootstrap?.brands || []);
+  const [manufacturers, setManufacturers] = useState<ShopManufacturer[]>(() => initialBootstrap?.manufacturers || []);
+  const [sources, setSources] = useState<ShopProductSource[]>(() => initialBootstrap?.sources || []);
+  const [query, setQuery] = useState(persistedProductManagerUi.query);
+  const [page, setPage] = useState(persistedProductManagerUi.page);
+  const [pageSize, setPageSize] = useState(persistedProductManagerUi.pageSize);
+  const [productTotal, setProductTotal] = useState(initialBootstrap?.total || initialBootstrap?.products.length || 0);
+  const [loading, setLoading] = useState(!initialBootstrap);
+  const [listRefreshing, setListRefreshing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savingMode, setSavingMode] = useState<'create' | 'edit'>('create');
+  const [error, setError] = useState('');
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [editorLoading, setEditorLoading] = useState(false);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detail, setDetail] = useState<ShopProductStats | null>(null);
+  const [detailSalesPage, setDetailSalesPage] = useState(1);
+  const [detailReviewPage, setDetailReviewPage] = useState(1);
+  const [reviewReplies, setReviewReplies] = useState<Record<string, string>>({});
+  const [galleryDragging, setGalleryDragging] = useState(false);
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const [smartBillSettings, setSmartBillSettings] = useState<ShopSmartBillSettings | null>(null);
+  const [smartBillLookup, setSmartBillLookup] = useState<ShopSmartBillSkuLookup | null>(null);
+  const [smartBillLookupBusy, setSmartBillLookupBusy] = useState(false);
+  const smartBillLookupSequence = useRef(0);
+  const requestSequence = useRef(0);
+  const metadataLoaded = useRef(Boolean(initialBootstrap?.categories?.length));
+  const hasLoaded = useRef(Boolean(initialBootstrap));
+  const initialLoadEffect = useRef(true);
+  const clearSearch = useCallback(() => { setQuery(''); setPage(1); }, []);
+  useAndroidSearchBack(query, clearSearch);
+
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    const refreshSmartBillSettings = () => shopApi.getSmartBillSettings(token)
+      .then((next) => { if (active) setSmartBillSettings(next); })
+      .catch(() => undefined);
+    void refreshSmartBillSettings();
+    const timer = setInterval(() => void refreshSmartBillSettings(), 5 * 60 * 1000);
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') void refreshSmartBillSettings();
+    });
+    return () => {
+      active = false;
+      clearInterval(timer);
+      subscription.remove();
+    };
+  }, [token]);
+
+  useEffect(() => {
+    const sku = form.sku.trim();
+    const warehouseId = form.smartbill_warehouse_id;
+    const sequence = ++smartBillLookupSequence.current;
+    if (!editorVisible || editorLoading || !token || !smartBillSettings?.read_enabled || !sku) {
+      setSmartBillLookup(null);
+      setSmartBillLookupBusy(false);
+      return;
+    }
+    setSmartBillLookupBusy(true);
+    const timer = setTimeout(() => {
+      shopApi.lookupSmartBillSku(token, sku, warehouseId).then((result) => {
+        if (sequence !== smartBillLookupSequence.current) return;
+        setSmartBillLookup(result);
+      }).catch(() => {
+        if (sequence !== smartBillLookupSequence.current) return;
+        setSmartBillLookup({ status: 'not_found', sku, match: null });
+      }).finally(() => {
+        if (sequence === smartBillLookupSequence.current) setSmartBillLookupBusy(false);
+      });
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [editorLoading, editorVisible, form.sku, form.smartbill_warehouse_id, smartBillSettings?.read_enabled, token]);
+
+  useEffect(() => {
+    persistedProductManagerUi = { ...persistedProductManagerUi, query, page, pageSize };
+  }, [page, pageSize, query]);
+
+  const load = useCallback(async (
+    quiet = false,
+    request: { page?: number; pageSize?: number; query?: string; includeMetadata?: boolean; silent?: boolean } = {},
+  ) => {
+    if (!token) return;
+    const sequence = ++requestSequence.current;
+    if (!quiet) setLoading(true);
+    else setListRefreshing(true);
+    if (!request.silent) setError('');
+    try {
+      const requestedPage = request.page ?? 1;
+      const requestedPageSize = request.pageSize ?? 10;
+      const requestedQuery = request.query ?? '';
+      const bootstrap = await shopApi.loadProductManager(token, {
+        page: requestedPage,
+        page_size: requestedPageSize,
+        q: requestedQuery,
+        include_metadata: request.includeMetadata ?? !metadataLoaded.current,
+      });
+      if (sequence !== requestSequence.current) return undefined;
+      if (!requestedQuery && requestedPage === 1 && requestedPageSize === 10) rememberProductManagerSnapshot(token, bootstrap);
+      setProducts(bootstrap.products);
+      setProductTotal(bootstrap.total ?? bootstrap.products.length);
+      if (bootstrap.categories.length || !metadataLoaded.current) setCategories(bootstrap.categories);
+      if (bootstrap.brands.length || !metadataLoaded.current) setBrands(bootstrap.brands);
+      if (bootstrap.manufacturers.length || !metadataLoaded.current) setManufacturers(bootstrap.manufacturers);
+      if (bootstrap.sources.length || !metadataLoaded.current) setSources(bootstrap.sources);
+      if (bootstrap.categories.length || bootstrap.brands.length || bootstrap.manufacturers.length || bootstrap.sources.length) metadataLoaded.current = true;
+      setError('');
+      return bootstrap;
+    } catch (loadError) {
+      if (!request.silent) setError(loadError instanceof Error ? loadError.message : 'Produsele nu au putut fi incarcate.');
+      return undefined;
+    } finally {
+      if (sequence === requestSequence.current) {
+        hasLoaded.current = true;
+        setLoading(false);
+        setListRefreshing(false);
+      }
+    }
+  }, [token]);
+
+  useEffect(() => {
+    const firstRun = initialLoadEffect.current;
+    initialLoadEffect.current = false;
+    if (firstRun && initialSnapshot) {
+      if (Date.now() - initialSnapshot.cachedAt <= PRODUCT_MANAGER_SNAPSHOT_TTL_MS) return;
+      let interactionTask: ReturnType<typeof runWhenIdle> | null = null;
+      const frame = requestAnimationFrame(() => {
+        interactionTask = runWhenIdle(() => {
+          void load(true, {
+            page,
+            pageSize,
+            query,
+            includeMetadata: !metadataLoaded.current,
+            silent: true,
+          });
+        });
+      });
+      return () => {
+        cancelAnimationFrame(frame);
+        interactionTask?.cancel();
+      };
+    }
+    const timeout = setTimeout(() => {
+      void load(hasLoaded.current, {
+        page,
+        pageSize,
+        query,
+        includeMetadata: !metadataLoaded.current,
+      });
+    }, query.trim() ? 220 : 0);
+    return () => clearTimeout(timeout);
+  }, [initialSnapshot, load, page, pageSize, query]);
+
+  const filtered = products;
+  const safePage = Math.min(page, Math.max(1, Math.ceil(productTotal / pageSize)));
+  const pagedProducts = products;
+  const detailSalesTotal = detail?.orders.length || 0;
+  const detailSalesSafePage = Math.min(detailSalesPage, Math.max(1, Math.ceil(detailSalesTotal / DETAIL_SALES_PAGE_SIZE)));
+  const pagedDetailSales = detail?.orders.slice((detailSalesSafePage - 1) * DETAIL_SALES_PAGE_SIZE, detailSalesSafePage * DETAIL_SALES_PAGE_SIZE) || [];
+  const detailReviewTotal = detail?.reviews.length || 0;
+  const detailReviewSafePage = Math.min(detailReviewPage, Math.max(1, Math.ceil(detailReviewTotal / DETAIL_REVIEWS_PAGE_SIZE)));
+  const pagedDetailReviews = detail?.reviews.slice((detailReviewSafePage - 1) * DETAIL_REVIEWS_PAGE_SIZE, detailReviewSafePage * DETAIL_REVIEWS_PAGE_SIZE) || [];
+  const normalizedFormName = form.name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ro-RO');
+  const duplicateProductName = normalizedFormName
+    ? products.find((product) => product.id !== form.id && product.name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ro-RO') === normalizedFormName)
+    : undefined;
+
+  const patchForm = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const resetEditor = () => {
+    setEditorVisible(false);
+    setEditorLoading(false);
+    setGalleryDragging(false);
+    setSlugTouched(false);
+    setSmartBillLookup(null);
+    setSmartBillLookupBusy(false);
+    setForm(emptyForm());
+  };
+
+  const openNew = () => {
+    const next = emptyForm();
+    setForm(next);
+    setSlugTouched(false);
+    setEditorLoading(false);
+    setEditorVisible(true);
+  };
+
+  const openEdit = async (product: ShopProduct) => {
+    if (!token) return;
+    // Open first, then hydrate the large editor payload in the background. A
+    // product can contain long HTML, many images, specs and FAQ entries, so
+    // waiting before showing the modal made the button look frozen.
+    setForm({ ...emptyForm(), id: product.id, name: product.name });
+    setEditorLoading(true);
+    setEditorVisible(true);
+    try {
+      const full = await shopApi.getProduct(token, product.id);
+      setForm({
+        id: full.id,
+        source_id: full.source_id,
+        source_domain: full.source_domain || 'cubisshop.ro',
+        name: full.name,
+        slug: full.slug,
+        sku: full.sku || '',
+        smartbill_product_id: full.smartbill_product_id || '',
+        smartbill_sku: full.smartbill_sku || '',
+        smartbill_warehouse_id: full.smartbill_warehouse_id || '',
+        smartbill_warehouse_name: full.smartbill_warehouse_name || '',
+        smartbill_stock_quantity: full.smartbill_stock_quantity == null ? '' : String(full.smartbill_stock_quantity),
+        smartbill_link_status: full.smartbill_link_status || 'unlinked',
+        smartbill_last_synced_at: full.smartbill_last_synced_at || '',
+        smartbill_last_error: full.smartbill_last_error || '',
+        supplier_product_code: full.supplier_product_code || '',
+        ean: full.ean || '',
+        short_description: full.short_description || '',
+        description_title: full.description_title || '',
+        description_html: full.description_html || '',
+        meta_title: full.meta_title || '',
+        meta_description: full.meta_description || '',
+        cost_price: String(full.cost_price || 0),
+        price: String(full.price),
+        supplier_base_price: full.supplier_base_price == null ? '' : String(full.supplier_base_price),
+        supplier_price_difference: full.supplier_price_difference == null ? '' : String(full.supplier_price_difference),
+        discount_type: full.discount_type || 'percent',
+        discount_value: full.discount_value ? String(full.discount_value) : '',
+        unit_of_measure: full.unit_of_measure || 'buc',
+        category_id: full.category_id,
+        category_ids: full.category_ids?.length ? full.category_ids : (full.category_id ? [full.category_id] : []),
+        manufacturer_id: full.manufacturer_id,
+        manufacturer_address: full.manufacturer_address || '',
+        manufacturer_email: full.manufacturer_email || '',
+        eu_responsible_person_name: full.eu_responsible_person_name || '',
+        eu_responsible_person_address: full.eu_responsible_person_address || '',
+        eu_responsible_person_email: full.eu_responsible_person_email || '',
+        product_model: full.product_model || '',
+        product_identifier: full.product_identifier || '',
+        safety_warnings_ro: full.safety_warnings_ro || '',
+        safety_documents: (full.safety_documents || []).join('\n'),
+        ce_marking_applicable: full.ce_marking_applicable ?? null,
+        compliance_documents: (full.compliance_documents || []).join('\n'),
+        legal_warranty_months: full.legal_warranty_months == null ? '' : String(full.legal_warranty_months),
+        commercial_warranty_months: full.commercial_warranty_months == null ? '' : String(full.commercial_warranty_months),
+        software_updates_until: full.software_updates_until || '',
+        repairability_info: full.repairability_info || '',
+        spare_parts_info: full.spare_parts_info || '',
+        brand_ids: full.brand_ids || [],
+        stock_mode: full.stock_mode,
+        stock_quantity: String(full.stock_quantity),
+        supplier_stock_quantity: String(full.supplier_stock_quantity || 0),
+        accounting_stock_quantity: String(full.accounting_stock_quantity || 0),
+        is_accounting_stock_tracked: full.is_accounting_stock_tracked !== false,
+        low_stock_threshold: String(full.low_stock_threshold),
+        is_active: full.is_active,
+        is_featured: full.is_featured,
+        images: (full.images || []).map((image, index) => ({ ...image, key: image.id || `existing-${index}`, preview_uri: image.url || '' })),
+        specifications: (full.specifications || []).map((item, index) => ({ ...item, key: `spec-${index}-${Date.now()}` })),
+        questions: (full.questions || []).map((item, index) => ({ ...item, key: `question-${index}-${Date.now()}` })),
+      });
+      setSlugTouched(false);
+    } catch (editError) {
+      Alert.alert('Produs indisponibil', editError instanceof Error ? editError.message : 'Nu s-a putut deschide produsul.');
+      resetEditor();
+    } finally {
+      setEditorLoading(false);
+    }
+  };
+
+  const openDetail = async (product: ShopProduct) => {
+    if (!token) return;
+    setDetailVisible(true);
+    setDetailLoading(true);
+    setDetail(null);
+    setDetailSalesPage(1);
+    setDetailReviewPage(1);
+    try {
+      const next = await shopApi.getProductStats(token, product.id);
+      setDetail(next);
+      setReviewReplies(Object.fromEntries(next.reviews.map((review) => [review.id, review.admin_reply || ''])));
+    } catch (detailError) {
+      Alert.alert('Fisa indisponibila', detailError instanceof Error ? detailError.message : 'Nu s-a putut deschide fisa produsului.');
+      setDetailVisible(false);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetail = () => {
+    setDetailVisible(false);
+    setTimeout(() => {
+      setDetail(null);
+      setReviewReplies({});
+    }, 40);
+  };
+
+  const closeEditor = () => {
+    if (saving || editorLoading) return;
+    resetEditor();
+  };
+
+  const refreshDetail = async () => {
+    if (!token || !detail) return;
+    const next = await shopApi.getProductStats(token, detail.product.id);
+    setDetail(next);
+    setReviewReplies(Object.fromEntries(next.reviews.map((review) => [review.id, review.admin_reply || ''])));
+  };
+
+  const saveReviewReply = async (review: ShopProductReview) => {
+    if (!token) return;
+    try {
+      await shopApi.replyProductReview(token, review.id, reviewReplies[review.id] || '');
+      await refreshDetail();
+    } catch (replyError) {
+      Alert.alert('Raspuns nesalvat', replyError instanceof Error ? replyError.message : 'Incearca din nou.');
+    }
+  };
+
+  const removeReview = (review: ShopProductReview) => {
+    if (!token) return;
+    Alert.alert('Stergi recenzia?', 'Recenzia nu va mai fi vizibila pe site.', [
+      { text: 'Renunta', style: 'cancel' },
+      { text: 'Sterge', style: 'destructive', onPress: async () => { await shopApi.deleteProductReview(token, review.id); await refreshDetail(); } },
+    ]);
+  };
+
+  const chooseImages = async () => {
+    const remaining = 12 - form.images.length;
+    if (remaining <= 0) {
+      Alert.alert('Limita atinsa', 'Poti incarca maximum 12 imagini pentru un produs.');
+      return;
+    }
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Acces necesar', 'Permite accesul la fotografii pentru a incarca imaginile produsului.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      orderedSelection: true,
+      quality: 0.72,
+      base64: true,
+    });
+    if (result.canceled) return;
+    const added: EditorImage[] = result.assets
+      .filter((asset) => Boolean(asset.base64))
+      .slice(0, remaining)
+      .map((asset, index) => ({
+        key: `new-${Date.now()}-${index}`,
+        preview_uri: asset.uri,
+        base64: `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`,
+        alt_text: form.name || 'Produs Cubis Shop',
+      }));
+    patchForm('images', [...form.images, ...added]);
+  };
+
+  const reorderImages = (index: number, nextIndex: number) => {
+    if (nextIndex < 0 || nextIndex >= form.images.length || index === nextIndex) return;
+    const next = [...form.images];
+    const [selected] = next.splice(index, 1);
+    next.splice(nextIndex, 0, selected);
+    patchForm('images', next);
+  };
+
+  const makePrimary = (index: number) => {
+    if (index === 0) return;
+    const next = [...form.images];
+    const [selected] = next.splice(index, 1);
+    next.unshift(selected);
+    patchForm('images', next);
+  };
+
+  const save = async () => {
+    if (!token || saving) return;
+    if (duplicateProductName) {
+      Alert.alert('Produs deja existent', 'Acest nume de produs exista deja. Alege un nume diferit.');
+      return;
+    }
+    if (!form.name.trim() || !form.slug.trim() || !form.price.trim()) {
+      Alert.alert('Campuri obligatorii', 'Completeaza numele, slug-ul si pretul produsului.');
+      return;
+    }
+    const price = Number(form.price.replace(',', '.'));
+    const costPrice = Number(form.cost_price.replace(',', '.'));
+    const discountText = form.discount_value || '';
+    const discount = discountText.trim() ? Number(discountText.replace(',', '.')) : 0;
+    const discountType = form.discount_type || 'percent';
+    const invalidDiscount = discountType === 'percent' ? discount >= 100 : discount >= price;
+    if (!Number.isFinite(price) || price < 0 || !Number.isFinite(costPrice) || costPrice < 0 || !Number.isFinite(discount) || discount < 0 || (discount > 0 && invalidDiscount)) {
+      Alert.alert('Valori invalide', 'Verifica pretul si reducerea produsului.');
+      return;
+    }
+    const salePrice = discount > 0
+      ? Math.round((discountType === 'percent' ? price * (1 - discount / 100) : price - discount) * 100) / 100
+      : null;
+    const payload: ShopProductPayload = {
+      category_id: form.category_id,
+      category_ids: form.category_ids,
+      manufacturer_id: form.manufacturer_id,
+      brand_ids: form.brand_ids,
+      sku: form.sku.trim(),
+      supplier_product_code: form.supplier_product_code.trim(),
+      ean: form.ean.trim(),
+      source_domain: form.source_domain,
+      source_id: form.source_id,
+      source_url: '',
+      name: form.name.trim(),
+      slug: form.slug.trim(),
+      short_description: form.short_description.trim(),
+      description_title: form.description_title.trim(),
+      description_html: form.description_html,
+      meta_title: form.meta_title.trim(),
+      meta_description: form.meta_description.trim(),
+      cost_price: costPrice,
+      price,
+      sale_price: salePrice,
+      discount_type: discountType,
+      discount_value: discount || null,
+      discount_percent: discountType === 'percent' ? discount || null : null,
+      currency: 'RON',
+      unit_of_measure: form.unit_of_measure.trim() || 'buc',
+      stock_mode: form.stock_mode,
+      stock_quantity: Math.max(0, Number.parseInt(form.stock_quantity || '0', 10) || 0),
+      is_accounting_stock_tracked: form.is_accounting_stock_tracked,
+      low_stock_threshold: Math.max(0, Number.parseInt(form.low_stock_threshold || '0', 10) || 0),
+      is_active: form.is_active,
+      is_featured: form.is_featured,
+      images: form.images.map(({ id, base64, alt_text }, index) => ({ id, base64, alt_text: alt_text || form.name.trim(), sort_order: index })),
+      specifications: form.specifications.map(({ group, label, value }) => ({ group: group.trim(), label: label.trim(), value: value.trim() })),
+      questions: form.questions.map(({ question, answer }) => ({ question: question.trim(), answer: answer.trim() })),
+      manufacturer_address: form.manufacturer_address.trim(),
+      manufacturer_email: form.manufacturer_email.trim(),
+      eu_responsible_person_name: form.eu_responsible_person_name.trim(),
+      eu_responsible_person_address: form.eu_responsible_person_address.trim(),
+      eu_responsible_person_email: form.eu_responsible_person_email.trim(),
+      product_model: form.product_model.trim(),
+      product_identifier: form.product_identifier.trim(),
+      safety_warnings_ro: form.safety_warnings_ro.trim(),
+      safety_documents: form.safety_documents.split(/\r?\n/).map((value) => value.trim()).filter(Boolean),
+      ce_marking_applicable: form.ce_marking_applicable,
+      compliance_documents: form.compliance_documents.split(/\r?\n/).map((value) => value.trim()).filter(Boolean),
+      legal_warranty_months: form.legal_warranty_months.trim() ? Math.max(0, Number.parseInt(form.legal_warranty_months, 10) || 0) : null,
+      commercial_warranty_months: form.commercial_warranty_months.trim() ? Math.max(0, Number.parseInt(form.commercial_warranty_months, 10) || 0) : null,
+      software_updates_until: form.software_updates_until.trim() || null,
+      repairability_info: form.repairability_info.trim(),
+      spare_parts_info: form.spare_parts_info.trim(),
+    };
+    setSavingMode(form.id ? 'edit' : 'create');
+    setSaving(true);
+    try {
+      let saved = form.id
+        ? await shopApi.updateProduct(token, form.id, payload)
+        : await shopApi.createProduct(token, payload);
+      const selectedWarehouseId = form.smartbill_warehouse_id;
+      if (smartBillLookup?.status === 'verified' && selectedWarehouseId && saved.sku === smartBillLookup.sku) {
+        await shopApi.linkProductSmartBill(token, saved.id, smartBillLookup.sku, selectedWarehouseId);
+        saved = await shopApi.getProduct(token, saved.id);
+      }
+      resetEditor();
+      await load(true, { page, pageSize, query, includeMetadata: false });
+      const saveWarnings = [];
+      if (saved.stripe_sync_status === 'error') {
+        saveWarnings.push(`Stripe: ${saved.stripe_sync_error || 'sincronizarea va trebui reincercata.'}`);
+      }
+      if (saved.seo_page && !saved.seo_page.success) {
+        saveWarnings.push(`Pagina Google: ${saved.seo_page.error || 'generarea trebuie reincercata.'}`);
+      }
+      if (saved.newsletter_notification?.failed) {
+        saveWarnings.push(`Newsletter: ${saved.newsletter_notification.failed} ${saved.newsletter_notification.failed === 1 ? 'e-mail nu a putut fi trimis' : 'e-mailuri nu au putut fi trimise'}. Detaliile apar in tabul Abonati newsletter.`);
+      }
+      if (saveWarnings.length) {
+        Alert.alert('Produs salvat in catalog', `Produsul este salvat, dar exista avertizari:\n\n${saveWarnings.join('\n')}`);
+      }
+    } catch (saveError) {
+      Alert.alert('Nu s-a putut salva', saveError instanceof Error ? saveError.message : 'Incearca din nou.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeProduct = (product: ShopProduct) => {
+    if (!token) return;
+    Alert.alert('Stergi produsul definitiv?', `„${product.name}” va fi eliminat din catalog, iar toate pozele incarcate pentru el vor fi sterse de pe server.`, [
+      { text: 'Renunta', style: 'cancel' },
+      {
+        text: 'Sterge', style: 'destructive', onPress: async () => {
+          try {
+            const result = await shopApi.deleteProduct(token, product.id);
+            if (!result.success || result.deleted_id !== product.id) throw new Error('Serverul nu a confirmat stergerea produsului.');
+            setProducts((current) => current.filter((item) => item.id !== product.id));
+            const refreshed = await load(true, { page, pageSize, query, includeMetadata: false });
+            if (refreshed?.products.some((item) => item.id === product.id)) throw new Error('Produsul apare inca in catalog dupa stergere. Reincarca si incearca din nou.');
+          }
+          catch (deleteError) { Alert.alert('Nu s-a putut sterge', deleteError instanceof Error ? deleteError.message : 'Incearca din nou.'); }
+        },
+      },
+    ]);
+  };
+
+  const priceValue = Number(form.price.replace(',', '.')) || 0;
+  const isBoomagProduct = form.source_domain.trim().toLowerCase() === 'boomag.ro';
+  const supplierBasePriceValue = form.supplier_base_price.trim() === '' ? null : Number(form.supplier_base_price.replace(',', '.'));
+  const commercialDifferenceValue = supplierBasePriceValue === null || !Number.isFinite(supplierBasePriceValue)
+    ? null
+    : (priceValue <= 0 ? 0 : Math.round((priceValue - supplierBasePriceValue) * 100) / 100);
+  const discountType = form.discount_type || 'percent';
+  const discountValue = Number((form.discount_value || '').replace(',', '.')) || 0;
+  const reducedPrice = discountValue > 0
+    ? Math.max(0, discountType === 'percent' ? priceValue * (1 - discountValue / 100) : priceValue - discountValue)
+    : null;
+  const seoTitle = form.meta_title.trim() || form.name.trim() || 'Titlul produsului';
+  const seoDescription = form.meta_description.trim() || form.short_description.trim() || 'Descrierea produsului va aparea aici.';
+
+  if (loading) return <ScrollView style={styles.wrap} contentContainerStyle={styles.scrollContent}><View style={styles.pageHeader}>{header}</View><View style={styles.state}><ActivityIndicator color={Colors.orange} /><Text style={styles.stateText}>Se incarca produsele...</Text></View></ScrollView>;
+  if (error) return <ScrollView style={styles.wrap} contentContainerStyle={styles.scrollContent}><View style={styles.pageHeader}>{header}</View><View style={styles.state}><Text style={styles.error}>{error}</Text><TouchableOpacity style={styles.retry} onPress={() => void load(false, { page, pageSize, query, includeMetadata: !metadataLoaded.current })}><Text style={styles.retryText}>Incearca din nou</Text></TouchableOpacity></View></ScrollView>;
+
+  return (
+    <>
+      <ScrollView
+        style={styles.wrap}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 94 + bottomInset }]}
+        stickyHeaderIndices={[1]}
+        contentOffset={{ x: 0, y: persistedProductManagerUi.scrollY }}
+        onScroll={(event) => { persistedProductManagerUi.scrollY = event.nativeEvent.contentOffset.y; }}
+        scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+      <View style={styles.pageHeader}>{header}</View>
+      <View style={styles.stickyToolbar}>
+        <View style={styles.toolbarRow}>
+          <View accessibilityLabel={`${productTotal} produse`} style={styles.summary}><Text style={styles.summaryValue}>{productTotal}</Text></View>
+          <View style={styles.search}><Search size={17} color={Colors.orange} /><TextInput value={query} onChangeText={(value) => { setQuery(value); setPage(1); }} placeholder="Caută" placeholderTextColor={Colors.textMuted} style={styles.searchInput} />{query ? <TouchableOpacity accessibilityLabel="Șterge căutarea" style={styles.clearSearch} onPress={clearSearch}><X size={16} color={Colors.textSecondary} /></TouchableOpacity> : null}</View>
+          <ShopProductExportButton sources={sources} total={productTotal} compact />
+          <TouchableOpacity style={styles.refresh} onPress={() => void load(true, { page, pageSize, query, includeMetadata: false })}>{listRefreshing ? <ActivityIndicator size="small" color={Colors.orange} /> : <RefreshCw size={18} color={Colors.textSecondary} />}</TouchableOpacity>
+          <TouchableOpacity accessibilityLabel="Adaugă produs" style={styles.add} onPress={openNew}><Plus size={21} color={Colors.white} /></TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.listContent}>
+      {filtered.length ? pagedProducts.map((product) => (
+        <View key={product.id} style={styles.productCard}>
+          <TouchableOpacity style={styles.productMain} activeOpacity={0.72} onPress={() => void openDetail(product)}>
+            {product.images?.[0]?.url ? <ShopProductPicture image={product.images[0]} width={66} height={66} borderRadius={14} /> : <View style={styles.productImageFallback}><Package size={25} color={Colors.textMuted} /></View>}
+            <View style={styles.productCopy}>
+              <View style={styles.productTitleRow}><AutoScrollProductName value={product.name} style={styles.productName} />{product.is_featured ? <Star size={13} color="#F59E0B" fill="#F59E0B" /> : null}</View>
+              <Text style={styles.productMeta}>{product.sku || 'Fara SKU'} · {product.source_domain}</Text>
+              <View style={styles.productBottom}>
+                <Text style={styles.productPrice}>{money(product.promotion_price ?? product.sale_price ?? product.price)}</Text>
+                <Text style={[styles.stock, product.stock_mode === 'tracked' && product.stock_quantity <= product.low_stock_threshold && styles.stockLow]}>{product.stock_mode === 'unlimited' ? 'Nelimitat' : `${product.stock_quantity} buc.`}</Text>
+              </View>
+            </View>
+            <ChevronRight size={17} color={Colors.textMuted} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconAction} onPress={() => void openEdit(product)}><Pencil size={17} color="#087FF5" /></TouchableOpacity>
+          <TouchableOpacity style={[styles.iconAction, styles.deleteAction]} onPress={() => removeProduct(product)}><Trash2 size={17} color={Colors.error} /></TouchableOpacity>
+        </View>
+      )) : <View style={styles.empty}><Package size={32} color="#087FF5" /><Text style={styles.emptyTitle}>Niciun produs</Text><Text style={styles.emptyText}>Adauga primul produs pentru a-l publica pe site.</Text></View>}
+      <ShopPagination page={safePage} pageSize={pageSize} total={productTotal} onPageChange={setPage} onPageSizeChange={(nextSize) => { setPage(1); setPageSize(nextSize); }} />
+      </View>
+      </ScrollView>
+
+      {detailVisible ? <Modal visible animationType="none" onRequestClose={closeDetail}>
+        <SafeAreaView style={styles.editorSafe} edges={['top', 'bottom']}>
+          <View style={styles.editorHeader}>
+            <TouchableOpacity style={styles.close} onPress={closeDetail}><X size={21} color={Colors.textSecondary} /></TouchableOpacity>
+            <View style={styles.editorHeaderCopy}><Text style={styles.editorKicker}>COD PRODUS</Text><Text selectable numberOfLines={1} style={styles.productCodeTop}>{detail?.product.sku || detail?.product.supplier_product_code || 'FĂRĂ COD'}</Text><AutoScrollProductName value={detail?.product.name || 'Se incarca...'} style={styles.editorProductName} /></View>
+            {detail ? <TouchableOpacity style={styles.saveTop} onPress={() => { const product = detail.product; closeDetail(); setTimeout(() => void openEdit(product), 0); }}><Pencil size={17} color={Colors.white} /><Text style={styles.saveTopText}>Editeaza</Text></TouchableOpacity> : null}
+          </View>
+          {detailLoading || !detail ? <View style={styles.detailLoading}><ActivityIndicator color={Colors.orange} /><Text style={styles.stateText}>Se incarca fisa produsului...</Text></View> : <ScrollView contentContainerStyle={[styles.detailContent, { paddingBottom: Math.max(insets.bottom, 24) + 30 }]} showsVerticalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.detailGallery}>{detail.product.images.map((image, index) => <View key={image.id || index} style={styles.detailImage}><ShopProductPicture image={image} width={210} height={190} borderRadius={20} />{index === 0 ? <View style={styles.mainBadge}><Text style={styles.mainBadgeText}>PRINCIPALA</Text></View> : null}</View>)}</ScrollView>
+            <View style={styles.detailIdentity}><View style={styles.detailIdentityMain}><Text style={styles.detailIdentityLabel}>COD PRODUS</Text><Text selectable style={styles.detailIdentityCode}>{detail.product.sku || detail.product.supplier_product_code || 'FĂRĂ COD'}</Text></View>{detail.product.ean ? <View style={styles.detailIdentitySide}><Text style={styles.detailIdentityLabel}>EAN</Text><Text selectable style={styles.detailIdentityValue}>{detail.product.ean}</Text></View> : null}</View>
+            <View style={styles.metricGrid}>
+              <Metric label="TOTAL VÂNZĂRI" value={money(detail.revenue)} />
+              <Metric label="PREȚ VÂNZARE MEDIU" value={money(detail.units_sold ? detail.revenue / detail.units_sold : 0)} />
+              <Metric label="BUCĂȚI VÂNDUTE" value={String(detail.units_sold)} />
+              <Metric label="VIZUALIZĂRI PE SITE" value={String(detail.product.view_count)} icon="eye" />
+              <Metric label="NUMĂR RECENZII" value={String(detail.reviews.length)} />
+              <Metric label="MEDIA RECENZIILOR" value={detail.product.review_average ? `${detail.product.review_average.toFixed(1)} ★` : '—'} />
+            </View>
+            <SectionTitle number="01" title="Comenzi si vanzari" text="Comenzile in care apare acest produs." />
+            {detail.orders.length ? pagedDetailSales.map((order) => {
+              const salePrice = Number(order.unit_price || 0);
+              return <TouchableOpacity key={order.id} activeOpacity={0.76} style={styles.saleCard} onPress={() => { closeDetail(); onOpenOrder?.(order.id); }}>
+                <View style={styles.saleHead}><View><Text style={styles.saleLabel}>NUMAR COMANDA</Text><Text style={styles.saleNumber}>{order.order_number}</Text></View><View style={styles.saleStatus}><Text style={styles.saleStatusText}>{order.status}</Text></View></View>
+                <Text style={styles.saleMeta}>{order.customer_display_name || order.customer_name} · {order.created_at} · {order.quantity} buc.</Text>
+                <View style={styles.saleStats}><View style={styles.saleStat}><Text style={styles.saleLabel}>PRET VANZARE</Text><Text style={styles.saleValue}>{money(salePrice)}</Text></View></View>
+              </TouchableOpacity>;
+            }) : <Text style={styles.detailEmpty}>Produsul nu apare in nicio comanda.</Text>}
+            <DetailGooglePagination label="comenzi" page={detailSalesSafePage} pageSize={DETAIL_SALES_PAGE_SIZE} total={detailSalesTotal} onPageChange={setDetailSalesPage} />
+            <SectionTitle number="02" title="Recenzii" text="Raspunde clientilor sau sterge recenziile direct de aici." />
+            {detail.reviews.length ? pagedDetailReviews.map((review) => <View key={review.id} style={styles.reviewCard}><View style={styles.reviewHead}><View><Text style={styles.reviewName}>{review.customer_name}</Text>{review.verified_purchase ? <View style={styles.reviewVerified}><Text style={styles.reviewVerifiedText}>✓ ACHIZIȚIE VERIFICATĂ</Text></View> : review.review_source && review.review_source !== 'cubisshop.ro' ? <Text style={styles.reviewSource}>Sursa: {review.review_source}</Text> : null}<Text style={styles.reviewMeta}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)} · {review.created_at}</Text></View><TouchableOpacity style={styles.reviewDelete} onPress={() => removeReview(review)}><Trash2 size={16} color={Colors.error} /></TouchableOpacity></View><Text style={styles.reviewMessage}>{review.message}</Text><TextInput value={reviewReplies[review.id] || ''} onChangeText={(value) => setReviewReplies((current) => ({ ...current, [review.id]: value }))} placeholder="Scrie raspunsul magazinului..." placeholderTextColor={Colors.textMuted} multiline style={styles.reviewReply} /><TouchableOpacity style={styles.reviewSave} onPress={() => void saveReviewReply(review)}><MessageSquare size={15} color={Colors.white} /><Text style={styles.reviewSaveText}>Salveaza raspunsul</Text></TouchableOpacity></View>) : <Text style={styles.detailEmpty}>Produsul nu are inca recenzii.</Text>}
+            <DetailGooglePagination label="recenzii" page={detailReviewSafePage} pageSize={DETAIL_REVIEWS_PAGE_SIZE} total={detailReviewTotal} onPageChange={setDetailReviewPage} />
+          </ScrollView>}
+        </SafeAreaView>
+      </Modal> : null}
+
+      {editorVisible ? <Modal visible animationType="none" onRequestClose={closeEditor}>
+        <SafeAreaView style={styles.editorSafe} edges={['top', 'bottom']}>
+          <View style={styles.editorHeader}>
+            <TouchableOpacity style={styles.close} onPress={closeEditor} disabled={saving || editorLoading}><X size={21} color={Colors.textSecondary} /></TouchableOpacity>
+            <View style={styles.editorHeaderCopy}><Text style={styles.editorKicker}>CRM PRODUSE</Text><Text style={styles.editorTitle}>{form.id ? 'Editeaza produsul' : 'Produs nou'}</Text></View>
+            <TouchableOpacity style={[styles.saveTop, (saving || editorLoading) && styles.disabled]} onPress={() => void save()} disabled={saving || editorLoading}>{saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={17} color={Colors.white} /><Text style={styles.saveTopText}>Salveaza</Text></>}</TouchableOpacity>
+          </View>
+          {editorLoading ? <View style={styles.editorLoadingState}><View style={styles.editorLoadingIcon}><RefreshCw size={27} color={Colors.orange} /></View><ActivityIndicator size="large" color={Colors.orange} /><Text style={styles.editorLoadingTitle}>Se încarcă produsul</Text><Text style={styles.editorLoadingText}>Pregătim descrierea, imaginile, specificațiile și datele comerciale.</Text></View> : <ScrollView contentContainerStyle={[styles.form, { paddingBottom: Math.max(insets.bottom, 24) + 36 }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <SectionTitle number="01" title="Sursa si identitate" text="Alege provenienta produsului si adresa lui publica." />
+            <Text style={styles.label}>SURSA PRODUSULUI</Text>
+            <View style={styles.sourceRow}>
+              <Choice label="Fără sursă · produs Cubis Shop" selected={form.source_id === null} onPress={() => { patchForm('source_id', null); patchForm('source_domain', 'cubisshop.ro'); }} />
+              {sources.filter((source) => source.is_active || (Boolean(form.id) && source.id === form.source_id)).map((source) => <Choice key={source.id} label={`${source.name} · ${source.domain}${source.is_default ? ' (implicita)' : ''}${!source.is_active ? ' · ascunsa pe site' : ''}`} selected={form.source_id === source.id} onPress={() => { patchForm('source_id', source.id); patchForm('source_domain', source.domain); }} />)}
+            </View>
+            <Field label="NUME PRODUS *" value={form.name} onChangeText={(value) => { patchForm('name', value); if (!slugTouched) patchForm('slug', slugify(value)); }} placeholder="Ex: Anvelopa G10 All-Terrain" error={duplicateProductName ? 'Acest nume de produs exista deja.' : undefined} />
+            <Field label="SLUG *" value={form.slug} onChangeText={(value) => { setSlugTouched(true); patchForm('slug', slugify(value)); }} placeholder="anvelopa-g10-all-terrain" autoCapitalize="none" prefix="cubisshop.ro/magazin/produs/" />
+            <Field label="SKU / COD PRODUS" value={form.sku} onChangeText={(value) => patchForm('sku', value)} placeholder="Codul exact din SmartBill" hint="Căutarea exactă în SmartBill pornește după 450 ms. Asocierea devine verde numai după salvare." autoCapitalize="characters" maxLength={80} />
+            <View style={styles.smartBillCard}>
+              <View style={styles.smartBillHead}><View><Text style={styles.smartBillKicker}>SMARTBILL V3 + V1</Text><Text style={styles.smartBillTitle}>Asociere produs și gestiune</Text></View><View style={[styles.smartBillStatus, form.smartbill_link_status === 'linked' && form.smartbill_sku === form.sku ? styles.smartBillStatusOk : smartBillLookup?.status === 'verified' || smartBillLookup?.status === 'ambiguous' ? styles.smartBillStatusPending : smartBillLookup?.status === 'not_found' ? styles.smartBillStatusError : styles.smartBillStatusIdle]}><Text style={styles.smartBillStatusText}>{smartBillLookupBusy ? 'SE VERIFICĂ' : form.smartbill_link_status === 'linked' && form.smartbill_sku === form.sku ? 'SALVAT' : smartBillLookup?.status === 'verified' ? 'GĂSIT · NESALVAT' : smartBillLookup?.status === 'ambiguous' ? 'AMBIGUU' : smartBillLookup?.status === 'not_found' ? 'NEGĂSIT' : 'NEVERIFICAT'}</Text></View></View>
+              {!smartBillSettings?.read_enabled ? <Text style={styles.smartBillHelp}>Citirea SmartBill este oprită în configurația serverului.</Text> : null}
+              {smartBillLookup?.match ? <View style={styles.smartBillMatch}><Text style={styles.smartBillMatchName}>{smartBillLookup.match.name}</Text><Text style={styles.smartBillHelp}>ID: {smartBillLookup.match.id} · U.M.: {smartBillLookup.match.measuring_unit || form.unit_of_measure}</Text></View> : null}
+              <Text style={styles.label}>GESTIUNE SMARTBILL</Text>
+              <View style={styles.smartBillWarehouses}>{(smartBillSettings?.warehouses || []).map((warehouse) => <TouchableOpacity key={warehouse.id} onPress={() => setForm((current) => ({ ...current, smartbill_warehouse_id: warehouse.id, smartbill_warehouse_name: warehouse.name }))} style={[styles.smartBillWarehouse, form.smartbill_warehouse_id === warehouse.id && styles.smartBillWarehouseActive]}><Text style={styles.smartBillWarehouseName}>{warehouse.name}</Text><Text style={styles.smartBillWarehouseId}>{warehouse.id}</Text></TouchableOpacity>)}</View>
+              {smartBillLookup?.stock ? <Text style={styles.smartBillStock}>Stoc SmartBill în {smartBillLookup.stock.warehouse_name}: {smartBillLookup.stock.quantity} {form.unit_of_measure || 'buc'}</Text> : form.smartbill_stock_quantity ? <Text style={styles.smartBillStock}>Ultimul stoc SmartBill salvat: {form.smartbill_stock_quantity} {form.unit_of_measure || 'buc'}</Text> : null}
+              {form.smartbill_last_error ? <Text style={styles.smartBillError}>{form.smartbill_last_error}</Text> : null}
+            </View>
+            <View style={styles.twoColumns}><View style={styles.column}><Field label="COD PRODUS FURNIZOR" value={form.supplier_product_code} onChangeText={(value) => patchForm('supplier_product_code', value)} placeholder="Opțional · litere și cifre" maxLength={120} autoCapitalize="characters" /></View><View style={styles.column}><Field label="EAN" value={form.ean} onChangeText={(value) => patchForm('ean', value)} placeholder="Opțional · litere și cifre" maxLength={120} autoCapitalize="characters" /></View></View>
+
+            <SectionTitle number="02" title="Galerie foto" text="Incarca pana la 12 poze. Tine de o fotografie si trage-o in pozitia dorita." />
+            <ScrollView horizontal scrollEnabled={!galleryDragging} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
+              {form.images.map((image, index) => <DraggableGalleryImage key={image.key} image={image} index={index} total={form.images.length} isMain={index === 0} onRemove={() => patchForm('images', form.images.filter((_, imageIndex) => imageIndex !== index))} onMakeMain={() => makePrimary(index)} onDrop={reorderImages} onDragStateChange={setGalleryDragging} />)}
+              {form.images.length < 12 ? <TouchableOpacity style={styles.imageAdd} onPress={() => void chooseImages()}><View style={styles.imageAddIcon}><ImagePlus size={25} color={Colors.orange} /></View><Text style={styles.imageAddText}>Adauga fotografii</Text><Text style={styles.imageCount}>{form.images.length} din 12</Text></TouchableOpacity> : null}
+            </ScrollView>
+
+            <SectionTitle number="03" title="Descriere" text="Formatarea si stilurile lipite din alte pagini sunt pastrate." />
+            <Field label="DESCRIERE SCURTA" value={form.short_description} onChangeText={(value) => patchForm('short_description', value)} placeholder="Rezumatul afisat in liste si in Google" multiline />
+            <Field label="TITLU DESCRIERE LUNGA" value={form.description_title} onChangeText={(value) => patchForm('description_title', value)} placeholder="Ex: Aderenta sigura pentru traseele tale zilnice." maxLength={220} />
+            <Text style={styles.label}>DESCRIERE COMPLETA</Text>
+            <RichTextEditor
+              value={form.description_html}
+              onChange={(value) => patchForm('description_html', value)}
+              onUploadImage={async (base64) => {
+                if (!token) throw new Error('Sesiunea a expirat. Autentifica-te din nou.');
+                const uploaded = await shopApi.uploadRichDescriptionImage(token, base64);
+                return uploaded.url;
+              }}
+            />
+
+            <SectionTitle number="04" title="Specificatii" text="Fiecare produs poate avea propriile grupe si caracteristici." />
+            <TouchableOpacity style={styles.inlineAdd} onPress={() => patchForm('specifications', [...form.specifications, { key: `spec-${Date.now()}`, group: 'Caracteristici generale', label: '', value: '' }])}><Plus size={16} color={Colors.orange} /><Text style={styles.inlineAddText}>Adauga specificatie</Text></TouchableOpacity>
+            {form.specifications.map((specification, index) => <View key={specification.key} style={styles.subEditorCard}><View style={styles.subEditorHead}><Text style={styles.subEditorTitle}>SPECIFICATIE {index + 1}</Text><TouchableOpacity onPress={() => patchForm('specifications', form.specifications.filter((item) => item.key !== specification.key))}><Trash2 size={16} color={Colors.error} /></TouchableOpacity></View><Field label="GRUPA" value={specification.group} onChangeText={(value) => patchForm('specifications', form.specifications.map((item) => item.key === specification.key ? { ...item, group: value } : item))} placeholder="Caracteristici generale" /><Field label="DENUMIRE" value={specification.label} onChangeText={(value) => patchForm('specifications', form.specifications.map((item) => item.key === specification.key ? { ...item, label: value } : item))} placeholder="Ex: Greutate" /><Field label="VALOARE" value={specification.value} onChangeText={(value) => patchForm('specifications', form.specifications.map((item) => item.key === specification.key ? { ...item, value } : item))} placeholder="Ex: 1,2 kg" multiline /></View>)}
+
+            <SectionTitle number="05" title="Intrebari si raspunsuri" text="Sunt afisate numai pe pagina acestui produs." />
+            <TouchableOpacity style={styles.inlineAdd} onPress={() => patchForm('questions', [...form.questions, { key: `question-${Date.now()}`, question: '', answer: '' }])}><Plus size={16} color={Colors.orange} /><Text style={styles.inlineAddText}>Adauga intrebare</Text></TouchableOpacity>
+            {form.questions.map((question, index) => <View key={question.key} style={styles.subEditorCard}><View style={styles.subEditorHead}><Text style={styles.subEditorTitle}>INTREBARE {index + 1}</Text><TouchableOpacity onPress={() => patchForm('questions', form.questions.filter((item) => item.key !== question.key))}><Trash2 size={16} color={Colors.error} /></TouchableOpacity></View><Field label="INTREBARE" value={question.question} onChangeText={(value) => patchForm('questions', form.questions.map((item) => item.key === question.key ? { ...item, question: value } : item))} placeholder="Intrebarea clientului" multiline /><Field label="RASPUNS" value={question.answer} onChangeText={(value) => patchForm('questions', form.questions.map((item) => item.key === question.key ? { ...item, answer: value } : item))} placeholder="Raspunsul magazinului" multiline /></View>)}
+
+            <SectionTitle number="06" title="Preț și reducere" text={isBoomagProduct ? 'Prețul Cubis Shop rămâne prețul feedului Boomag plus diferența comercială stabilită de tine.' : 'Configurează prețul Cubis Shop și reducerea afișată pe site.'} />
+            {isBoomagProduct ? <View style={styles.supplierPricingCard}>
+              <View style={styles.supplierPricingHead}><View><Text style={styles.supplierPricingKicker}>SINCRONIZARE BOOMAG</Text><Text style={styles.supplierPricingTitle}>Pretul public se pastreaza automat</Text></View><View style={styles.supplierPricingLive}><View style={styles.supplierPricingLiveDot} /><Text style={styles.supplierPricingLiveText}>FEED ACTIV</Text></View></View>
+              <View style={styles.twoColumns}>
+                <View style={styles.column}><Field label="PRET FEED BOOMAG" value={form.supplier_base_price} editable={false} placeholder="Nesincronizat" keyboardType="decimal-pad" hint="Valoare preluata automat din feed." /></View>
+                <View style={styles.column}><Field label="DIFERENȚĂ COMERCIALĂ" value={commercialDifferenceValue === null ? '' : String(commercialDifferenceValue).replace('.', ',')} editable={false} placeholder="Nedisponibilă" keyboardType="decimal-pad" hint="Calculată automat față de prețul Cubis Shop." /></View>
+              </View>
+            </View> : null}
+            <Text style={styles.label}>TIP REDUCERE</Text>
+            <View style={styles.sourceRow}>
+              <Choice label="Procent (%)" selected={discountType === 'percent'} onPress={() => patchForm('discount_type', 'percent')} />
+              <Choice label="Suma fixa (lei)" selected={discountType === 'fixed'} onPress={() => patchForm('discount_type', 'fixed')} />
+            </View>
+            <Field label="PREȚ CUBIS SHOP *" value={form.price} onChangeText={(value) => patchForm('price', value)} placeholder="0,00" keyboardType="decimal-pad" hint={isBoomagProduct ? 'Editezi prețul public dorit. Dacă lași 0, se folosește prețul valid al furnizorului și marja pornește de la 0.' : 'Acesta este prețul public folosit când produsul nu are un preț de furnizor valid.'} />
+            <Field label="UNITATE DE MĂSURĂ (U.M.)" value={form.unit_of_measure} onChangeText={(value) => patchForm('unit_of_measure', value)} placeholder="buc" maxLength={20} hint="Se preia automat pe avizul de însoțire a mărfii." />
+            <Field label={discountType === 'percent' ? 'REDUCERE %' : 'REDUCERE LEI'} value={form.discount_value || ''} onChangeText={(value) => patchForm('discount_value', value)} placeholder="0" keyboardType="decimal-pad" />
+            {form.is_accounting_stock_tracked
+              ? <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Costul real vine din documentele de intrare.</Text><Text style={styles.nirNoteText}>Loturile din NIR păstrează costul fiecărei recepții, iar retururile refac exact costul real al lotului vândut.</Text></View>
+              : <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Cost fixat la momentul comenzii.</Text><Text style={styles.nirNoteText}>Pentru produsul exclus din Stocuri Conta, pretul furnizorului devine costul curent, iar comanda salveaza un instantaneu. Schimbarile viitoare nu modifica statisticile istorice.</Text></View>}
+            {reducedPrice !== null ? <View style={styles.pricePreview}><Text style={styles.oldPrice}>{money(priceValue)}</Text><Text style={styles.newPrice}>{money(reducedPrice)}</Text><Text style={styles.discountBadge}>{discountType === 'percent' ? `-${discountValue}%` : `-${money(discountValue)}`}</Text></View> : null}
+
+            <SectionTitle number="07" title="Catalog si compatibilitate" text="Leaga produsul de structura magazinului." />
+            <Text style={styles.label}>CATEGORIE</Text>
+            <CategoryTreeDropdown items={categories} selectedIds={form.category_ids} onChange={(ids) => setForm((current) => ({ ...current, category_ids: ids, category_id: preferredCategoryId(categories, ids) }))} />
+            <Text style={styles.label}>PRODUCATOR</Text>
+            <SearchableSingleDropdown items={manufacturers} selectedId={form.manufacturer_id} onChange={(id) => patchForm('manufacturer_id', id)} placeholder="Alege producatorul" />
+            <Text style={styles.label}>COMPATIBILITATI</Text>
+            <MultiSelectDropdown items={brands} selectedIds={form.brand_ids} onChange={(ids) => patchForm('brand_ids', ids)} />
+
+            <SectionTitle number="08" title="Garantia produsului" text="Este afisata public pe pagina produsului atunci cand are o valoare mai mare de zero." />
+            <View style={styles.twoColumns}><View style={styles.column}><Field label="GARANTIE LEGALA · LUNI" value={form.legal_warranty_months} onChangeText={(value) => patchForm('legal_warranty_months', value)} keyboardType="number-pad" placeholder="Nesetat" /></View><View style={styles.column}><Field label="GARANTIE COMERCIALA · LUNI" value={form.commercial_warranty_months} onChangeText={(value) => patchForm('commercial_warranty_months', value)} keyboardType="number-pad" placeholder="Nesetat" /></View></View>
+
+            <SectionTitle number="09" title="Stoc" text={isBoomagProduct ? 'Alege stoc automat din Boomag sau din receptiile NIR, ori stoc nelimitat pentru aprovizionare din alte surse.' : 'Alege stoc online nelimitat sau cantitate urmarita automat.'} />
+            <View style={styles.sourceRow}><Choice label="Stoc cu numar" selected={form.stock_mode === 'tracked'} onPress={() => patchForm('stock_mode', 'tracked')} /><Choice label="Stoc nelimitat" selected={form.stock_mode === 'unlimited'} onPress={() => patchForm('stock_mode', 'unlimited')} /></View>
+            {isBoomagProduct
+              ? <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Online: {form.stock_quantity} · Boomag: {form.supplier_stock_quantity} · Fizic NIR: {form.accounting_stock_quantity} buc.</Text><Text style={styles.nirNoteText}>{form.stock_mode === 'unlimited' ? 'Stocul online ramane nelimitat chiar daca Boomag si stocul fizic ajung la zero.' : 'Produsul ramane disponibil automat din Boomag sau din stocul fizic receptionat prin NIR, indiferent de furnizorul NIR.'}</Text></View>
+              : form.stock_mode === 'tracked' ? <View style={styles.twoColumns}><View style={styles.column}><Field label="CANTITATE" value={form.stock_quantity} onChangeText={(value) => patchForm('stock_quantity', value)} placeholder="0" keyboardType="number-pad" /></View><View style={styles.column}><Field label="ALERTA SUB" value={form.low_stock_threshold} onChangeText={(value) => patchForm('low_stock_threshold', value)} placeholder="3" keyboardType="number-pad" /></View></View> : null}
+            {isBoomagProduct && form.stock_mode === 'tracked' ? <Field label="ALERTA SUB" value={form.low_stock_threshold} onChangeText={(value) => patchForm('low_stock_threshold', value)} placeholder="3" keyboardType="number-pad" /> : null}
+            <View style={[styles.toggleCard, styles.accountingToggleCard]}><View style={styles.toggleCopy}><Text style={styles.toggleTitle}>Urmărește în stocul contabil</Text><Text style={styles.toggleText}>Activ implicit. Stocul contabil folosit la facturare este verificat în SmartBill, pe SKU și gestiunea asociată.</Text></View><Switch accessibilityLabel="Urmărește în stocul contabil" value={form.is_accounting_stock_tracked} onValueChange={(value) => patchForm('is_accounting_stock_tracked', value)} trackColor={{ false: '#DEE8F0', true: '#34D39955' }} thumbColor={form.is_accounting_stock_tracked ? '#34D399' : '#8A8A8A'} /></View>
+
+            <SectionTitle number="10" title="SEO si Google" text="Controleaza titlul si descrierea din rezultatele cautarii." />
+            <Field label="META TITLU" value={form.meta_title} onChangeText={(value) => patchForm('meta_title', value)} placeholder={form.name || 'Titlul produsului'} />
+            <Field label="META DESCRIERE" value={form.meta_description} onChangeText={(value) => patchForm('meta_description', value)} placeholder="Descriere pentru Google" multiline />
+            <View style={styles.googlePreview}>
+              {form.images[0]?.preview_uri ? <ShopProductPicture image={form.images[0]} width={78} height={78} borderRadius={10} /> : null}
+              <View style={styles.googleCopy}><Text style={styles.googleSite}>Cubis Shop · cubisshop.ro</Text><Text numberOfLines={2} style={styles.googleTitle}>{seoTitle}</Text><Text numberOfLines={3} style={styles.googleDescription}>{seoDescription}</Text><Text style={styles.googleUrl}>https://cubisshop.ro/magazin/produs/{form.slug || 'slug-produs'}</Text></View>
+            </View>
+
+            <View style={styles.toggleCard}><View><Text style={styles.toggleTitle}>Produs activ</Text><Text style={styles.toggleText}>Este vizibil si poate fi comandat pe site.</Text></View><Switch value={form.is_active} onValueChange={(value) => patchForm('is_active', value)} trackColor={{ false: '#DEE8F0', true: Colors.orangeMid }} thumbColor={form.is_active ? Colors.orange : '#8A8A8A'} /></View>
+            <View style={styles.toggleCard}><View><Text style={styles.toggleTitle}>Produs recomandat</Text><Text style={styles.toggleText}>Apare prioritar in magazin.</Text></View><Switch value={form.is_featured} onValueChange={(value) => patchForm('is_featured', value)} trackColor={{ false: '#DEE8F0', true: '#F59E0B55' }} thumbColor={form.is_featured ? '#F59E0B' : '#8A8A8A'} /></View>
+            <TouchableOpacity style={[styles.saveBottom, saving && styles.disabled]} onPress={() => void save()} disabled={saving}>{saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={19} color={Colors.white} /><Text style={styles.saveBottomText}>Salveaza produsul</Text></>}</TouchableOpacity>
+          </ScrollView>}
+        </SafeAreaView>
+      </Modal> : null}
+      {saving ? <ProductSaveProgress mode={savingMode} /> : null}
+    </>
+  );
+}
+
+function ProductSaveProgress({ mode }: { mode: 'create' | 'edit' }) {
+  const [elapsed, setElapsed] = useState(0);
+  const [spin] = useState(() => new Animated.Value(0));
+  const [pulse] = useState(() => new Animated.Value(0));
+  const estimatedSeconds = mode === 'create' ? 24 : 17;
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    const timer = setInterval(() => setElapsed(Date.now() - startedAt), 300);
+    const spinLoop = Animated.loop(Animated.timing(spin, { toValue: 1, duration: 1500, easing: Easing.linear, useNativeDriver: true }));
+    const pulseLoop = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ]));
+    spinLoop.start();
+    pulseLoop.start();
+    return () => { clearInterval(timer); spinLoop.stop(); pulseLoop.stop(); };
+  }, [pulse, spin]);
+
+  const seconds = elapsed / 1000;
+  const progress = Math.min(94, Math.max(5, Math.round((1 - Math.exp(-seconds / (estimatedSeconds * .48))) * 100)));
+  const remaining = Math.max(0, Math.ceil(estimatedSeconds - seconds));
+  const stages = mode === 'create'
+    ? ['Validăm datele și imaginile', 'Salvăm produsul în catalog', 'Sincronizăm canalele de vânzare', 'Generăm pagina publică și SEO', 'Pregătim noutatea pentru abonați']
+    : ['Validăm modificările', 'Actualizăm produsul în catalog', 'Sincronizăm prețul și stocul', 'Regenerăm pagina publică', 'Reîmprospătăm lista de produse'];
+  const stageIndex = Math.min(stages.length - 1, Math.floor(progress / 20));
+  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
+
+  return <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={() => undefined}>
+    <View style={styles.saveProgressBackdrop}>
+      <View style={styles.saveProgressCard}>
+        <View style={styles.saveGlowA} /><View style={styles.saveGlowB} />
+        <View style={styles.saveVisual}>
+          <Animated.View style={[styles.saveOrbit, { transform: [{ rotate }] }]}><View style={styles.saveOrbitDot} /></Animated.View>
+          <Animated.View style={[styles.saveCore, { transform: [{ scale: pulseScale }] }]}><Save size={28} color="#FFF" /></Animated.View>
+        </View>
+        <Text style={styles.saveProgressKicker}>{mode === 'create' ? 'PRODUS NOU' : 'ACTUALIZARE PRODUS'}</Text>
+        <Text style={styles.saveProgressTitle}>{mode === 'create' ? 'Îl pregătim pentru magazin.' : 'Salvăm toate modificările.'}</Text>
+        <Text style={styles.saveProgressText}>{stages[stageIndex]}</Text>
+        <View style={styles.saveTrack}><View style={[styles.saveTrackFill, { width: `${progress}%` as `${number}%` }]}><View style={styles.saveTrackShine} /></View></View>
+        <View style={styles.saveProgressMeta}><Text style={styles.saveProgressPercent}>{progress}%</Text><Text style={styles.saveProgressEta}>{remaining > 0 ? `aprox. ${remaining} sec.` : 'ultimele verificări…'}</Text></View>
+        <View style={styles.saveSteps}>{stages.map((stage, index) => <View key={stage} style={[styles.saveStep, index <= stageIndex && styles.saveStepActive]}>{index < stageIndex ? <Check size={12} color="#FFFFFF" /> : <Text style={[styles.saveStepNumber, index <= stageIndex && styles.saveStepNumberActive]}>{index + 1}</Text>}</View>)}</View>
+        <Text style={styles.saveProgressNote}>Poți lăsa ecranul deschis. Se închide automat când produsul este salvat complet.</Text>
+      </View>
+    </View>
+  </Modal>;
+}
+
+function SectionTitle({ number, title, text }: { number: string; title: string; text: string }) {
+  return <View style={styles.sectionTitle}><Text style={styles.sectionNumber}>{number}</Text><View><Text style={styles.sectionName}>{title}</Text><Text style={styles.sectionText}>{text}</Text></View></View>;
+}
+
+function DetailGooglePagination({ label, page, pageSize, total, onPageChange }: { label: string; page: number; pageSize: number; total: number; onPageChange: (page: number) => void }) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const pages = detailPaginationItems(totalPages, safePage);
+  return <View style={styles.detailPagination}>
+    <TouchableOpacity accessibilityLabel="Pagina anterioară" disabled={safePage === 1} style={[styles.detailPageDirection, safePage === 1 && styles.detailPageDisabled]} onPress={() => onPageChange(safePage - 1)}><ChevronLeft size={18} color="#087FF5" /></TouchableOpacity>
+    {pages.map((item, index) => item === 'ellipsis' ? <Text key={`ellipsis-${label}-${index}`} style={styles.detailPageEllipsis}>…</Text> : <TouchableOpacity key={`${label}-${item}`} style={[styles.detailPageButton, item === safePage && styles.detailPageButtonActive]} onPress={() => onPageChange(item)}><Text style={[styles.detailPageText, item === safePage && styles.detailPageTextActive]}>{item}</Text></TouchableOpacity>)}
+    <TouchableOpacity accessibilityLabel="Pagina următoare" disabled={safePage === totalPages} style={[styles.detailPageDirection, safePage === totalPages && styles.detailPageDisabled]} onPress={() => onPageChange(safePage + 1)}><ChevronRight size={18} color="#087FF5" /></TouchableOpacity>
+    <Text style={styles.detailPageTotal}>{total} {label}</Text>
+  </View>;
+}
+
+function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  return <TouchableOpacity style={[styles.choice, selected && styles.choiceActive]} onPress={onPress}>{selected ? <Check size={13} color={Colors.orange} /> : null}<Text style={[styles.choiceText, selected && styles.choiceTextActive]}>{label}</Text></TouchableOpacity>;
+}
+
+function categoryDepth(items: ShopCategory[], id: string) {
+  const byId = new Map(items.map((item) => [item.id, item]));
+  let depth = 0;
+  let current = byId.get(id);
+  const seen = new Set<string>();
+  while (current?.parent_id && !seen.has(current.parent_id)) {
+    seen.add(current.parent_id);
+    depth += 1;
+    current = byId.get(current.parent_id);
+  }
+  return depth;
+}
+
+function preferredCategoryId(items: ShopCategory[], ids: string[]) {
+  return [...ids].sort((left, right) => categoryDepth(items, right) - categoryDepth(items, left))[0] || null;
+}
+
+function CategoryTreeDropdown({ items, selectedIds, onChange }: { items: ShopCategory[]; selectedIds: string[]; onChange: (ids: string[]) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const byId = useMemo(() => new Map(items.map((item) => [item.id, item])), [items]);
+  const ordered = useMemo(() => {
+    const children = new Map<string | null, ShopCategory[]>();
+    items.forEach((item) => children.set(item.parent_id, [...(children.get(item.parent_id) || []), item]));
+    children.forEach((list) => list.sort((a, b) => a.name.localeCompare(b.name, 'ro')));
+    const result: ShopCategory[] = [];
+    const visit = (parent: string | null) => (children.get(parent) || []).forEach((item) => { result.push(item); visit(item.id); });
+    visit(null);
+    items.filter((item) => !result.includes(item)).forEach((item) => result.push(item));
+    return result;
+  }, [items]);
+  const visible = ordered.filter((item) => !query.trim() || item.name.toLocaleLowerCase('ro').includes(query.trim().toLocaleLowerCase('ro')) || (item.parent_name || '').toLocaleLowerCase('ro').includes(query.trim().toLocaleLowerCase('ro')));
+  const toggle = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      const removeBranch = (parentId: string) => items.filter((item) => item.parent_id === parentId).forEach((child) => { next.delete(child.id); removeBranch(child.id); });
+      next.delete(id);
+      removeBranch(id);
+      let parentId = byId.get(id)?.parent_id || null;
+      while (parentId) {
+        const hasSelectedChild = items.some((item) => item.parent_id === parentId && next.has(item.id));
+        if (hasSelectedChild) break;
+        next.delete(parentId);
+        parentId = byId.get(parentId)?.parent_id || null;
+      }
+    } else {
+      next.add(id);
+      let parentId = byId.get(id)?.parent_id || null;
+      while (parentId) { next.add(parentId); parentId = byId.get(parentId)?.parent_id || null; }
+    }
+    onChange([...next]);
+  };
+  const selectedNames = ordered.filter((item) => selectedIds.includes(item.id)).map((item) => item.name);
+  return <View style={styles.multiSelect}>
+    <TouchableOpacity style={[styles.multiSelectButton, open && styles.multiSelectButtonOpen]} onPress={() => setOpen((value) => !value)}><Text numberOfLines={1} style={[styles.multiSelectValue, !selectedNames.length && styles.multiSelectPlaceholder]}>{selectedNames.length ? `${selectedNames.length} selectate · ${selectedNames.join(', ')}` : 'Alege categorii si subcategorii'}</Text><ChevronDown size={18} color={Colors.orange} /></TouchableOpacity>
+    {open ? <View style={styles.multiSelectOptions}><View style={styles.dropdownSearch}><Search size={15} color={Colors.orange} /><TextInput value={query} onChangeText={setQuery} placeholder="Cauta in categorii" placeholderTextColor={Colors.textMuted} style={styles.dropdownSearchInput} />{query ? <TouchableOpacity onPress={() => setQuery('')}><X size={15} color={Colors.textSecondary} /></TouchableOpacity> : null}</View>{visible.map((item) => { const selected = selectedIds.includes(item.id); const depth = categoryDepth(items, item.id); return <TouchableOpacity key={item.id} style={[styles.multiSelectOption, { paddingLeft: 10 + depth * 18 }]} onPress={() => toggle(item.id)}><View style={[styles.multiSelectCheck, selected && styles.multiSelectCheckActive]}>{selected ? <Check size={13} color={Colors.white} /> : null}</View><Text style={[styles.multiSelectOptionText, selected && styles.multiSelectOptionTextActive]}>{depth ? '↳ ' : ''}{item.name}</Text></TouchableOpacity>; })}</View> : null}
+  </View>;
+}
+
+function SearchableSingleDropdown({ items, selectedId, onChange, placeholder }: { items: ShopManufacturer[]; selectedId: string | null; onChange: (id: string | null) => void; placeholder: string }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const selected = items.find((item) => item.id === selectedId);
+  const visible = items.filter((item) => item.name.toLocaleLowerCase('ro').includes(query.trim().toLocaleLowerCase('ro')));
+  return <View style={styles.multiSelect}><TouchableOpacity style={[styles.multiSelectButton, open && styles.multiSelectButtonOpen]} onPress={() => setOpen((value) => !value)}><Text style={[styles.multiSelectValue, !selected && styles.multiSelectPlaceholder]}>{selected?.name || placeholder}</Text><ChevronDown size={18} color={Colors.orange} /></TouchableOpacity>{open ? <View style={styles.multiSelectOptions}><View style={styles.dropdownSearch}><Search size={15} color={Colors.orange} /><TextInput value={query} onChangeText={setQuery} placeholder="Cauta producatorul" placeholderTextColor={Colors.textMuted} style={styles.dropdownSearchInput} /></View><TouchableOpacity style={styles.multiSelectOption} onPress={() => { onChange(null); setOpen(false); }}><View style={[styles.multiSelectCheck, !selectedId && styles.multiSelectCheckActive]}>{!selectedId ? <Check size={13} color={Colors.white} /> : null}</View><Text style={styles.multiSelectOptionText}>Fara producator</Text></TouchableOpacity>{visible.map((item) => <TouchableOpacity key={item.id} style={styles.multiSelectOption} onPress={() => { onChange(item.id); setOpen(false); }}><View style={[styles.multiSelectCheck, item.id === selectedId && styles.multiSelectCheckActive]}>{item.id === selectedId ? <Check size={13} color={Colors.white} /> : null}</View><Text style={styles.multiSelectOptionText}>{item.name}</Text></TouchableOpacity>)}</View> : null}</View>;
+}
+
+function MultiSelectDropdown({ items, selectedIds, onChange }: { items: ShopBrand[]; selectedIds: string[]; onChange: (ids: string[]) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const selectedNames = items.filter((item) => selectedIds.includes(item.id)).map((item) => item.name);
+  const toggle = (id: string) => onChange(selectedIds.includes(id) ? selectedIds.filter((selectedId) => selectedId !== id) : [...selectedIds, id]);
+  return <View style={styles.multiSelect}>
+    <TouchableOpacity style={[styles.multiSelectButton, open && styles.multiSelectButtonOpen]} onPress={() => setOpen((current) => !current)} disabled={!items.length}>
+      <Text numberOfLines={1} style={[styles.multiSelectValue, !selectedNames.length && styles.multiSelectPlaceholder]}>{selectedNames.length ? selectedNames.join(', ') : items.length ? 'Alege marcile compatibile' : 'Nu exista marci disponibile'}</Text>
+      <ChevronDown size={18} color={Colors.orange} style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }} />
+    </TouchableOpacity>
+    {open ? <View style={styles.multiSelectOptions}><View style={styles.dropdownSearch}><Search size={15} color={Colors.orange} /><TextInput value={query} onChangeText={setQuery} placeholder="Cauta compatibilitatea" placeholderTextColor={Colors.textMuted} style={styles.dropdownSearchInput} />{query ? <TouchableOpacity onPress={() => setQuery('')}><X size={15} color={Colors.textSecondary} /></TouchableOpacity> : null}</View>{items.filter((item) => item.name.toLocaleLowerCase('ro').includes(query.trim().toLocaleLowerCase('ro'))).map((item) => {
+      const selected = selectedIds.includes(item.id);
+      return <TouchableOpacity key={item.id} style={styles.multiSelectOption} onPress={() => toggle(item.id)}><View style={[styles.multiSelectCheck, selected && styles.multiSelectCheckActive]}>{selected ? <Check size={13} color={Colors.white} /> : null}</View><Text style={[styles.multiSelectOptionText, selected && styles.multiSelectOptionTextActive]}>{item.name}</Text></TouchableOpacity>;
+    })}</View> : null}
+  </View>;
+}
+
+function Field({ label, prefix, multiline, error, hint, editable = true, ...props }: React.ComponentProps<typeof TextInput> & { label: string; prefix?: string; error?: string; hint?: string }) {
+  return <View style={styles.field}><Text style={styles.label}>{label}</Text>{prefix ? <Text style={styles.prefix}>{prefix}</Text> : null}<TextInput {...props} editable={editable} multiline={multiline} placeholderTextColor={Colors.textMuted} style={[styles.input, !editable && styles.inputInactive, multiline && styles.textarea, Boolean(error) && styles.inputError]} />{hint ? <Text style={styles.fieldHint}>{hint}</Text> : null}{error ? <Text style={styles.fieldError}>{error}</Text> : null}</View>;
+}
+
+function Metric({ label, value, accent, icon }: { label: string; value: string; accent?: boolean; icon?: 'eye' }) {
+  return <View style={[styles.metricCard, accent && styles.metricCardAccent]}><View style={styles.metricLabelRow}>{icon === 'eye' ? <Eye size={13} color={Colors.orange} /> : null}<Text style={styles.metricLabel}>{label}</Text></View><Text numberOfLines={1} style={[styles.metricValue, accent && styles.metricValueAccent]}>{value}</Text></View>;
+}
+
+const styles = StyleSheet.create({
+  wrap: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
+  pageHeader: { paddingHorizontal: 16 },
+  listContent: { paddingHorizontal: 16 },
+  state: { minHeight: 260, alignItems: 'center', justifyContent: 'center', gap: 12, borderRadius: 24, backgroundColor: Theme.colors.surface.base, marginTop: 16 },
+  stateText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 11 },
+  error: { color: Theme.colors.state.error, fontFamily: 'Inter-Regular', fontSize: 11, textAlign: 'center', paddingHorizontal: 22 },
+  retry: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: Colors.orangeDim }, retryText: { color: Colors.orange, fontFamily: 'Inter-SemiBold', fontSize: 10 },
+  stickyToolbar: { width: '100%', height: 58, borderBottomWidth: 1, borderBottomColor: '#E2EAF1', backgroundColor: Colors.bg, elevation: 14, shadowColor: Theme.colors.shadow.color, shadowOpacity: 0.3, shadowRadius: 9, shadowOffset: { width: 0, height: 4 } },
+  toolbarRow: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 7 },
+  search: { flex: 1, minWidth: 0, height: 42, flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 13, paddingHorizontal: 10, backgroundColor: Theme.colors.surface.base },
+  searchInput: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 14 },
+  clearSearch: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.muted },
+  refresh: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: Theme.colors.surface.base },
+  add: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: Colors.orange },
+  summary: { width: 42, height: 42, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 13, paddingHorizontal: 5, backgroundColor: Theme.colors.surface.subtle }, summaryValue: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 10 },
+  productCard: { minHeight: 88, flexDirection: 'row', alignItems: 'center', gap: 7, borderRadius: 19, padding: 10, backgroundColor: Theme.colors.surface.base, marginBottom: 8 },
+  productMain: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  productImage: { width: 66, height: 66, borderRadius: 14, backgroundColor: Theme.colors.surface.muted }, productImageFallback: { width: 66, height: 66, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted },
+  productCopy: { flex: 1, minWidth: 0 }, productTitleRow: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 6 }, productName: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 15 }, productMeta: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 11, marginTop: 4 }, productBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 9 }, productPrice: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 14 }, stock: { color: Theme.colors.state.success, fontFamily: 'Inter-SemiBold', fontSize: 11 }, stockLow: { color: Theme.colors.state.error },
+  iconAction: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(56,189,248,0.11)' }, deleteAction: { backgroundColor: 'rgba(239,68,68,0.10)' },
+  empty: { minHeight: 230, alignItems: 'center', justifyContent: 'center', borderRadius: 24, backgroundColor: Theme.colors.surface.base }, emptyTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 15, marginTop: 13 }, emptyText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10, marginTop: 5 },
+  editorSafe: { flex: 1, backgroundColor: Colors.bg }, editorHeader: { minHeight: 88, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 1, borderBottomColor: '#D8E5EF', paddingHorizontal: 12, backgroundColor: Theme.colors.surface.base }, close: { width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted }, editorHeaderCopy: { flex: 1, minWidth: 0 }, editorKicker: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 10, letterSpacing: 1 }, editorTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 20, marginTop: 2 }, productCodeTop: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 24, lineHeight: 28, marginTop: 1 }, editorProductName: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 13, lineHeight: 18, marginTop: 2 }, saveTop: { minWidth: 104, height: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 13, backgroundColor: Colors.orange }, saveTopText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 13 }, disabled: { opacity: 0.55 }, editorLoadingState: { flex: 1, paddingHorizontal: 32, alignItems: 'center', justifyContent: 'center' }, editorLoadingIcon: { width: 68, height: 68, marginBottom: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 23, backgroundColor: Theme.colors.surface.brandSoft }, editorLoadingTitle: { marginTop: 17, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 22 }, editorLoadingText: { maxWidth: 330, marginTop: 7, color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 14, lineHeight: 20, textAlign: 'center' },
+  form: { width: '100%', maxWidth: 920, alignSelf: 'center', padding: 16 },
+  detailLoading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }, detailContent: { width: '100%', maxWidth: 920, alignSelf: 'center', padding: 16 }, detailGallery: { gap: 10, paddingBottom: 12 }, detailImage: { width: 210, height: 190, overflow: 'hidden', borderRadius: 20, backgroundColor: Theme.colors.surface.subtle },
+  detailIdentity: { minHeight: 72, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: 19, padding: 13, backgroundColor: Theme.colors.surface.muted, marginBottom: 12 }, detailIdentityMain: { flex: 1, minWidth: 0 }, detailIdentitySide: { maxWidth: '46%', alignItems: 'flex-end' }, detailIdentityLabel: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.9 }, detailIdentityCode: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 16, marginTop: 5 }, detailIdentityValue: { color: Theme.colors.state.info, fontFamily: 'Inter-SemiBold', fontSize: 10, marginTop: 5, textAlign: 'right' },
+  metricGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }, metricCard: { width: '48%', minHeight: 72, justifyContent: 'space-between', borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 16, padding: 11, backgroundColor: Theme.colors.surface.base }, metricCardAccent: { borderColor: 'rgba(34,197,94,0.35)', backgroundColor: 'rgba(34,197,94,0.07)' }, metricLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 5 }, metricLabel: { color: Colors.textMuted, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.55 }, metricValue: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 14, marginTop: 6 }, metricValueAccent: { color: Theme.colors.state.success },
+  saleCard: { marginTop: 10, padding: 14, borderRadius: 16, backgroundColor: Theme.colors.surface.muted, borderWidth: 1, borderColor: Theme.colors.border.subtle }, saleHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }, saleLabel: { color: Colors.textMuted, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.6 }, saleNumber: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 12, marginTop: 3 }, saleMeta: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 6 }, saleStatus: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, backgroundColor: Theme.colors.surface.brandSoft }, saleStatusText: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 7, textTransform: 'uppercase' }, saleStats: { flexDirection: 'row', gap: 7, marginTop: 12 }, saleStat: { flex: 1, minWidth: 0, padding: 9, borderRadius: 11, backgroundColor: Theme.colors.surface.base }, saleValue: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 10, marginTop: 5 }, saleProfit: { color: '#28D16F', fontFamily: 'Inter-Bold', fontSize: 10, marginTop: 5 }, detailEmpty: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 10, paddingVertical: 18 },
+  reviewCard: { borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 18, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }, reviewName: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 11 }, reviewVerified: { alignSelf: 'flex-start', marginTop: 5, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(45,212,191,0.32)', backgroundColor: 'rgba(45,212,191,0.1)' }, reviewVerifiedText: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-Bold', fontSize: 7 }, reviewSource: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 7, marginTop: 5 }, reviewMeta: { color: Theme.colors.state.warningBright, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 5 }, reviewDelete: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: 'rgba(239,68,68,0.1)' }, reviewMessage: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 16, marginVertical: 12 }, reviewReply: { minHeight: 74, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, padding: 11, color: Colors.textPrimary, backgroundColor: Theme.colors.surface.subtle, fontFamily: 'Inter-Regular', fontSize: 10, textAlignVertical: 'top' }, reviewSave: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 13, backgroundColor: Colors.orange, marginTop: 8 }, reviewSaveText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 9 },
+  detailPagination: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 10, marginBottom: 4 }, detailPageDirection: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: Theme.colors.surface.cyanSoft }, detailPageDisabled: { opacity: 0.28 }, detailPageButton: { minWidth: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'transparent', borderRadius: 11, backgroundColor: Theme.colors.surface.muted }, detailPageButtonActive: { borderColor: '#09BFD950', backgroundColor: Theme.colors.brand.primaryAction }, detailPageText: { color: Theme.colors.text.muted, fontFamily: 'Inter-Bold', fontSize: 10 }, detailPageTextActive: { color: Theme.colors.text.onBrand }, detailPageEllipsis: { width: 20, color: Theme.colors.text.muted, textAlign: 'center', fontFamily: 'Inter-Bold', fontSize: 14 }, detailPageTotal: { position: 'absolute', right: 2, color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 8 },
+  sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 11, borderTopWidth: 1, borderTopColor: '#D8E5EF', paddingTop: 22, marginTop: 14, marginBottom: 18 }, sectionNumber: { width: 42, height: 42, textAlign: 'center', textAlignVertical: 'center', borderRadius: 12, color: Colors.orange, backgroundColor: Colors.orangeDim, fontFamily: 'Inter-Bold', fontSize: 13 }, sectionName: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 18 }, sectionText: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 13, lineHeight: 18, marginTop: 3, maxWidth: 650 },
+  inlineAdd: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 1, borderColor: 'rgba(255,107,0,0.28)', borderRadius: 14, backgroundColor: Colors.orangeDim, marginBottom: 10 }, inlineAddText: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 13 }, subEditorCard: { borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 17, padding: 13, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, subEditorHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }, subEditorTitle: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 12, letterSpacing: 0.8 },
+  label: { color: Colors.textSecondary, fontFamily: 'Inter-Bold', fontSize: 12, letterSpacing: 0.6, marginBottom: 8 }, sourceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15 }, choices: { gap: 8, paddingBottom: 15 }, choiceWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15 }, choice: { minHeight: 46, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 999, paddingHorizontal: 15, backgroundColor: Theme.colors.surface.base }, choiceActive: { borderColor: Colors.orange, backgroundColor: Colors.orangeDim }, choiceText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 13 }, choiceTextActive: { color: Colors.orange },
+  field: { marginBottom: 17 }, input: { minHeight: 56, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 14, color: Colors.textPrimary, backgroundColor: Theme.colors.surface.subtle, fontFamily: 'Inter-Regular', fontSize: 16 }, inputInactive: { borderColor: Theme.colors.border.default, color: Colors.textMuted, backgroundColor: Theme.colors.surface.muted, opacity: 0.78 }, inputError: { borderColor: Theme.colors.state.error, backgroundColor: 'rgba(239,68,68,0.055)' }, fieldHint: { marginTop: 7, color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 12, lineHeight: 17 }, fieldError: { marginTop: 7, color: '#FF6B72', fontFamily: 'Inter-SemiBold', fontSize: 12, lineHeight: 17 }, textarea: { minHeight: 104, paddingTop: 14, textAlignVertical: 'top' }, prefix: { alignSelf: 'flex-start', marginBottom: 7, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, color: Theme.colors.state.info, backgroundColor: Theme.colors.surface.brandSoft, fontFamily: 'Inter-SemiBold', fontSize: 10 },
+  gallery: { gap: 12, paddingBottom: 10, paddingRight: 16 }, galleryCard: { width: 180, height: 214, padding: 7, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 20, backgroundColor: Theme.colors.surface.subtle }, galleryMain: { borderColor: Colors.orange }, galleryDragging: { zIndex: 20, elevation: 14, opacity: 0.88, shadowColor: Theme.colors.shadow.color, shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 } }, galleryPhoto: { width: 164, height: 148, overflow: 'hidden', borderRadius: 14, backgroundColor: '#F4F3F1' }, galleryRemove: { position: 'absolute', top: 7, right: 7, width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted }, mainBadge: { position: 'absolute', left: 7, bottom: 7, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 5, backgroundColor: Theme.colors.surface.muted }, mainBadgeText: { color: '#111', fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.5 }, galleryFooter: { height: 51, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 5, paddingHorizontal: 2 }, dragHint: { flexDirection: 'row', alignItems: 'center', gap: 2 }, dragHintText: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 7 }, makeMain: { height: 30, flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 9, paddingHorizontal: 7, backgroundColor: Theme.colors.surface.muted }, makeMainActive: { borderColor: 'rgba(255,107,0,0.3)', backgroundColor: Colors.orangeDim }, makeMainText: { color: Colors.textSecondary, fontFamily: 'Inter-Bold', fontSize: 7 }, makeMainTextActive: { color: Colors.orange }, imageAdd: { width: 180, height: 214, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderStyle: 'dashed', borderRadius: 20, backgroundColor: Theme.colors.surface.subtle }, imageAddIcon: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: Colors.orangeDim }, imageAddText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 10, marginTop: 11 }, imageCount: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 4 },
+  twoColumns: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 }, column: { flexGrow: 1, flexBasis: 150 }, pricePreview: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, oldPrice: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 14, textDecorationLine: 'line-through' }, newPrice: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 20 }, discountBadge: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 12 },
+  nirNote: { marginBottom: 12, borderWidth: 1, borderColor: 'rgba(56,189,248,0.18)', borderRadius: 15, padding: 14, backgroundColor: 'rgba(56,189,248,0.055)' }, nirNoteTitle: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 19 }, nirNoteText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 13, lineHeight: 19, marginTop: 5 },
+  supplierPricingCard: { marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,138,39,0.28)', borderRadius: 20, padding: 14, backgroundColor: 'rgba(255,138,39,0.055)' }, supplierPricingHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14 }, supplierPricingKicker: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 10, letterSpacing: 0.8 }, supplierPricingTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 16, lineHeight: 21, marginTop: 3 }, supplierPricingLive: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 7, backgroundColor: 'rgba(34,197,94,0.1)' }, supplierPricingLiveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#2DD881' }, supplierPricingLiveText: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 10, letterSpacing: 0.4 },
+  referenceCard: { minHeight: 112, flexDirection: 'row', alignItems: 'center', gap: 13, borderWidth: 1, borderColor: 'rgba(94,234,212,0.22)', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 14, backgroundColor: Theme.colors.state.successSoft, marginBottom: 10 }, referenceInactive: { opacity: 0.5 }, referenceIcon: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: 'rgba(94,234,212,0.11)', borderWidth: 1, borderColor: 'rgba(94,234,212,0.18)' }, referenceCopy: { flex: 1, minWidth: 0 }, referenceHeading: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }, referenceSupplier: { flexGrow: 1, minWidth: 120, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 19 }, referenceDataRow: { marginTop: 5, flexDirection: 'row', alignItems: 'center', gap: 7 }, referenceCodeChip: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(45,212,191,0.11)' }, referenceCode: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-Bold', fontSize: 10 }, referenceMeta: { color: '#AAA4AC', fontFamily: 'Inter-Regular', fontSize: 10.5, lineHeight: 15, marginTop: 2 }, referenceAliases: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-SemiBold', fontSize: 10, lineHeight: 15, marginTop: 4 }, referenceCost: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 10.5, lineHeight: 15, marginTop: 5 }, referenceAction: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.muted, borderWidth: 1, borderColor: Theme.colors.border.default }, referencePrimary: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, backgroundColor: 'rgba(34,197,94,0.12)' }, referencePrimaryText: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 0.5 },
+  purchaseCard: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 16, padding: 12, backgroundColor: Theme.colors.surface.base, marginBottom: 8 }, purchaseNir: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 10 }, purchaseMeta: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 4 }, purchaseRight: { alignItems: 'flex-end' }, purchaseCost: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 11 },
+  multiSelect: { marginBottom: 16 }, multiSelectButton: { minHeight: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 14, backgroundColor: Theme.colors.surface.subtle }, multiSelectButtonOpen: { borderColor: Colors.orange }, multiSelectValue: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 14 }, multiSelectPlaceholder: { color: Colors.textMuted, fontFamily: 'Inter-Regular' }, multiSelectOptions: { marginTop: 6, overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 14, padding: 6, backgroundColor: Theme.colors.surface.subtle }, multiSelectOption: { minHeight: 50, flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 10, paddingHorizontal: 10 }, multiSelectCheck: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 7, backgroundColor: Theme.colors.surface.subtle }, multiSelectCheckActive: { borderColor: Colors.orange, backgroundColor: Colors.orange }, multiSelectOptionText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 14 }, multiSelectOptionTextActive: { color: Colors.orange },
+  dropdownSearch: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 10, paddingHorizontal: 10, marginBottom: 4, backgroundColor: Theme.colors.surface.subtle }, dropdownSearchInput: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 14 },
+  googlePreview: { flexDirection: 'row', gap: 12, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 19, padding: 14, backgroundColor: '#FFF', marginBottom: 18 }, googleImage: { width: 78, height: 78, borderRadius: 10, backgroundColor: '#EEE' }, googleCopy: { flex: 1, minWidth: 0 }, googleSite: { color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 9 }, googleTitle: { color: '#1A0DAB', fontFamily: 'Inter-Regular', fontSize: 15, lineHeight: 19, marginTop: 3 }, googleDescription: { color: '#4D5156', fontFamily: 'Inter-Regular', fontSize: 9, lineHeight: 14, marginTop: 3 }, googleUrl: { color: '#188038', fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 4 },
+  toggleCard: { minHeight: 78, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderRadius: 17, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, accountingToggleCard: { borderWidth: 1, borderColor: 'rgba(52,211,153,0.22)', backgroundColor: Theme.colors.surface.base }, toggleCopy: { flex: 1, minWidth: 0 }, toggleTitle: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 15 }, toggleText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 12, lineHeight: 18, marginTop: 4 },
+  smartBillCard: { marginBottom: 18, gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 19, padding: 14, backgroundColor: Theme.colors.surface.brandSoft }, smartBillHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }, smartBillKicker: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1 }, smartBillTitle: { marginTop: 3, color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 15 }, smartBillStatus: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 6 }, smartBillStatusOk: { backgroundColor: Theme.colors.surface.cyanSoft }, smartBillStatusPending: { backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusError: { backgroundColor: '#854D0E' }, smartBillStatusIdle: { backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusText: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: .5 }, smartBillMatch: { borderRadius: 13, padding: 11, backgroundColor: Theme.colors.background.canvas }, smartBillMatchName: { color: Theme.colors.state.info, fontFamily: 'Inter-Bold', fontSize: 12 }, smartBillHelp: { color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 15 }, smartBillWarehouses: { gap: 7 }, smartBillWarehouse: { minHeight: 49, justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 12, backgroundColor: Theme.colors.background.canvas }, smartBillWarehouseActive: { borderColor: Theme.colors.border.focus, backgroundColor: Theme.colors.surface.cyanSoft }, smartBillWarehouseName: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 11 }, smartBillWarehouseId: { marginTop: 2, color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 8 }, smartBillStock: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 11 }, smartBillError: { color: Theme.colors.state.error, fontFamily: 'Inter-SemiBold', fontSize: 10, lineHeight: 15 },
+  saveBottom: { minHeight: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 17, backgroundColor: Colors.orange, marginTop: 16 }, saveBottomText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 15 },
+  saveProgressBackdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16, backgroundColor: Theme.colors.overlay.scrim },
+  saveProgressCard: { width: '100%', maxWidth: 570, minHeight: 510, paddingHorizontal: 24, paddingVertical: 34, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 34, backgroundColor: Theme.colors.surface.base, shadowColor: Theme.colors.shadow.color, shadowOpacity: .55, shadowRadius: 35, shadowOffset: { width: 0, height: 20 }, elevation: 22 },
+  saveGlowA: { width: 260, height: 260, position: 'absolute', top: -170, right: -80, borderRadius: 130, backgroundColor: Theme.colors.surface.brandSoft }, saveGlowB: { width: 210, height: 210, position: 'absolute', bottom: -150, left: -100, borderRadius: 105, backgroundColor: '#FFAA3312' },
+  saveVisual: { width: 112, height: 112, alignItems: 'center', justifyContent: 'center' }, saveOrbit: { width: 106, height: 106, position: 'absolute', borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: 53 }, saveOrbitDot: { width: 13, height: 13, position: 'absolute', top: -6, left: 46, borderWidth: 3, borderColor: '#A8EAF4', borderRadius: 7, backgroundColor: Theme.colors.brand.primaryAction }, saveCore: { width: 72, height: 72, alignItems: 'center', justifyContent: 'center', borderRadius: 24, backgroundColor: Theme.colors.brand.primaryAction, shadowColor: Theme.colors.brand.primary, shadowOpacity: .5, shadowRadius: 22, shadowOffset: { width: 0, height: 8 }, elevation: 12 },
+  saveProgressKicker: { marginTop: 22, color: Theme.colors.brand.secondary, fontFamily: 'Inter-Bold', fontSize: 9, letterSpacing: 1.6 }, saveProgressTitle: { maxWidth: 430, marginTop: 8, color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 26, lineHeight: 32, letterSpacing: -.7, textAlign: 'center' }, saveProgressText: { minHeight: 19, marginTop: 10, color: '#B5AAA3', fontFamily: 'Inter-SemiBold', fontSize: 11, textAlign: 'center' },
+  saveTrack: { width: '100%', height: 12, marginTop: 26, overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 99, backgroundColor: Theme.colors.surface.base }, saveTrackFill: { height: '100%', minWidth: 12, overflow: 'hidden', borderRadius: 99, backgroundColor: Theme.colors.brand.primaryAction }, saveTrackShine: { width: '35%', height: '100%', alignSelf: 'flex-end', backgroundColor: '#09C9E5AA' }, saveProgressMeta: { width: '100%', marginTop: 9, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, saveProgressPercent: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 11 }, saveProgressEta: { color: Theme.colors.text.muted, fontFamily: 'Inter-SemiBold', fontSize: 9 },
+  saveSteps: { marginTop: 23, flexDirection: 'row', alignItems: 'center', gap: 8 }, saveStep: { width: 27, height: 27, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 9, backgroundColor: Theme.colors.surface.muted }, saveStepActive: { borderColor: Theme.colors.brand.secondary, backgroundColor: Theme.colors.brand.primaryAction }, saveStepNumber: { color: Theme.colors.text.muted, fontFamily: 'Inter-Bold', fontSize: 8 }, saveStepNumberActive: { color: Theme.colors.text.onBrand }, saveProgressNote: { maxWidth: 420, marginTop: 23, color: '#746C68', fontFamily: 'Inter-Regular', fontSize: 9, lineHeight: 14, textAlign: 'center' },
+});

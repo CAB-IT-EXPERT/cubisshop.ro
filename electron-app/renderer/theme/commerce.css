@@ -1,0 +1,1116 @@
+:root[data-theme="cubis-light"] :is(.shop-section-head h2, .shop-commerce-title h1,
+  .shop-placeholder-page > h1, .shop-invoice-configurator-page > h1) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-section-head > small, .shop-commerce-title p,
+  .shop-placeholder-card p) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] :is(.active-module-chip strong, .shop-section-head span,
+  .shop-commerce-title span, .shop-catalog-hero-copy small) {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-hero, .shop-commerce-hero, .shop-commerce-hero[data-commerce-kind]) {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  background:
+    radial-gradient(circle at 86% 30%, rgba(9, 201, 229, 0.2), transparent 30%),
+    radial-gradient(circle at 66% 110%, rgba(8, 127, 245, 0.09), transparent 36%),
+    linear-gradient(135deg, var(--color-surface), var(--color-canvas));
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-hero::before, .shop-commerce-hero::after,
+  .shop-commerce-hero-glow) {
+  opacity: 0.32;
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero .shop-commerce-hero-symbol {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: linear-gradient(145deg, var(--color-surface), var(--color-surface-brand));
+  box-shadow: 0 14px 32px rgba(8, 127, 245, 0.12);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero .shop-commerce-refresh,
+:root[data-theme="cubis-light"] .shop-commerce-refresh,
+:root[data-theme="cubis-light"] .shop-tab-panel .shop-back-btn {
+  border: 1px solid var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface);
+  box-shadow: 0 8px 20px rgba(31, 82, 126, 0.08);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-area-card, .shop-placeholder-card,
+  .shop-dashboard-card, .shop-dashboard-panel, .shop-dashboard-metric) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-area-card:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-area-copy strong, .shop-placeholder-card h1,
+  .shop-dashboard-card strong, .shop-dashboard-panel strong, .shop-dashboard-metric strong) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-area-copy em, .shop-dashboard-card small,
+  .shop-dashboard-panel small, .shop-dashboard-metric small) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-page :is(
+  .shop-commerce-tools, .shop-products-tools, .shop-commerce-summary,
+  .shop-order-kpi, .shop-order-filters, .shop-commerce-table-wrap,
+  .shop-commerce-pagination, .shop-commerce-loading, .shop-commerce-empty,
+  .shop-commerce-error, .shop-smartbill-config-head, .shop-smartbill-connection,
+  .shop-smartbill-sync, .shop-smartbill-form, .shop-smartbill-reference,
+  .shop-smartbill-capabilities, .shop-smartbill-credentials, .shop-smartbill-issuing
+) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-page :is(
+  .shop-products-tools > div b, .shop-commerce-summary b, .shop-order-kpi strong,
+  .shop-order-filters > header strong, .shop-commerce-empty > strong,
+  .shop-smartbill-config-head h2, .shop-smartbill-config-head strong,
+  .shop-smartbill-connection strong, .shop-smartbill-sync strong,
+  .shop-smartbill-form strong, .shop-smartbill-reference strong,
+  .shop-smartbill-capabilities strong, .shop-smartbill-credentials strong,
+  .shop-smartbill-issuing strong
+) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-page :is(
+  .shop-products-tools > div span, .shop-commerce-summary span, .shop-order-kpi small,
+  .shop-order-filters small, .shop-commerce-empty p, .shop-smartbill-config-head p,
+  .shop-smartbill-connection small, .shop-smartbill-connection p,
+  .shop-smartbill-sync small, .shop-smartbill-form p, .shop-smartbill-reference small,
+  .shop-smartbill-capabilities small, .shop-smartbill-credentials small,
+  .shop-smartbill-issuing p
+) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-table-wrap {
+  overflow: hidden;
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-table {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-table thead, .shop-commerce-table th) {
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-table tbody, .shop-commerce-table tr,
+  .shop-commerce-table td) {
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-table tbody tr:hover td {
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-table td :is(strong, b) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-table td :is(small, em) {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-table td a {
+  color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-detail-metrics article,
+:root[data-theme="cubis-light"] .shop-detail-metrics.compact article {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-detail-metrics article.accent {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-detail-metrics small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-detail-metrics strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-detail-metrics article.accent strong {
+  color: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] :is(
+  .shop-products-tools #shop-products-search,
+  .shop-commerce-page input:not([type="checkbox"]):not([type="radio"]),
+  .shop-commerce-page textarea,
+  .shop-commerce-page select
+) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  -webkit-text-fill-color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] :is(
+  .shop-products-tools #shop-products-search:hover,
+  .shop-products-tools #shop-products-search:focus,
+  .shop-commerce-page input:focus,
+  .shop-commerce-page textarea:focus,
+  .shop-commerce-page select:focus
+) {
+  border-color: rgba(8, 127, 245, 0.58);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-focus);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-page input::placeholder,
+  .shop-commerce-page textarea::placeholder) {
+  color: var(--color-text-muted);
+  -webkit-text-fill-color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-pagination {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-pagination button, .shop-commerce-page-size select) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-pagination button:hover:not(:disabled) {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-product-export-trigger {
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-hero {
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(circle at 88% 25%, rgba(9, 201, 229, 0.18), transparent 29%),
+    linear-gradient(135deg, var(--color-surface), var(--color-canvas));
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-hero-copy strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-hero-copy em {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-hero-icon {
+  border: 1px solid var(--color-cyan-border);
+  color: var(--color-brand-cyan-strong);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-count {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-count b {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-count small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-tabs {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-tabs button {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-tabs button:hover {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-tabs button.active {
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+  box-shadow: 0 9px 22px rgba(8, 127, 245, 0.19);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-catalog-state, .shop-taxonomy-sync) {
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+:root[data-theme="cubis-light"] .shop-catalog-state.loading::before {
+  border-color: rgba(8, 127, 245, 0.16);
+  border-top-color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-taxonomy-sync:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-taxonomy-sync > span {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-taxonomy-sync > b, .shop-taxonomy-sync strong) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-taxonomy-sync > small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-table-shell {
+  border-color: var(--color-border);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-table th {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-table td {
+  border-top-color: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-table tbody tr:hover td {
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-table-thumb {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-table-name strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-table-name small,
+:root[data-theme="cubis-light"] .shop-website {
+  color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-table-name em, .shop-parent-root) {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-parent-path {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-level-label {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-status-badge.active {
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-status-badge.inactive {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-table-action {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-table-action.delete {
+  border-color: var(--color-error-border);
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-table-action.locked {
+  border-color: var(--color-warning-border);
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-fab, .shop-fab.teal, .shop-fab.indigo) {
+  border-color: rgba(255, 255, 255, 0.56);
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+  box-shadow: 0 13px 30px rgba(8, 127, 245, 0.24);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-smartbill-product-link, .shop-smartbill-choice,
+  .shop-smartbill-rules > button, .shop-smartbill-rules > article,
+  .shop-smartbill-warehouse-list article, .shop-smartbill-catalog article,
+  .shop-smartbill-product-match) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-smartbill-product-link, .shop-smartbill-choice,
+  .shop-smartbill-rules, .shop-smartbill-warehouse-list, .shop-smartbill-catalog,
+  .shop-smartbill-product-match) strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-smartbill-product-link, .shop-smartbill-choice,
+  .shop-smartbill-rules, .shop-smartbill-warehouse-list, .shop-smartbill-catalog,
+  .shop-smartbill-product-match) small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-smartbill-choice.active, .shop-smartbill-rules > .active,
+  .shop-smartbill-issuing.active) {
+  border-color: var(--color-cyan-border);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-power {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing > button {
+  background: var(--color-border-strong);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing > button i {
+  background: var(--color-surface);
+  box-shadow: 0 2px 7px rgba(23, 43, 64, 0.18);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing.active > button {
+  background: var(--color-brand-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-dashboard-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+:root[data-theme="cubis-light"] .shop-dashboard-insights {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+:root[data-theme="cubis-light"] .shop-chart-tooltip {
+  border-color: var(--color-border-brand);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 14px 34px rgba(49, 80, 109, 0.16);
+}
+
+:root[data-theme="cubis-light"] .shop-chart-tooltip :is(strong, b) {
+  color: var(--color-text-primary);
+}
+
+/* Newsletter kept its own legacy dark skin outside the generic commerce cards. */
+:root[data-theme="cubis-light"] .shop-newsletter-metrics article {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-metrics strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-metrics small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-metrics article > span.green {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  box-shadow: inset 0 0 0 1px var(--color-success-border);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-metrics article > span.muted {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-metrics article > span.orange {
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+  box-shadow: inset 0 0 0 1px var(--color-warning-border);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-toolbar {
+  border-color: var(--color-border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-search {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-search > span {
+  color: var(--color-brand-cyan-strong);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-search label small,
+:root[data-theme="cubis-light"] .shop-newsletter-search > b {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-search input {
+  color: var(--color-text-primary);
+  -webkit-text-fill-color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-search > button {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-filters {
+  border-color: var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-filters button {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-filters button:hover {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-filters button.active {
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+  box-shadow: 0 8px 20px rgba(8, 127, 245, 0.2);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-card {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-copy strong,
+:root[data-theme="cubis-light"] .shop-newsletter-consent strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-newsletter-copy span, .shop-newsletter-copy em,
+  .shop-newsletter-consent small, .shop-newsletter-consent span) {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-card.unsubscribed .shop-newsletter-avatar {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-avatar i {
+  border-color: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-newsletter-status.unsubscribed {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+/* Remaining commerce modules are normalized here because their original skins
+   were isolated feature styles rather than shared card primitives. */
+:root[data-theme="cubis-light"] .shop-settings-row,
+:root[data-theme="cubis-light"] :is(.shop-customer-card, .shop-customer-order,
+  .shop-promotion-card, .shop-promotion-application, .shop-company-card) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-shipping-row:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-settings-row :is(strong, small, em),
+:root[data-theme="cubis-light"] :is(.shop-customer-card, .shop-customer-order,
+  .shop-promotion-card, .shop-promotion-application, .shop-company-card) :is(strong, h3) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-settings-row :is(small, em),
+:root[data-theme="cubis-light"] :is(.shop-customer-card, .shop-customer-order,
+  .shop-promotion-card, .shop-promotion-application, .shop-company-card) :is(small, p, em) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-settings-icon {
+  color: var(--color-brand-cyan-strong);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-metrics > article {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-metrics > article :is(small, span) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-metrics > article :is(strong, b) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-search-panel {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-search-panel:focus-within {
+  border-color: var(--color-border-brand);
+  box-shadow: var(--shadow-focus), var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-search-panel label small {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-search-panel input {
+  color: var(--color-text-primary);
+  -webkit-text-fill-color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-customer-search-clear {
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-customer-profile, .shop-promotion-stats-hero,
+  .shop-promotion-stats-facts, .shop-company-intro) {
+  border-color: var(--color-border);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-customer-profile, .shop-promotion-stats-hero,
+  .shop-promotion-stats-facts, .shop-company-intro) :is(h3, strong) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-customer-profile, .shop-promotion-stats-hero,
+  .shop-promotion-stats-facts, .shop-company-intro) :is(p, small, em, span) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-company-stamp {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-company-stamp-preview,
+:root[data-theme="cubis-light"] .shop-company-stamp-state :is(img, i) {
+  border-color: var(--color-border-brand);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-company-info-grid > span {
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-company-info-grid strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.paid {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.unpaid {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics :is(small, em) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar > label {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar input {
+  color: var(--color-text-primary);
+  -webkit-text-fill-color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar button {
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar button.active {
+  border-color: var(--color-border-brand);
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy :is(header strong, h3) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy :is(p, span) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice button {
+  border-color: var(--color-border);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings {
+  --payment-primary: var(--color-brand-action);
+  --payment-on-primary: var(--color-text-on-brand);
+  --payment-outline: var(--color-border-strong);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings > section,
+:root[data-theme="cubis-light"] .shop-payment-form-actions {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-stripe-main {
+  background: linear-gradient(135deg, var(--color-surface-brand), var(--color-surface));
+}
+
+:root[data-theme="cubis-light"] .shop-payment-brand-icon {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  box-shadow: inset 0 0 0 1px var(--color-border-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-eyebrow {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings :is(.shop-payment-copy h2,
+  .shop-payment-section-head h2, .shop-payment-method-copy h3,
+  .shop-payment-sync-summary strong, .shop-payment-save-note strong) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings :is(.shop-payment-copy p,
+  .shop-payment-section-head p, .shop-payment-method-copy p,
+  .shop-payment-sync-summary small, .shop-payment-save-note small,
+  .shop-payment-field small) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-status.is-offline,
+:root[data-theme="cubis-light"] .shop-payment-options-badge {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-sync-row {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-sync-icon {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-sync-button {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-method-card,
+:root[data-theme="cubis-light"] .shop-payment-method-card:has(.shop-payment-switch input:checked) {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-payment-method-card:has(.shop-payment-switch input:checked) {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-switch-track {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-switch-track::after {
+  background: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-switch input:checked + .shop-payment-switch-track::after {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings .shop-payment-switch input:checked + .shop-payment-switch-track {
+  border-color: var(--color-brand-action);
+  background: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings .shop-payment-switch input:checked + .shop-payment-switch-track::after {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-field {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-payment-settings .shop-payment-field input {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-intro {
+  border-color: var(--color-border-brand);
+  background: linear-gradient(135deg, var(--color-surface-brand), var(--color-surface-cyan));
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-intro-icon {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-primary);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-intro-copy > small,
+:root[data-theme="cubis-light"] .shop-automation-section-head span > small {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-intro-copy > strong,
+:root[data-theme="cubis-light"] .shop-automation-section-head span > strong,
+:root[data-theme="cubis-light"] .shop-automation-group > header strong,
+:root[data-theme="cubis-light"] .shop-automation-rule-copy strong,
+:root[data-theme="cubis-light"] .shop-automation-actions > span > strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-intro-copy > p,
+:root[data-theme="cubis-light"] .shop-automation-group > header p,
+:root[data-theme="cubis-light"] .shop-automation-rule-copy small,
+:root[data-theme="cubis-light"] .shop-automation-actions > span > small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-section-head > em {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-group {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-rule {
+  border-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-rule.is-active {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-rule-icon {
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-switch i {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-switch i::after {
+  background: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-switch input:checked + i::after {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-safety {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-safety strong {
+  color: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-safety p {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-actions {
+  border-color: var(--color-border);
+}
+
+:root[data-theme="cubis-light"] .shop-automation-actions button {
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+  box-shadow: 0 13px 28px rgba(8, 127, 245, 0.2);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-hero {
+  --invoice-accent: var(--color-brand-action);
+  --invoice-dark: var(--color-brand-action-secondary);
+  --invoice-soft: var(--color-surface-brand);
+  border-color: var(--color-border-brand);
+  background: linear-gradient(135deg, var(--color-surface-brand), var(--color-surface), var(--color-surface-cyan));
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-page {
+  --invoice-accent: var(--color-brand-action);
+  --invoice-dark: var(--color-brand-action-secondary);
+  --invoice-soft: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-hero::after {
+  border-color: var(--color-border-brand);
+  box-shadow: 0 0 0 42px var(--color-surface-brand), 0 0 0 84px var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-document {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-primary);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-gear {
+  border-color: var(--color-surface);
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action);
+  box-shadow: 0 9px 20px rgba(8, 127, 245, 0.22);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy .shop-kicker {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy h1 {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy p {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-showcase {
+  border-color: var(--color-border);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head,
+:root[data-theme="cubis-light"] :is(.shop-smartbill-sync, .shop-smartbill-issuing,
+  .shop-smartbill-form, .shop-smartbill-credentials, .shop-smartbill-reference,
+  .shop-smartbill-capabilities) {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > span {
+  color: var(--color-brand-text);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head small,
+:root[data-theme="cubis-light"] .shop-smartbill-issuing small {
+  color: var(--color-brand-cyan-strong);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head h2,
+:root[data-theme="cubis-light"] :is(.shop-smartbill-sync, .shop-smartbill-issuing,
+  .shop-smartbill-form, .shop-smartbill-credentials, .shop-smartbill-reference,
+  .shop-smartbill-capabilities) strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head p,
+:root[data-theme="cubis-light"] :is(.shop-smartbill-sync, .shop-smartbill-issuing,
+  .shop-smartbill-form, .shop-smartbill-credentials, .shop-smartbill-reference,
+  .shop-smartbill-capabilities) :is(p, small, label) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync {
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync > span {
+  color: var(--color-brand-cyan-strong);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync button,
+:root[data-theme="cubis-light"] .shop-smartbill-save {
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets :is(b, strong) {
+  color: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets p {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-fields :is(input, textarea),
+:root[data-theme="cubis-light"] .shop-smartbill-credentials input,
+:root[data-theme="cubis-light"] .shop-smartbill-catalog-search input {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-empty > b {
+  color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero[data-commerce-kind="automations"] {
+  --hero-accent: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero[data-commerce-kind="automations"] .shop-commerce-hero-symbol {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-action);
+  background: linear-gradient(145deg, var(--color-surface-brand), var(--color-surface-cyan));
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero[data-commerce-kind="automations"] .shop-commerce-hero-symbol::before {
+  border-color: var(--color-border-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero[data-commerce-kind="automations"] .shop-commerce-hero-symbol::after {
+  background: var(--color-brand-cyan-track);
+  box-shadow: -112px 69px 0 -2px var(--color-brand-action), -14px 101px 0 -3px var(--color-brand-cyan-strong);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-hero[data-commerce-kind="automations"] .shop-commerce-hero-symbol svg {
+  filter: drop-shadow(0 7px 13px rgba(8, 127, 245, 0.24));
+}
+
+@media (max-width: 900px) {
+  :root[data-theme="cubis-light"] .shop-dashboard-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  :root[data-theme="cubis-light"] .shop-commerce-hero {
+    min-height: 180px;
+    padding: 24px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-commerce-hero .shop-commerce-hero-symbol {
+    opacity: 0.62;
+  }
+}

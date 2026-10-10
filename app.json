@@ -1,0 +1,77 @@
+{
+  "expo": {
+    "name": "Cubis Shop",
+    "slug": "cubisshop",
+    "version": "1.2.23",
+    "orientation": "portrait",
+    "icon": "./assets/images/cubis-shop-icon.png",
+    "scheme": "cubisshop",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FFFFFF",
+    "ios": {
+      "supportsTablet": true,
+      "icon": "./assets/images/cubis-shop-icon.png",
+      "bundleIdentifier": "ro.cabit.cubisshop"
+    },
+    "android": {
+      "package": "ro.cabit.cubisshop",
+      "versionCode": 23,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/cubis-shop-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#FFFFFF",
+      "barStyle": "dark-content"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/cubis-shop-icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-updates",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enablePngCrunchInReleaseBuilds": true
+          }
+        }
+      ],
+      "expo-secure-store",
+      "@react-native-community/datetimepicker",
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/cubis-shop-logo.png",
+          "imageWidth": 280,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
+    },
+    "extra": {
+      "router": {}
+    }
+  }
+}

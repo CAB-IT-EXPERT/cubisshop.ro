@@ -1,0 +1,345 @@
+(() => {
+  const API_URL = "https://cubisshop.ro/shop-api/api-v2.php";
+  const icons = {
+    new: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    confirmed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12.5 10.2 16 17.5 8"/><circle cx="12" cy="12" r="9"/></svg>',
+    processing: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4Z"/><path d="M4 8v8l8 4 8-4V8M12 12v8"/></svg>',
+    shipped: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+    completed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="10"/></svg>',
+    return_requested: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5"/><path d="M5.6 16a8 8 0 1 0 .2-8.2L4 12"/></svg>',
+    return_refused: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></svg>',
+    return_confirmed: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5"/><path d="M5.6 16a8 8 0 1 0 .2-8.2L4 12"/><path d="m9 12 2 2 4-4"/></svg>',
+    refunded: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5"/><path d="M5.6 16a8 8 0 1 0 .2-8.2L4 12"/></svg>',
+    cancelled: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></svg>'
+  };
+  const statuses = [
+    { value: "new", label: "În procesare", description: "Am primit comanda și verificăm toate detaliile.", color: "#38bdf8", icon: icons.new },
+    { value: "confirmed", label: "Confirmată", description: "Comanda și plata au fost confirmate.", color: "#34d399", icon: icons.confirmed },
+    { value: "processing", label: "În pregătire", description: "Produsele sunt pregătite pentru expediere.", color: "#fb923c", icon: icons.processing },
+    { value: "shipped", label: "Predată curierului", description: "Pachetul a plecat către adresa de livrare.", color: "#a78bfa", icon: icons.shipped },
+    { value: "completed", label: "Livrată", description: "Comanda a ajuns la destinație.", color: "#22c55e", icon: icons.completed },
+    { value: "return_requested", label: "Retur solicitat", description: "Solicitarea de retur este în curs de verificare.", color: "#f472b6", icon: icons.return_requested },
+    { value: "return_refused", label: "Retur refuzat", description: "Solicitarea de retur a fost verificată și refuzată.", color: "#fb7185", icon: icons.return_refused },
+    { value: "return_confirmed", label: "Retur confirmat", description: "Returul a fost confirmat și urmează rambursarea.", color: "#2dd4bf", icon: icons.return_confirmed },
+    { value: "refunded", label: "Rambursată", description: "Comanda a fost returnată și rambursată.", color: "#f59e0b", icon: icons.refunded },
+    { value: "cancelled", label: "Comandă anulată", description: "Comanda nu mai este procesată.", color: "#fb7185", icon: icons.cancelled },
+  ];
+  const resultHost = document.getElementById("tracking-result");
+  const stateHost = document.getElementById("tracking-state");
+  const form = document.getElementById("tracking-form");
+  const submit = document.getElementById("tracking-submit");
+  const orderInput = document.getElementById("tracking-order-number");
+  const emailInput = document.getElementById("tracking-email");
+  const cancelModal = document.getElementById("cancellation-modal");
+  const cancelReason = document.getElementById("cancellation-reason");
+  const cancelError = document.getElementById("cancellation-error");
+  const cancelConfirm = document.getElementById("cancellation-confirm");
+  const footerCancel = document.getElementById("tracking-footer-cancel");
+  const returnModal = document.getElementById("return-modal");
+  const returnReason = document.getElementById("return-reason");
+  const returnHolder = document.getElementById("return-holder");
+  const returnIban = document.getElementById("return-iban");
+  const returnIbanFeedback = document.getElementById("return-iban-feedback");
+  const returnError = document.getElementById("return-error");
+  const returnConfirm = document.getElementById("return-confirm");
+  const returnCost = document.getElementById("return-cost");
+  const returnCourierLabel = document.getElementById("return-courier-label");
+  const returnRefund = document.getElementById("return-refund");
+  const returnProductList = document.getElementById("return-product-list");
+  const returnRefundConsent = document.getElementById("return-refund-consent");
+  const returnDeadline = document.getElementById("return-deadline");
+  const returnReasonRequired = document.getElementById("return-reason-required");
+  const returnReasonHelp = document.getElementById("return-reason-help");
+  const footerReturn = document.getElementById("tracking-footer-return");
+  const params = new URLSearchParams(window.location.search);
+  const cancellationIntent = params.get("anulare") === "1";
+  const returnIntent = params.get("retur") === "1";
+  let activeAccess = null;
+  let activeOrder = null;
+  const esc = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+  const money = (value, currency = "RON") => `${new Intl.NumberFormat("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0))} ${currency}`;
+  const date = value => { const parsed = new Date(String(value || "").replace(" ", "T")); return Number.isNaN(parsed.getTime()) ? String(value || "") : parsed.toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" }); };
+  const normalizeIban = value => String(value || "").toUpperCase().replace(/\s+/g, "");
+  function isValidIban(value) {
+    const iban = normalizeIban(value);
+    if (iban.length < 15 || iban.length > 34 || !/^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(iban)) return false;
+    if (iban.startsWith("RO") && iban.length !== 24) return false;
+    const rearranged = `${iban.slice(4)}${iban.slice(0, 4)}`;
+    let remainder = 0;
+    for (const character of rearranged) {
+      const digits = /[A-Z]/.test(character) ? String(character.charCodeAt(0) - 55) : character;
+      for (const digit of digits) remainder = (remainder * 10 + Number(digit)) % 97;
+    }
+    return remainder === 1;
+  }
+  function validateReturnIban(showEmptyError = false) {
+    const iban = normalizeIban(returnIban.value);
+    const valid = isValidIban(iban);
+    const message = valid
+      ? "IBAN valid."
+      : iban || showEmptyError
+        ? "Introdu un IBAN valid, cu țara, cifrele de control și checksum corect."
+        : "IBAN-ul este verificat înainte de trimitere.";
+    returnIban.setCustomValidity(valid || (!iban && !showEmptyError) ? "" : message);
+    returnIban.setAttribute("aria-invalid", String(Boolean(iban || showEmptyError) && !valid));
+    returnIban.classList.toggle("is-valid", valid);
+    returnIban.classList.toggle("is-invalid", Boolean(iban || showEmptyError) && !valid);
+    returnIbanFeedback.textContent = message;
+    returnIbanFeedback.classList.toggle("is-valid", valid);
+    returnIbanFeedback.classList.toggle("is-invalid", Boolean(iban || showEmptyError) && !valid);
+    return valid;
+  }
+
+  function showState(kind, title, message) {
+    resultHost.hidden = true;
+    footerCancel.hidden = true;
+    footerReturn.hidden = true;
+    stateHost.hidden = false;
+    stateHost.className = `tracking-state ${kind}`;
+    stateHost.innerHTML = `<div><span class="tracking-state-icon">${kind === "error" ? "!" : "↻"}</span><h2>${esc(title)}</h2><p>${esc(message)}</p></div>`;
+  }
+  function visibleStatuses(order) {
+    return statuses.filter(item => !["return_requested", "return_refused", "return_confirmed"].includes(item.value));
+  }
+  function render(order) {
+    activeOrder = order;
+    const current = statuses.find(item => item.value === order.status) || statuses[0];
+    const history = Array.isArray(order.status_history) ? order.status_history : [];
+    const terminalValues = ["refunded", "cancelled"];
+    const internalReturnActive = ["return_requested", "return_refused", "return_confirmed"].includes(order.status);
+    const terminalCurrent = terminalValues.includes(order.status);
+    const deliveryWasCompleted = internalReturnActive || order.status === "refunded";
+    const flowStatuses = visibleStatuses(order).filter(item => !terminalValues.includes(item.value));
+    const currentFlowIndex = flowStatuses.findIndex(item => item.value === order.status);
+    const timeline = flowStatuses.map((item, index) => {
+      const entry = [...history].reverse().find(historyItem => historyItem.to_status === item.value);
+      const reached = deliveryWasCompleted || Boolean(entry) || (!terminalCurrent && currentFlowIndex >= 0 && index <= currentFlowIndex);
+      const isCurrent = item.value === order.status;
+      return `<article class="tracking-step ${reached ? "reached" : ""} ${isCurrent ? "current" : ""}" style="--status-color:${item.color}"><div class="tracking-step-rail"><span>${item.icon}</span></div><div class="tracking-step-copy"><small>${isCurrent ? "STATUS ACTUAL" : reached ? "FINALIZAT" : "URMEAZĂ"}</small><strong>${esc(item.label)}</strong><p>${esc(item.description)}</p>${entry ? `<time>${esc(date(entry.created_at))}</time>` : ""}</div></article>`;
+    }).join("");
+    const terminalMeta = terminalCurrent || internalReturnActive ? statuses.find(item => item.value === order.status) : null;
+    const terminalEntry = terminalMeta ? [...history].reverse().find(historyItem => historyItem.to_status === terminalMeta.value) : null;
+    const cancellationDetails = order.status === "cancelled" && order.cancellation_reason
+      ? `<div class="tracking-cancellation-result"><small>MOTIVUL ANULĂRII</small><strong>${esc(order.cancellation_reason)}</strong>${order.refund_status === "pending" ? `<p>Rambursarea pe card este în curs și va fi efectuată în cel mult 15 zile calendaristice${order.refund_due_at ? `, până la ${esc(new Date(`${order.refund_due_at}T12:00:00`).toLocaleDateString("ro-RO"))}` : ""}.</p>` : ""}</div>`
+      : "";
+    const returnDetails = internalReturnActive && order.return_reason
+      ? `<div class="tracking-return-result"><small>DETALII RETUR</small><strong>${esc(order.return_reason)}</strong><p>Titular: ${esc(order.return_bank_account_holder || "—")} · IBAN: ${esc(order.return_bank_iban_masked || "—")}</p><p>Cost retur ${money(order.return_shipping_cost, order.currency)} · estimare restituire <b>${money(order.return_refund_amount, order.currency)}</b></p></div>`
+      : "";
+    const terminalState = terminalMeta ? `<article class="tracking-cancel-state current" style="--status-color:${terminalMeta.color}"><span>${terminalMeta.icon}</span><div><small>STATUS ACTUAL</small><strong>${esc(terminalMeta.label)}</strong><p>${esc(terminalMeta.description)}</p>${terminalEntry ? `<time>${esc(date(terminalEntry.created_at))}</time>` : ""}</div></article>${cancellationDetails}${returnDetails}` : "";
+    const discount = Math.max(0, Number(order.discount_total || 0));
+    const isProductPromotion = order.promotion_scope === "product";
+    const items = (order.items || []).map(item => {
+      const hasDiscount = isProductPromotion && Number(item.discount_total || 0) > 0;
+      const unitPrice = hasDiscount
+        ? `<del>${money(item.unit_price, order.currency)}</del><em>${money(item.discounted_unit_price, order.currency)}</em>`
+        : money(item.unit_price, order.currency);
+      const lineTotal = hasDiscount
+        ? `<del>${money(item.line_total, order.currency)}</del><em>${money(item.discounted_line_total, order.currency)}</em>`
+        : money(item.line_total, order.currency);
+      return `<article class="tracking-item">${item.image_url ? `<img src="${esc(item.image_url)}" alt="">` : '<span class="tracking-item-placeholder">GT</span>'}<span><strong>${esc(item.product_name)}</strong><small class="${hasDiscount ? "is-discounted" : ""}">${Number(item.quantity)} × ${unitPrice}</small></span><b class="${hasDiscount ? "is-discounted" : ""}">${lineTotal}</b></article>`;
+    }).join("");
+    const displaySubtotal = Number(order.subtotal || 0) - (isProductPromotion ? discount : 0);
+    const hasVat = Boolean(order.vat_payer);
+    const subtotalLabel = `${isProductPromotion && discount > 0 ? "Subtotal după reducerile pe produse" : "Subtotal"}${hasVat ? " (TVA inclus)" : ""}`;
+    const discountRow = discount > 0 && !isProductPromotion
+      ? `<p class="discount"><span>Reducere${order.promotion_code ? ` · ${esc(order.promotion_code)}` : ""}</span><b>−${money(discount, order.currency)}</b></p>`
+      : "";
+    const customerType = order.customer_type === "company" ? "PJ" : "PF";
+    const contactName = order.customer_contact_name || order.customer_name || "";
+    const displayName = order.customer_display_name || (customerType === "PJ" ? order.company_name : contactName) || "";
+    const companyRows = customerType === "PJ" ? `<p><span>Persoană de contact</span><b>${esc(contactName)}</b></p><p><span>CUI / CIF</span><b>${esc(order.company_cui)}</b></p><p><span>Registrul Comerțului</span><b>${esc(order.company_registration_number)}</b></p><p><span>Sediu social</span><b>${esc(order.company_address)}</b></p>` : "";
+    const customerBlock = `<div class="tracking-customer-data"><header><span class="tracking-customer-badge ${customerType === "PJ" ? "is-company" : ""}">${customerType}</span><strong>${customerType === "PJ" ? "Persoană juridică" : "Persoană fizică"}</strong></header><p><span>${customerType === "PJ" ? "Denumire firmă" : "Nume"}</span><b>${esc(displayName)}</b></p>${companyRows}<p><span>Telefon</span><b>${esc(order.customer_phone)}</b></p><p><span>Livrare</span><b>${esc([order.address, order.city, order.county].filter(Boolean).join(", "))}</b></p></div>`;
+    resultHost.innerHTML = `<section class="tracking-progress"><header class="tracking-result-head"><div class="tracking-current-icon" style="--status-color:${current.color}">${current.icon}</div><div><small>COMANDA ${esc(order.order_number)}</small><h2>${esc(current.label)}</h2><p>${esc(current.description)}</p></div><span class="tracking-status-pill" style="--status-color:${current.color}"><i></i>${esc(current.label)}</span></header><div class="tracking-timeline"><div class="tracking-timeline-flow">${timeline}</div>${terminalState}</div></section><aside class="tracking-receipt"><div class="tracking-receipt-brand"><img src="assets/logo.png" alt=""><span><strong>G-Trots România</strong><small>REZUMAT COMANDĂ</small></span><b>Actualizat acum</b></div><div class="tracking-receipt-code"><span><small>COD COMANDĂ</small><strong>${esc(order.order_number)}</strong></span><span><small>DATA</small><strong>${esc(date(order.created_at))}</strong></span></div>${customerBlock}<div class="tracking-items">${items}</div><div class="tracking-totals"><p><span>${subtotalLabel}</span><b>${money(displaySubtotal, order.currency)}</b></p>${discountRow}<p><span>Livrare · ${esc(order.shipping_method_name)}</span><b>${money(order.shipping_cost, order.currency)}</b></p><p><span>Plată</span><b>${order.payment_method === "card" ? "Card online" : "Ramburs la curier"}</b></p><p class="total"><span>Total de plată${hasVat ? " (TVA inclus)" : ""}</span><strong>${money(order.total, order.currency)}</strong></p></div><div class="tracking-help"><span>${icons.new}</span><p><strong>Actualizare automată</strong>Vezi aici ultimul status salvat de echipa G-Trots. Nu este nevoie să reintroduci datele comenzii.</p></div></aside>`;
+    footerCancel.hidden = !order.can_cancel;
+    footerReturn.hidden = !order.can_request_return;
+    resultHost.querySelectorAll(".tracking-item img").forEach(image => image.addEventListener("error", () => {
+      image.replaceWith(Object.assign(document.createElement("span"), { className: "tracking-item-placeholder", textContent: "GT" }));
+    }, { once: true }));
+    stateHost.hidden = true;
+    resultHost.hidden = false;
+    requestAnimationFrame(() => {
+      const headerOffset = Math.max(18, Math.min(112, window.innerHeight * .1));
+      const top = Math.max(0, resultHost.getBoundingClientRect().top + window.scrollY - headerOffset);
+      window.scrollTo({ top, behavior: "smooth" });
+    });
+    if (cancellationIntent && order.can_cancel) window.setTimeout(openCancellation, 180);
+    if (returnIntent && order.can_request_return) window.setTimeout(openReturn, 180);
+  }
+  function openCancellation() {
+    if (!activeOrder?.can_cancel || !activeAccess) return;
+    cancelError.textContent = "";
+    cancelReason.value = "";
+    cancelModal.hidden = false;
+    document.body.classList.add("cancellation-open");
+    window.setTimeout(() => cancelReason.focus(), 80);
+  }
+  function closeCancellation() {
+    if (cancelConfirm.disabled) return;
+    cancelModal.hidden = true;
+    document.body.classList.remove("cancellation-open");
+  }
+  async function submitCancellation() {
+    const reason = cancelReason.value.trim();
+    if (reason.length < 3) { cancelError.textContent = "Scrie un motiv de cel puțin 3 caractere."; cancelReason.focus(); return; }
+    cancelError.textContent = "";
+    cancelConfirm.disabled = true;
+    cancelConfirm.textContent = "Se anulează…";
+    try {
+      const response = await fetch(`${API_URL}?action=customerCancelOrder`, { method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify({ ...activeAccess, reason }) });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || "Comanda nu a putut fi anulată.");
+      cancelModal.hidden = true;
+      document.body.classList.remove("cancellation-open");
+      render(data.order);
+    } catch (error) {
+      cancelError.textContent = error instanceof Error ? error.message : "Comanda nu a putut fi anulată.";
+    } finally {
+      cancelConfirm.disabled = false;
+      cancelConfirm.textContent = "Anulează comanda";
+    }
+  }
+  function openReturn() {
+    if (!activeOrder?.can_request_return || !activeAccess) return;
+    returnError.textContent = "";
+    returnReason.value = "";
+    returnHolder.value = activeOrder.customer_contact_name || activeOrder.customer_name || "";
+    returnIban.value = "";
+    returnRefundConsent.checked = false;
+    const eligibility = activeOrder.return_eligibility || {};
+    const isBusiness = eligibility.policy_type === "b2b_commercial";
+    returnConfirm.textContent = isBusiness ? "Trimite solicitarea de retur" : "Confirmați retragerea";
+    const deadline = eligibility.deadline_at ? new Date(String(eligibility.deadline_at).replace(" ", "T")) : null;
+    returnDeadline.innerHTML = `<strong>${isBusiness ? "Retur comercial PJ" : "Drept de retragere PF"}</strong><span>${deadline && !Number.isNaN(deadline.getTime()) ? `Solicitarea poate fi trimisă până la ${esc(deadline.toLocaleDateString("ro-RO", { dateStyle: "long" }))}, inclusiv` : "Termenul este verificat automat"}${Number.isFinite(Number(eligibility.days_remaining)) ? ` · ${Number(eligibility.days_remaining)} zile rămase` : ""}.</span>`;
+    returnReasonRequired.hidden = !isBusiness;
+    returnReasonHelp.textContent = isBusiness ? "Pentru returul comercial PJ, motivul ne ajută să verificăm condițiile acceptate de G-Trots." : "Pentru retragerea PF nu ești obligat(ă) să justifici decizia. Poți lăsa câmpul gol.";
+    returnProductList.innerHTML = (activeOrder.items || []).map(item => `<label class="return-product-option"><input type="checkbox" data-return-item="${esc(item.order_item_id)}" checked><span><strong>${esc(item.product_name)}</strong><small>${money(item.discounted_unit_price || item.unit_price, activeOrder.currency)} / buc.</small></span><select data-return-quantity>${Array.from({length:Number(item.quantity)},(_,index)=>`<option value="${index+1}">${index+1} din ${Number(item.quantity)}</option>`).join("")}</select></label>`).join("");
+    returnProductList.querySelectorAll('input,select').forEach(control => control.addEventListener('change', updateReturnEstimate));
+    validateReturnIban(false);
+    const cost = Number(activeOrder.configured_return_shipping_cost || 0);
+    if (returnCourierLabel) returnCourierLabel.textContent = activeOrder.shipping_method_name ? `Retur prin ${activeOrder.shipping_method_name}` : "Cost retur curier";
+    returnCost.textContent = money(cost, activeOrder.currency);
+    updateReturnEstimate();
+    returnModal.hidden = false;
+    document.body.classList.add("return-open");
+    window.setTimeout(() => (isBusiness ? returnReason : returnProductList.querySelector('input'))?.focus(), 80);
+  }
+  function closeReturn() {
+    if (returnConfirm.disabled) return;
+    returnModal.hidden = true;
+    document.body.classList.remove("return-open");
+  }
+  async function submitReturn() {
+    const isBusiness = activeOrder?.return_eligibility?.policy_type === "b2b_commercial";
+    const reason = returnReason.value.trim() || (!isBusiness ? "Retragere fără motiv declarat" : "");
+    const holder = returnHolder.value.trim();
+    const iban = normalizeIban(returnIban.value);
+    if ((isBusiness && reason.length < 3) || holder.length < 3) { returnError.textContent = isBusiness ? "Completează motivul returului și titularul contului." : "Completează titularul contului."; return; }
+    if (!validateReturnIban(true)) { returnError.textContent = "IBAN-ul introdus nu este valid."; returnIban.focus(); return; }
+    const items = Array.from(returnProductList.querySelectorAll('.return-product-option')).filter(row => row.querySelector('[data-return-item]').checked).map(row => ({ order_item_id: row.querySelector('[data-return-item]').dataset.returnItem, quantity: Number(row.querySelector('[data-return-quantity]').value) }));
+    if (!items.length) { returnError.textContent = "Selectează cel puțin un produs pentru retur."; return; }
+    if (!returnRefundConsent.checked) { returnError.textContent = "Confirmă acordul pentru rambursarea în IBAN-ul indicat."; return; }
+    returnError.textContent = "";
+    returnConfirm.disabled = true;
+    returnConfirm.textContent = "Se trimite…";
+    try {
+      const response = await fetch(`${API_URL}?action=customerRequestReturn`, { method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify({ ...activeAccess, reason, bank_account_holder: holder, bank_iban: iban, items, refund_consent: true, withdrawal_statement: isBusiness ? "" : `Mă retrag din contractul aferent comenzii ${activeOrder.order_number}.` }) });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || "Solicitarea de retur nu a putut fi trimisă.");
+      returnModal.hidden = true;
+      document.body.classList.remove("return-open");
+      render(data.order);
+    } catch (error) {
+      returnError.textContent = error instanceof Error ? error.message : "Solicitarea de retur nu a putut fi trimisă.";
+    } finally {
+      returnConfirm.disabled = false;
+      returnConfirm.textContent = isBusiness ? "Trimite solicitarea de retur" : "Confirmați retragerea";
+    }
+  }
+  function updateReturnEstimate() {
+    let selected = 0;
+    let fullReturn = true;
+    Array.from(returnProductList.querySelectorAll('.return-product-option')).forEach((row, index) => {
+      const checked = row.querySelector('[data-return-item]').checked;
+      const quantity = Number(row.querySelector('[data-return-quantity]').value || 0);
+      if (!checked || quantity !== Number(activeOrder.items[index].quantity || 0)) fullReturn = false;
+      if (!checked) return;
+      const item = activeOrder.items[index];
+      selected += Number(item.discounted_unit_price || item.unit_price || 0) * quantity;
+    });
+    const initialDelivery = fullReturn && activeOrder.return_eligibility?.initial_shipping_refundable ? Number(activeOrder.shipping_cost || 0) : 0;
+    returnRefund.textContent = money(Math.max(0, selected + initialDelivery - Number(activeOrder.configured_return_shipping_cost || 0)), activeOrder.currency);
+  }
+  async function load(query, access) {
+    activeAccess = access;
+    submit.disabled = true;
+    showState("loading", "Verificăm comanda…", "Conectăm în siguranță codul cu informațiile din magazin.");
+    try {
+      const response = await fetch(`${API_URL}?action=publicTrackOrder&${query}&_=${Date.now()}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || "Comanda nu a putut fi verificată.");
+      render(data);
+    } catch (error) {
+      showState("error", "Comanda nu a fost găsită", error instanceof Error ? error.message : "Verifică datele și încearcă din nou.");
+    } finally { submit.disabled = false; }
+  }
+  orderInput.addEventListener("input", () => { const start = orderInput.selectionStart; orderInput.value = orderInput.value.toUpperCase(); orderInput.setSelectionRange(start, start); });
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    const orderNumber = orderInput.value.trim();
+    const email = emailInput.value.trim();
+    if (!orderNumber || !emailInput.checkValidity()) { showState("error", "Completează datele", "Introdu codul comenzii și adresa de e-mail folosită la checkout."); return; }
+    void load(`order_number=${encodeURIComponent(orderNumber)}&email=${encodeURIComponent(email)}`, { order_number: orderNumber, email });
+  });
+  cancelModal.querySelectorAll("[data-cancel-close]").forEach(button => button.addEventListener("click", closeCancellation));
+  footerCancel.addEventListener("click", openCancellation);
+  cancelConfirm.addEventListener("click", () => void submitCancellation());
+  returnModal.querySelectorAll("[data-return-close]").forEach(button => button.addEventListener("click", closeReturn));
+  footerReturn.addEventListener("click", openReturn);
+  returnConfirm.addEventListener("click", () => void submitReturn());
+  returnIban.addEventListener("input", () => { const start = returnIban.selectionStart; returnIban.value = returnIban.value.toUpperCase().replace(/[^A-Z0-9 ]/g, ""); returnIban.setSelectionRange(start, start); validateReturnIban(false); });
+  returnIban.addEventListener("blur", () => validateReturnIban(Boolean(normalizeIban(returnIban.value))));
+  document.addEventListener("keydown", event => { if (event.key !== "Escape") return; if (!returnModal.hidden) closeReturn(); else if (!cancelModal.hidden) closeCancellation(); });
+  const token = params.get("token")?.trim() || "";
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  if (!token && !location.hash) requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "instant" }));
+
+  /* Local-only visual preview for checking the post-search layout without
+     exposing or changing a real order. */
+  const preview = ["127.0.0.1", "localhost"].includes(location.hostname) && params.get("preview") === "1";
+  if (preview) {
+    if (window.GTrotsOrderPreview?.order) document.body.classList.add("tracking-token-mode");
+    render(window.GTrotsOrderPreview?.order || {
+      order_number: "GT-PREVIEW-2026",
+      status: "processing",
+      created_at: "2026-09-20 12:30:00",
+      status_history: [
+        { to_status: "new", created_at: "2026-09-20 12:30:00" },
+        { to_status: "confirmed", created_at: "2026-09-20 12:36:00" },
+        { to_status: "processing", created_at: "2026-09-20 13:05:00" }
+      ],
+      items: [{ order_item_id: "preview-1", product_name: "Controller trotinetă electrică", quantity: 1, unit_price: 449, line_total: 449, image_url: "/assets/magazin-produse-v1.webp" }],
+      subtotal: 449,
+      discount_total: 0,
+      shipping_cost: 25,
+      total: 474,
+      currency: "RON",
+      shipping_method_name: "Curier standard",
+      payment_method: "cash_on_delivery",
+      customer_type: "individual",
+      customer_name: "Client demonstrativ",
+      customer_phone: "07xx xxx xxx",
+      address: "Adresă protejată",
+      city: "București",
+      county: "București",
+      can_cancel: false,
+      can_request_return: false,
+      vat_payer: false
+    });
+  }
+  if (token && !preview) {
+    document.body.classList.add("tracking-token-mode");
+    void load(`token=${encodeURIComponent(token)}`, { token });
+  }
+})();
+if (!window.GTrotsOrderPreview && !document.querySelector('link[href*="promotions.css"]')) { const link = document.createElement("link"); link.rel = "stylesheet"; link.href = "/promotions.css?v=20260828-marquee-v5"; document.head.append(link); }
+if (!window.GTrotsOrderPreview && !document.querySelector('script[src*="promotions.js"]')) { const script = document.createElement("script"); script.src = "/promotions.js?v=20260828-global-v1"; document.head.append(script); }

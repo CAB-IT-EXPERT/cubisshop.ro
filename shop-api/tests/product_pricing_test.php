@@ -1,0 +1,53 @@
+<?php
+declare(strict_types=1);
+
+require_once dirname(__DIR__) . '/product-pricing.php';
+require_once dirname(__DIR__) . '/gomag.php';
+
+function pricingAssert(bool $condition, string $message): void {
+    if (!$condition) throw new RuntimeException($message);
+}
+
+$fallback = boomagResolvePublicPricing(100.0, 0.0, null);
+pricingAssert($fallback['price'] === 0.0 && $fallback['difference'] === null, 'Pretul G-Trots 0 trebuie sa ramana nesetat, fara o marja artificiala.');
+$fallbackWithStaleDifference = boomagResolvePublicPricing(120.0, 0.0, 49.0);
+pricingAssert($fallbackWithStaleDifference['price'] === 0.0 && $fallbackWithStaleDifference['difference'] === null, 'Pretul G-Trots 0 trebuie sa anuleze o diferenta veche si sa foloseasca direct furnizorul.');
+
+$initialMargin = boomagResolvePublicPricing(100.0, 149.0, null);
+pricingAssert($initialMargin['price'] === 149.0 && $initialMargin['difference'] === 49.0, 'Prima sincronizare trebuie sa memoreze marja fixa existenta.');
+
+$stableMargin = boomagResolvePublicPricing(120.0, 149.0, 49.0);
+pricingAssert($stableMargin['price'] === 169.0 && $stableMargin['difference'] === 49.0, 'Schimbarea furnizorului trebuie sa pastreze marja fixa.');
+
+$missingSupplier = boomagResolvePublicPricing(null, 149.0, 49.0);
+pricingAssert($missingSupplier['price'] === 149.0 && $missingSupplier['difference'] === 49.0, 'Un furnizor fara pret valid nu trebuie sa suprascrie pretul G-Trots.');
+$zeroSupplier = boomagResolvePublicPricing(0.0, 149.0, 49.0);
+pricingAssert($zeroSupplier['price'] === 149.0 && $zeroSupplier['difference'] === 49.0, 'Pretul furnizorului 0 trebuie tratat la fel ca un pret nesetat.');
+pricingAssert(productPublicBasePrice(['price' => 0, 'supplier_base_price' => 100]) === 100.0, 'Pretul public trebuie sa cada pe furnizor cand G-Trots este 0.');
+pricingAssert(productPublicBasePrice(['price' => 149, 'supplier_base_price' => 100]) === 149.0, 'Pretul G-Trots valid trebuie sa aiba prioritate.');
+
+require_once dirname(__DIR__) . '/stripe.php';
+pricingAssert(stripeEffectiveProductPrice(['price' => 0, 'supplier_base_price' => 100, 'sale_price' => 0]) === 100.0, 'Stripe trebuie sa foloseasca acelasi fallback public cand preturile G-Trots sunt 0.');
+pricingAssert(stripeEffectiveProductPrice(['price' => 149, 'supplier_base_price' => 100, 'sale_price' => 129]) === 129.0, 'Pretul promotional manual trebuie sa aiba prioritate in Stripe.');
+pricingAssert(stripeEffectiveProductPrice(['price' => 149, 'supplier_base_price' => 100, 'sale_price' => 129, 'promotion_price' => 119]) === 119.0, 'Promotia activa trebuie sa fie pretul efectiv sincronizat.');
+
+pricingAssert(productOrderAcquisitionUnitCost([
+    'is_accounting_stock_tracked' => false,
+    'supplier_base_price' => 100,
+    'cost_price' => 70,
+]) === 100.0, 'Produsul online-only trebuie sa fixeze pretul furnizorului la momentul comenzii.');
+pricingAssert(productOrderAcquisitionUnitCost([
+    'is_accounting_stock_tracked' => false,
+    'supplier_base_price' => 0,
+    'cost_price' => 70,
+]) === 70.0, 'Pretul furnizorului 0 nu trebuie sa stearga un cost manual valid.');
+pricingAssert(productOrderAcquisitionUnitCost([
+    'is_accounting_stock_tracked' => true,
+    'supplier_base_price' => 100,
+    'cost_price' => 70,
+]) === null, 'Produsele contabile trebuie sa ramana exclusiv pe costul documentat NIR/FIFO.');
+
+pricingAssert(boomagResolveAcquisitionPrice(120.0, 80.0, false) === 120.0, 'Costul curent online-only trebuie actualizat din furnizor.');
+pricingAssert(boomagResolveAcquisitionPrice(120.0, 80.0, true) === 80.0, 'Sincronizarea furnizorului nu trebuie sa suprascrie un cost contabil.');
+
+echo "product_pricing_test: OK\n";

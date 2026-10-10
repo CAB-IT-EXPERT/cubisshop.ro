@@ -1,0 +1,507 @@
+:root[data-theme="cubis-light"] :is(.shop-commerce-overlay, .shop-order-product-picker,
+  .shop-order-replacement-dialog, .shop-product-save-overlay, .business-modal-overlay,
+  .app-update-overlay) {
+  background: var(--overlay-scrim);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal,
+  .shop-order-product-picker > section, .shop-order-replacement-dialog > section,
+  .shop-product-save-card, .business-modal, .business-modal-card, .app-update-modal) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  box-shadow: var(--shadow-modal);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal.compact {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-elevated);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal > header,
+:root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal > footer {
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  box-shadow: 0 10px 28px rgba(31, 82, 126, 0.08);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal > header, .shop-commerce-modal > footer,
+  .shop-order-product-picker > section > header, .shop-order-replacement-dialog header,
+  .business-modal-head) {
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal, .shop-order-product-picker,
+  .shop-order-replacement-dialog, .business-modal) :is(h1, h2, h3, h4, strong, b) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal, .shop-order-product-picker,
+  .shop-order-replacement-dialog, .business-modal) :is(p, small, label, em) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal > header button[data-commerce-close],
+  .shop-order-product-picker header button, .shop-order-replacement-dialog header button,
+  .business-close-btn) {
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal > header button[data-commerce-close],
+  .shop-order-product-picker header button, .shop-order-replacement-dialog header button,
+  .business-close-btn):hover {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-modal-scroll {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-commerce-modal :is(
+  [class*="-card"], [class*="-block"], [class*="-panel"], [class*="-section"],
+  [class*="-summary"], [class*="-identity"], [class*="-items"], [class*="-item"],
+  [class*="-field"], [class*="-group"], [class*="-metric"], [class*="-note"]
+),
+:root[data-theme="cubis-light"] .shop-order-product-picker :is(article, [data-picker-product]),
+:root[data-theme="cubis-light"] .shop-order-replacement-dialog :is(article, fieldset, .money) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] :is(
+  .shop-commerce-modal input:not([type="checkbox"]):not([type="radio"]),
+  .shop-commerce-modal textarea, .shop-commerce-modal select,
+  .shop-order-product-picker input, .shop-order-replacement-dialog input,
+  .business-modal .field input, .business-modal .field textarea,
+  .business-modal .field select, .shop-manufacturer-input,
+  .shop-manufacturer-editor .shop-manufacturer-input input
+) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  -webkit-text-fill-color: var(--color-text-primary);
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] :is(
+  .shop-commerce-modal input:focus, .shop-commerce-modal textarea:focus,
+  .shop-commerce-modal select:focus, .shop-order-product-picker input:focus,
+  .shop-order-replacement-dialog input:focus, .business-modal .field input:focus,
+  .business-modal .field textarea:focus, .business-modal .field select:focus,
+  .shop-manufacturer-input:focus-within
+) {
+  border-color: rgba(8, 127, 245, 0.58);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-focus);
+}
+
+:root[data-theme="cubis-light"] :is(.business-modal .field input::placeholder,
+  .business-modal .field textarea::placeholder,
+  .shop-manufacturer-editor .shop-manufacturer-input input::placeholder,
+  .shop-commerce-modal input::placeholder, .shop-commerce-modal textarea::placeholder) {
+  color: var(--color-text-muted);
+  -webkit-text-fill-color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal .btn-ghost,
+  .shop-order-product-picker button:not([data-picker-product]),
+  .shop-order-replacement-dialog footer button:not(.primary),
+  .business-modal-actions .btn-ghost, .shop-image-editor .btn-ghost) {
+  border-color: var(--color-border-strong);
+  color: var(--color-brand-navy-soft);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-commerce-modal .btn-primary,
+  .shop-order-replacement-dialog footer button.primary,
+  .business-modal-actions .btn-primary:not(.danger), .shop-manufacturer-actions .btn-primary) {
+  border-color: transparent;
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+}
+
+:root[data-theme="cubis-light"] :is(.shop-product-detail-header-code,
+  .shop-product-detail-identity) {
+  border-color: var(--color-border-brand);
+  color: var(--color-text-primary);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-product-detail-header-code small,
+  .shop-product-detail-identity small) {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-detail-row > span, .shop-order-delivery-field > input,
+  .shop-order-detail-row > span.strong, .shop-order-delivery-field.strong > input,
+  .shop-order-product-copy > strong, .shop-order-product-meta b,
+  .shop-order-line-total
+) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-order-product-picker [data-picker-product]:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-order-product-picker > section > label {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-order-replacement-dialog .money > span:last-child,
+  .shop-order-return-shipping-choice > div label,
+  .shop-order-return-shipping-choice .shop-order-return-shipping-amount > span:last-child,
+  .shop-order-shipping-editor > label) {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] :is(.business-modal-profile, .shop-category-system-note,
+  .shop-manufacturer-active, .shop-manufacturer-actions) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .business-modal-actions {
+  border-top-color: var(--color-border-subtle);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-image-preview {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-active-toggle {
+  border-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-active-toggle i {
+  background: var(--color-border-strong);
+}
+
+:root[data-theme="cubis-light"] .shop-active-toggle i::after {
+  background: var(--color-surface);
+  box-shadow: 0 2px 7px rgba(23, 43, 64, 0.18);
+}
+
+:root[data-theme="cubis-light"] .shop-active-toggle input:checked + i {
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+}
+
+:root[data-theme="cubis-light"] .shop-manufacturer-editor {
+  border-color: var(--color-border-strong);
+  background:
+    radial-gradient(circle at 4% 0%, rgba(8, 127, 245, 0.08), transparent 30%),
+    linear-gradient(145deg, var(--color-surface), var(--color-canvas));
+  box-shadow: var(--shadow-modal);
+}
+
+:root[data-theme="cubis-light"] .shop-manufacturer-editor::before {
+  background: linear-gradient(90deg, transparent, var(--color-brand-primary),
+    var(--color-brand-secondary), transparent);
+}
+
+:root[data-theme="cubis-light"] .shop-delete-modal {
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .business-toast {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 18px 45px rgba(12, 45, 73, 0.18);
+}
+
+:root[data-theme="cubis-light"] .business-toast :is(strong, b) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .business-toast :is(small, p) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .business-toast.error > span {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-editor-section {
+  border-top-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-editor-section > b {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-editor-section strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-editor-section small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-product-link > header > b.idle {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-product-link > header > b.linked {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-product-link > header > b.unlinked {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-product-link > header > b.missing {
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions > button,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions > button:not(.whatsapp) {
+  border-color: var(--color-border-strong);
+  color: var(--color-brand-navy-soft);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions > button:hover,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions > button.active {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-payment-method.card {
+  border-color: var(--color-payment-card-border);
+  color: var(--color-payment-card-text);
+  background: var(--color-payment-card-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-payment-method.cash {
+  border-color: var(--color-cyan-border);
+  color: var(--color-cyan-deep);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions > button.whatsapp {
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-customer-locked {
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-items {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-items > .shop-order-product-line {
+  border-top-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-placeholder {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-open {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-total {
+  border: 1px solid var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-total :is(span, strong) {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card {
+  border-color: var(--color-warning-border);
+  background: linear-gradient(125deg, var(--color-warning-soft), var(--color-surface) 52%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card.issued {
+  border-color: var(--color-success-border);
+  background: linear-gradient(125deg, var(--color-success-soft), var(--color-surface) 52%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card.shop-order-shipping-note {
+  border-color: var(--color-border-brand);
+  background: linear-gradient(125deg, var(--color-info-soft), var(--color-surface) 52%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card.return {
+  border-color: var(--color-cyan-border);
+  background: linear-gradient(125deg, var(--color-surface-cyan), var(--color-surface) 52%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card > div strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card > div p {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card aside button:not(.primary) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-timeline, .shop-order-status-section) {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-section-title > strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail > span,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-icon {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-timeline-rail > i, .shop-order-status-option::after) {
+  background: var(--color-border-strong);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-card,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option > span:nth-of-type(2) {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.current .shop-order-timeline-card,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option.selected > span:nth-of-type(2) {
+  background: color-mix(in srgb, var(--status-color) 10%, var(--color-surface));
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-timeline-card strong, .shop-order-status-option strong,
+  .shop-order-current-state strong
+) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-timeline-card p, .shop-order-timeline-card time,
+  .shop-order-timeline-card > small, .shop-order-status-option small,
+  .shop-order-current-state p, .shop-order-current-state time
+) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state {
+  border-color: color-mix(in srgb, var(--status-color) 42%, var(--color-border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--status-color) 9%, var(--color-surface)), var(--color-surface));
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option > i {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-return-field, .shop-order-return-summary,
+  .shop-order-return-item, .shop-order-return-item.partial,
+  .shop-order-return-shipping-choice
+) {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-return-field strong, .shop-order-return-summary > strong,
+  .shop-order-return-item strong
+) {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-return-field small, .shop-order-return-summary > p,
+  .shop-order-return-item small, .shop-order-return-shipping-choice > p
+) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-return-shipping-choice > div label {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-meta > span {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-product-meta > button, .shop-order-item-actions > button
+) {
+  border-color: var(--color-border-brand);
+  color: var(--color-info);
+  background: var(--color-info-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(
+  .shop-order-product-meta > button.remove, .shop-order-item-actions > button.remove
+) {
+  border-color: var(--color-error-border);
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-meta > label {
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-deep);
+  background: var(--color-warning-soft);
+}
+
+@media (max-width: 760px) {
+  :root[data-theme="cubis-light"] .shop-commerce-modal {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+}

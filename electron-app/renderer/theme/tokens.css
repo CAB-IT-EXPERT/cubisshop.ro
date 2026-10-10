@@ -1,0 +1,103 @@
+:root[data-theme="cubis-light"] {
+  color-scheme: light;
+
+  --color-brand-primary: #087ff5;
+  --color-brand-text: #0667c8;
+  --color-brand-action: #0667c8;
+  --color-brand-action-secondary: #08799a;
+  --color-brand-secondary: #09c9e5;
+  --color-brand-cyan-strong: #079dbd;
+  --color-brand-navy: #172b40;
+  --color-brand-navy-soft: #31506d;
+  --color-brand-navy-deep: #10273b;
+  --color-brand-cyan-track: #7edfeb;
+
+  --color-nav-text: #f5fbff;
+  --color-nav-muted: #9bb1c4;
+  --color-nav-icon: #4ed8ed;
+
+  --color-canvas: #f5f9fd;
+  --color-canvas-alt: #eef6fb;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-subtle: #f7fafd;
+  --color-surface-muted: #f2f7fb;
+  --color-surface-brand: #eef6ff;
+  --color-surface-cyan: #ecfbfd;
+
+  --color-text-primary: #172b40;
+  --color-text-secondary: #536a80;
+  --color-text-muted: #63778b;
+  --color-text-disabled: #9aaabb;
+  --color-text-on-brand: #ffffff;
+
+  --color-border: #d8e5ef;
+  --color-border-strong: #cbd9e4;
+  --color-border-subtle: #e5edf4;
+  --color-border-brand: #b8d8fa;
+
+  --color-success: #168457;
+  --color-success-bright: #22c55e;
+  --color-success-soft: #effaf5;
+  --color-success-border: #addfc3;
+  --color-warning: #9b6100;
+  --color-warning-bright: #f59e0b;
+  --color-warning-soft: #fff8e8;
+  --color-warning-border: #ead3bc;
+  --color-warning-deep: #80501d;
+  --color-error: #c43650;
+  --color-error-bright: #ef4444;
+  --color-error-soft: #fff1f3;
+  --color-error-border: #efbdc7;
+  --color-info: #2b6faf;
+  --color-info-soft: #eef6ff;
+  --color-cyan-border: #bee7ec;
+  --color-cyan-deep: #08799a;
+
+  --color-payment-card-border: #cdbef1;
+  --color-payment-card-text: #6043b5;
+  --color-payment-card-surface: #f6f2ff;
+
+  --overlay-scrim: rgba(12, 31, 50, 0.56);
+  --overlay-soft: rgba(12, 31, 50, 0.28);
+  --shadow-soft: 0 14px 38px rgba(31, 82, 126, 0.1);
+  --shadow-card: 0 18px 42px rgba(31, 82, 126, 0.11);
+  --shadow-modal: 0 28px 85px rgba(12, 45, 73, 0.24);
+  --shadow-focus: 0 0 0 4px rgba(8, 127, 245, 0.1);
+
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-round: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Compatibility variables consumed by legacy layout rules. */
+  --bg: var(--color-canvas);
+  --surface: var(--color-surface);
+  --surface2: var(--color-surface-muted);
+  --border: var(--color-border);
+  --border2: var(--color-border-strong);
+  --accent: var(--color-brand-primary);
+  --accent2: var(--color-brand-secondary);
+  --accent-dim: rgba(8, 127, 245, 0.1);
+  --accent-hover: rgba(8, 127, 245, 0.16);
+  --text: var(--color-text-primary);
+  --text-muted: var(--color-text-secondary);
+  --text-dim: var(--color-text-muted);
+  --success: var(--color-success-bright);
+  --success-dim: rgba(34, 197, 94, 0.12);
+  --error: var(--color-error-bright);
+  --error-dim: rgba(239, 68, 68, 0.12);
+  --warning: var(--color-warning-bright);
+  --radius: var(--radius-sm);
+}

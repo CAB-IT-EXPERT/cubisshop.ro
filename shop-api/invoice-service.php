@@ -1,0 +1,1867 @@
+<?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/invoice-theme.php';
+
+/**
+ * Invoice issuing domain service.
+ *
+ * The business snapshot and its cached PDF/XLSX representations are persisted,
+ * while the color theme remains pinned for the lifetime of the invoice.
+ */
+final class GtrotsInvoiceService
+{
+    public static function issue(PDO $db, string $orderId, array $actor, array $config): array
+    {
+        $orderId = trim($orderId);
+        if ($orderId === '') throw new InvalidArgumentException('Comanda nu a fost selectată.');
+
+        $db->beginTransaction();
+        try {
+            $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+            $lockSuffix = $driver === 'sqlite' ? '' : ' FOR UPDATE';
+            $orderStmt = $db->prepare('SELECT * FROM shop_orders WHERE id = ?' . $lockSuffix);
+            $orderStmt->execute([$orderId]);
+            $order = $orderStmt->fetch();
+            if (!$order) throw new InvalidArgumentException('Comanda nu există.');
+            if (in_array((string)($order['status'] ?? ''), ['cancelled', 'refunded'], true)) {
+                throw new InvalidArgumentException('Nu poți emite o factură normală pentru o comandă anulată sau rambursată.');
+            }
+
+            $existing = self::findByOrder($db, $orderId, true);
+            if ($existing) {
+                $db->commit();
+                return self::row($existing, true, self::canDelete($db, $existing));
+            }
+
+            $company = $db->query('SELECT * FROM shop_company_settings ORDER BY is_default DESC, id ASC LIMIT 1')->fetch() ?: [];
+            if (trim((string)($company['legal_name'] ?? '')) === '' || trim((string)($company['cui'] ?? '')) === '') {
+                throw new InvalidArgumentException('Completează denumirea juridică și CUI-ul în Datele firmei înainte de emitere.');
+            }
+
+            $invoiceId = self::uuid();
+            $documentSettings = GtrotsInvoiceThemeStore::settings($db);
+            $series = (string)($documentSettings['invoice_series'] ?? 'CS');
+            $number = self::nextNumber($db, $series);
+            $issueDate = date('Y-m-d');
+            $status = self::statusForOrder($order);
+            $dueDays = max(0, min(365, (int)($documentSettings['due_days'] ?? 7)));
+            $dueDate = $status === 'paid' ? $issueDate : date('Y-m-d', strtotime($issueDate . ' +' . $dueDays . ' days'));
+            self::postStock($db, $order, $invoiceId, $series, $number, $actor);
+            $payload = self::payload($db, $order, $company, $invoiceId, $series, $number, $issueDate, $dueDate, $status, (string)($documentSettings['default_notes'] ?? ''));
+            $assignedBy = mb_substr(trim((string)($actor['display_name'] ?? $actor['username'] ?? 'Administrator')), 0, 180);
+            $assignment = GtrotsInvoiceThemeStore::pin($db, $payload, $assignedBy);
+            $payload['theme'] = $assignment['theme'];
+
+            $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+            $insert = $db->prepare(
+                'INSERT INTO shop_invoices
+                 (id, order_id, series, invoice_number, document_status, theme, issue_date, due_date, currency, total, buyer_name, buyer_cui, payload_json, issued_by)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            );
+            $insert->execute([
+                $invoiceId,
+                $orderId,
+                $series,
+                $number,
+                $status,
+                (string)$assignment['theme'],
+                $issueDate,
+                $dueDate,
+                strtoupper(trim((string)($order['currency'] ?? 'RON'))) ?: 'RON',
+                round((float)($order['total'] ?? 0), 2),
+                (string)$payload['buyer']['name'],
+                (string)$payload['buyer']['cui'],
+                $encoded,
+                $assignedBy,
+            ]);
+            if (class_exists('GtrotsSpvService')) GtrotsSpvService::enqueue($db, $invoiceId, 'invoice');
+            $db->commit();
+
+            $saved = self::find($db, $invoiceId);
+            if (!$saved) throw new RuntimeException('Factura a fost emisă, dar nu a putut fi recitită.');
+            $result = self::row($saved, false, self::canDelete($db, $saved));
+            self::warmStoredDocuments($db, $saved, $config);
+            return $result;
+        } catch (Throwable $error) {
+            if ($db->inTransaction()) $db->rollBack();
+            throw $error;
+        }
+    }
+
+    /**
+     * Issues one full return invoice for an order. Return documents share the
+     * active invoice series and consume the next number from the same sequence.
+     */
+    public static function issueReturn(PDO $db, string $orderId, string $reason, array $actor, array $config, bool $manageTransaction = true, ?array $forcedSelection = null, ?float $forcedReturnShippingCost = null): array
+    {
+        if (!empty($config['smartbill_inventory_authority'])) {
+            throw new RuntimeException('Factura de retur locală și reintrarea NIR/FIFO sunt dezactivate. Corecția fiscală și de stoc trebuie efectuate exclusiv în SmartBill.');
+        }
+        $orderId = trim($orderId);
+        $reason = mb_substr(trim($reason), 0, 1000);
+        if ($orderId === '') throw new InvalidArgumentException('Comanda nu a fost selectată.');
+        if ($reason === '') throw new InvalidArgumentException('Motivul anulării este obligatoriu.');
+
+        if ($manageTransaction) $db->beginTransaction();
+        try {
+            $returnInvoiceType = $forcedSelection === null ? 'return' : 'correction_return';
+            if ($forcedSelection === null) {
+                $correctionCheck = $db->prepare('SELECT id FROM shop_invoices WHERE order_id = ? AND invoice_type IN ("correction_return", "corrected_invoice") LIMIT 1');
+                $correctionCheck->execute([$orderId]);
+                if ($correctionCheck->fetchColumn()) {
+                    throw new InvalidArgumentException('Comanda are documente de corecție fiscală. Returul ulterior necesită verificarea manuală a pozițiilor rămase.');
+                }
+            }
+            $existingReturn = self::findByOrderType($db, $orderId, $returnInvoiceType, true);
+            if ($existingReturn) {
+                if ($manageTransaction) $db->commit();
+                return self::row($existingReturn, true, false);
+            }
+            $original = self::findByOrderType($db, $orderId, 'invoice', true);
+            if (!$original) throw new InvalidArgumentException('Comanda nu are o factură care poate fi returnată.');
+
+            $originalPayload = json_decode((string)($original['payload_json'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($originalPayload)) throw new RuntimeException('Datele facturii inițiale nu mai sunt disponibile.');
+            $returnSelection = $forcedSelection === null ? self::returnSelection($db, $orderId) : array_values($forcedSelection);
+            if (!$returnSelection) throw new InvalidArgumentException('Corecția nu conține nicio poziție de produs.');
+            $orderStmt = $db->prepare('SELECT * FROM shop_orders WHERE id = ? LIMIT 1' . (strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME)) === 'sqlite' ? '' : ' FOR UPDATE'));
+            $orderStmt->execute([$orderId]);
+            $returnOrder = $orderStmt->fetch() ?: [];
+            $hasForcedSelection = $forcedSelection !== null;
+            $hasReturnRequest = !$hasForcedSelection && trim((string)($returnOrder['return_requested_at'] ?? '')) !== '';
+            $returnIsFull = $hasForcedSelection ? false : ($hasReturnRequest ? !empty($returnOrder['return_is_full']) : true);
+            $forcedItemsGross = $hasForcedSelection
+                ? round(array_reduce($returnSelection, static fn(float $sum, array $item): float => $sum + max(0.0, (float)($item['line_refund_value'] ?? 0)), 0.0), 2)
+                : 0.0;
+            $forcedReturnCost = $hasForcedSelection ? max(0.0, round((float)($forcedReturnShippingCost ?? 0), 2)) : 0.0;
+            if ($hasForcedSelection && $forcedReturnCost - $forcedItemsGross > 0.005) {
+                throw new InvalidArgumentException('Costul transportului de retur nu poate depăși valoarea produselor corectate.');
+            }
+            $returnRefundTotal = $hasForcedSelection
+                ? max(0.0, round($forcedItemsGross - $forcedReturnCost, 2))
+                : ($hasReturnRequest ? (float)($returnOrder['return_refund_amount'] ?? 0) : abs((float)$original['total']));
+            $documentSettings = GtrotsInvoiceThemeStore::settings($db);
+            $series = (string)($documentSettings['invoice_series'] ?? $original['series'] ?? 'CS');
+            $number = self::nextNumber($db, $series);
+            $invoiceId = self::uuid();
+            $issueDate = date('Y-m-d');
+            $assignedBy = mb_substr(trim((string)($actor['display_name'] ?? $actor['username'] ?? 'Sistem anulări')), 0, 180);
+
+            $payload = $originalPayload;
+            $selectionByOrderItem = [];
+            $selectionByProduct = [];
+            foreach ($returnSelection as $selectionItem) {
+                $selectionByOrderItem[(string)$selectionItem['order_item_id']] = $selectionItem;
+                $productKey = trim((string)($selectionItem['product_id'] ?? ''));
+                if ($productKey !== '') $selectionByProduct[$productKey][] = $selectionItem;
+            }
+            $returnPayloadItems = [];
+            foreach ((array)($originalPayload['items'] ?? []) as $sourceItem) {
+                if ((string)($sourceItem['sku'] ?? '') === 'TRANSPORT') {
+                    if ($returnIsFull) $returnPayloadItems[] = $sourceItem;
+                    continue;
+                }
+                $selectionItem = $selectionByOrderItem[(string)($sourceItem['order_item_id'] ?? '')] ?? null;
+                if (!$selectionItem) {
+                    $productKey = trim((string)($sourceItem['product_id'] ?? ''));
+                    if ($productKey !== '' && !empty($selectionByProduct[$productKey])) $selectionItem = array_shift($selectionByProduct[$productKey]);
+                }
+                if (!$selectionItem) continue;
+                $sourceItem['quantity'] = (float)$selectionItem['accepted_quantity'];
+                $sourceItem['order_item_id'] = (string)$selectionItem['order_item_id'];
+                $returnPayloadItems[] = $sourceItem;
+            }
+            if (!$returnPayloadItems) throw new InvalidArgumentException('Returul nu are niciun produs acceptat care poate fi facturat.');
+            $payload['items'] = $returnPayloadItems;
+            $payload['document_id'] = $invoiceId;
+            $payload['status'] = 'return';
+            $payload['series'] = $series;
+            $payload['number'] = $number;
+            $payload['issue_date'] = $issueDate;
+            $payload['due_date'] = $issueDate;
+            $payload['delivery_date'] = $issueDate;
+            $payload['amount_paid'] = 0;
+            $payload['return_reason'] = $reason;
+            $payload['return_items'] = $returnSelection;
+            $payload['return_scope'] = $returnIsFull ? 'full' : 'partial';
+            $payload['return_shipping_cost'] = $hasForcedSelection
+                ? $forcedReturnCost
+                : ($hasReturnRequest ? max(0.0, round((float)($returnOrder['return_shipping_cost'] ?? 0), 2)) : 0.0);
+            $payload['return_shipping_cost_vat_rate'] = (float)($returnOrder['vat_rate'] ?? 0);
+            $payload['return_items_gross'] = $hasForcedSelection ? $forcedItemsGross : round((float)($returnOrder['return_items_gross'] ?? 0), 2);
+            $payload['return_delivery_refund'] = round((float)($returnOrder['return_delivery_refund'] ?? 0), 2);
+            $payload['total'] = round($returnRefundTotal, 2);
+            $payload['order_reference'] = trim((string)($original['order_number'] ?? $originalPayload['order_reference'] ?? ''));
+            $payload['related_order'] = [
+                'order_number' => $payload['order_reference'],
+            ];
+            $payload['related_invoice'] = [
+                'series' => (string)$original['series'],
+                'number' => (string)$original['invoice_number'],
+                'date' => (string)$original['issue_date'],
+            ];
+            $payload['notes_label'] = 'Motivul returului';
+            $payload['notes'] = $reason;
+            if (!is_array($payload['payment'] ?? null)) $payload['payment'] = [];
+            $payload['payment']['reference'] = $series . ' ' . $number;
+
+            $assignment = GtrotsInvoiceThemeStore::pin($db, $payload, $assignedBy);
+            $payload['theme'] = $assignment['theme'];
+            $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+            $insert = $db->prepare(
+                'INSERT INTO shop_invoices
+                 (id, order_id, series, invoice_number, invoice_type, original_invoice_id, document_status, theme, issue_date, due_date, currency, total, buyer_name, buyer_cui, payload_json, issued_by)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            );
+            $insert->execute([
+                $invoiceId,
+                $orderId,
+                $series,
+                $number,
+                $returnInvoiceType,
+                (string)$original['id'],
+                'return',
+                (string)$assignment['theme'],
+                $issueDate,
+                $issueDate,
+                (string)$original['currency'],
+                -abs($returnRefundTotal),
+                (string)$original['buyer_name'],
+                (string)($original['buyer_cui'] ?? ''),
+                $encoded,
+                $assignedBy,
+            ]);
+            // Emiterea facturii de retur reprezintă și recepția fizică. Stocul
+            // este însă justificat de documentul separat „Retur client”, nu de
+            // factura fiscală în sine. Ambele sunt create în aceeași tranzacție.
+            $stockReturnSelection = array_values(array_filter($returnSelection, static fn(array $item): bool => trim((string)($item['product_id'] ?? '')) !== ''));
+            if ($stockReturnSelection) self::postReturnStock($db, $original, $stockReturnSelection, $invoiceId, $series, $number, $reason, $actor);
+            if (class_exists('GtrotsSpvService')) GtrotsSpvService::enqueue($db, $invoiceId, 'credit_note');
+            if ($manageTransaction) $db->commit();
+
+            $saved = self::find($db, $invoiceId);
+            if (!$saved) throw new RuntimeException('Factura de retur a fost emisă, dar nu a putut fi recitită.');
+            if ($manageTransaction) self::warmStoredDocuments($db, $saved, $config);
+            return self::row($saved, false, false);
+        } catch (Throwable $error) {
+            if ($manageTransaction && $db->inTransaction()) $db->rollBack();
+            throw $error;
+        }
+    }
+
+    public static function canDeleteOrderInvoice(PDO $db, array $invoice, bool $lock = false): bool
+    {
+        return self::canDelete($db, $invoice, $lock);
+    }
+
+    public static function removeStoredDocumentsForInvoice(array $invoice, array $config): void
+    {
+        self::removeStoredDocuments($invoice, $config);
+    }
+
+    public static function list(PDO $db): array
+    {
+        $rows = $db->query(
+            'SELECT i.*, o.order_number, o.payment_status, o.payment_method, o.stripe_paid_at, o.customer_name, o.customer_email, o.customer_phone
+             FROM shop_invoices i
+             INNER JOIN shop_orders o ON o.id = i.order_id
+             ORDER BY i.issued_at DESC, i.series DESC, i.invoice_number DESC
+             LIMIT 1000'
+        )->fetchAll();
+        $deletableId = self::deletableInvoiceId($db);
+        return array_map(static fn(array $row): array => self::row($row, true, (string)$row['id'] === $deletableId), $rows);
+    }
+
+    public static function get(PDO $db, string $id, array $config = []): array
+    {
+        $invoice = self::find($db, trim($id));
+        if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+        $result = self::row($invoice, true, self::canDelete($db, $invoice));
+        $payload = json_decode((string)($invoice['payload_json'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($payload)) throw new RuntimeException('Datele facturii nu mai sunt disponibile.');
+        $result['payload'] = self::detailPayload($db, $invoice, self::refreshPayloadState($invoice, $payload));
+        // Fișa trebuie să fie instantanee. Generarea PDF/XLSX rămâne în
+        // emitere, download și obținerea linkului, nu pe ruta de detaliu.
+        if (trim((string)($invoice['smartbill_document_id'] ?? '')) !== '') {
+            $smartBillPdfUrl = trim((string)($invoice['smartbill_pdf_url'] ?? ''));
+            if ($smartBillPdfUrl !== '') $result['pdf_url'] = $smartBillPdfUrl;
+        } elseif (self::storageEnabled($config)) {
+            $stored = self::storageSettings($invoice, $config, 'pdf');
+            $path = (string)$stored['directory'] . DIRECTORY_SEPARATOR . (string)$stored['stored_name'];
+            if (is_file($path) && (int)@filesize($path) > 0) $result['pdf_url'] = (string)$stored['public_url'];
+        }
+        return $result;
+    }
+
+    /**
+     * Builds the immutable UI/audit snapshot for a document numbered by an
+     * external fiscal provider. It does not allocate a local number, post
+     * inventory, enqueue SPV or write any row.
+     */
+    public static function buildExternalInvoiceSnapshot(
+        PDO $db,
+        array $order,
+        string $invoiceId,
+        string $series,
+        string $number,
+        string $issueDate,
+        string $dueDate,
+        string $status,
+        string $notes = ''
+    ): array {
+        $company = $db->query('SELECT * FROM shop_company_settings ORDER BY is_default DESC, id ASC LIMIT 1')->fetch() ?: [];
+        if (trim((string)($company['legal_name'] ?? '')) === '' || trim((string)($company['cui'] ?? '')) === '') {
+            throw new InvalidArgumentException('Completează denumirea juridică și CUI-ul în Datele firmei înainte de emitere.');
+        }
+        return self::payload($db, $order, $company, $invoiceId, $series, $number, $issueDate, $dueDate, $status, $notes);
+    }
+
+    /** Read-only export: reuse the same fiscal snapshot and payment presentation as individual downloads. */
+    public static function snapshotForExport(PDO $db, array $invoice): array
+    {
+        $payload = json_decode((string)($invoice['payload_json'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($payload)) throw new RuntimeException('Datele facturii nu mai sunt disponibile.');
+        return self::detailPayload($db, $invoice, self::refreshPayloadState($invoice, $payload));
+    }
+
+    public static function download(PDO $db, string $id, string $format = 'pdf', array $config = []): array
+    {
+        $invoice = self::find($db, trim($id));
+        if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+        $format = strtolower(trim($format));
+        if (!in_array($format, ['pdf', 'xlsx', 'xml'], true)) throw new InvalidArgumentException('Formatul facturii nu este acceptat.');
+        if (self::storageEnabled($config)) {
+            $stored = self::storedDocument($db, $invoice, $format, $config);
+            $contents = file_get_contents((string)$stored['path']);
+            if (!is_string($contents)) throw new RuntimeException('Factura stocată nu a putut fi citită.');
+            return [
+                'file_name' => (string)$stored['file_name'],
+                'mime_type' => (string)$stored['mime_type'],
+                'content_base64' => base64_encode($contents),
+                'public_url' => (string)$stored['public_url'],
+                'stored' => true,
+            ];
+        }
+        $payload = json_decode((string)($invoice['payload_json'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($payload)) throw new RuntimeException('Datele facturii nu mai sunt disponibile.');
+
+        $payload = self::detailPayload($db, $invoice, self::refreshPayloadState($invoice, $payload));
+        $fileNumber = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string)$invoice['invoice_number']) ?: 'factura';
+        $isReturn = (string)($invoice['invoice_type'] ?? '') === 'return' || (string)($invoice['document_status'] ?? '') === 'return';
+        if ($format === 'xlsx') {
+            require_once __DIR__ . '/invoice-xlsx.php';
+            $xlsx = GtrotsInvoiceXlsx::render($payload);
+            return [
+                'file_name' => ($isReturn ? 'Factura-retur-' : 'Factura-') . (string)$invoice['series'] . '-' . $fileNumber . '.xlsx',
+                'mime_type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'content_base64' => base64_encode($xlsx),
+            ];
+        }
+        if ($format === 'xml') {
+            require_once __DIR__ . '/invoice-ubl.php';
+            $xml = GtrotsInvoiceUbl::render($payload);
+            $validation = GtrotsInvoiceUbl::validateWithAnaf($xml, $config);
+            return [
+                'file_name' => ($isReturn ? 'e-Factura-retur-' : 'e-Factura-') . (string)$invoice['series'] . '-' . $fileNumber . '.xml',
+                'mime_type' => 'application/xml',
+                'content_base64' => base64_encode($xml),
+                'anaf_validation' => $validation,
+            ];
+        }
+        require_once __DIR__ . '/invoice-pdf.php';
+        $pdf = GtrotsInvoicePdf::renderPinned($db, $payload, (string)($invoice['issued_by'] ?? ''));
+        return [
+            'file_name' => ($isReturn ? 'Factura-retur-' : 'Factura-') . (string)$invoice['series'] . '-' . $fileNumber . '.pdf',
+            'mime_type' => 'application/pdf',
+            'content_base64' => base64_encode($pdf),
+        ];
+    }
+
+    /** Pure email rendering; no database, attachment generation or sending. */
+    public static function buildEmail(array $invoice, array $config): array
+    {
+        $number = trim((string)$invoice['series'] . ' ' . (string)$invoice['invoice_number']);
+        $isReturn = (string)($invoice['invoice_type'] ?? '') === 'return' || (string)($invoice['document_status'] ?? '') === 'return';
+        $buyer = htmlspecialchars((string)($invoice['customer_name'] ?? $invoice['buyer_name'] ?? 'client'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeNumber = htmlspecialchars($number, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeCurrency = htmlspecialchars((string)$invoice['currency'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeOrderNumber = htmlspecialchars((string)($invoice['order_number'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeLogoUrl = htmlspecialchars((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $issueDate = htmlspecialchars(date('d.m.Y', strtotime((string)($invoice['issue_date'] ?? 'now'))), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $total = number_format((float)$invoice['total'], 2, ',', '.') . ' ' . $safeCurrency;
+        $statusText = $isReturn
+            ? 'Factura de retur corectează factura inițială pentru produsele și sumele indicate în documentul PDF.'
+            : (self::effectiveStatus($invoice) === 'paid' ? 'Factura este achitată.' : 'Factura este emisă și este în așteptarea plății.');
+        $heading = $isReturn ? 'FACTURĂ DE RETUR EMISĂ' : 'FACTURĂ EMISĂ';
+        $title = $isReturn ? 'Factura de retur ' . $safeNumber : 'Factura ' . $safeNumber;
+        $accent = $isReturn ? '#fb7185' : '#ff8a00';
+        $accentBackground = $isReturn ? '#301a20' : '#2c2117';
+        $statusLabel = $isReturn ? 'RETUR' : (self::effectiveStatus($invoice) === 'paid' ? 'ACHITATĂ' : 'EMISĂ');
+        $intro = $isReturn
+            ? 'Găsești atașată factura de retur în format PDF.'
+            : 'Găsești factura atașată acestui e-mail în format PDF.';
+        $html = '<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></head>'
+            . '<body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,\'Segoe UI\',Arial,sans-serif;-webkit-font-smoothing:antialiased">'
+            . '<div style="display:none;max-height:0;overflow:hidden;opacity:0">' . $title . ' este atașată în format PDF.</div>'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td align="center" style="padding:30px 14px">'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #3f3a42;border-radius:34px;background:#1d1b20">'
+            . '<tr><td style="height:8px;background:' . $accent . '"></td></tr><tr><td style="padding:28px 30px 32px">'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:62px"><img src="' . $safeLogoUrl . '" width="54" height="54" alt="Cubis Shop" style="display:block;width:54px;height:54px;border-radius:18px"></td>'
+            . '<td><strong style="display:block;color:#fff8f3;font-size:17px;line-height:1.2">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">MAGAZIN ONLINE</span></td>'
+            . '<td align="right"><span style="display:inline-block;padding:9px 12px;border:1px solid ' . $accent . '55;border-radius:999px;background:' . $accentBackground . ';color:' . $accent . ';font-size:9px;font-weight:900;letter-spacing:.08em">●&nbsp; ' . $statusLabel . '</span></td></tr></table>'
+            . '<div style="padding:31px 0 22px"><span style="display:block;color:' . $accent . ';font-size:9px;font-weight:900;letter-spacing:.14em">DOCUMENT FISCAL · ' . $heading . '</span>'
+            . '<h1 style="margin:10px 0 12px;color:#fff8f3;font-size:38px;line-height:1.04;letter-spacing:-.045em">' . $title . '</h1>'
+            . '<p style="margin:0;color:#b1a9b2;font-size:14px;line-height:1.65">Bună, ' . $buyer . '. ' . $intro . '</p></div>'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #454048;border-radius:24px;background:#151318"><tr>'
+            . '<td style="padding:19px 20px"><span style="display:block;color:#8f8790;font-size:8px;font-weight:900;letter-spacing:.11em">TOTAL DOCUMENT</span><strong style="display:block;margin-top:7px;color:' . $accent . ';font-size:25px;line-height:1.1">' . $total . '</strong><span style="display:block;margin-top:7px;color:#aaa2ac;font-size:10px;line-height:1.5">' . $statusText . '</span></td>'
+            . '<td align="right" style="width:155px;padding:19px 20px;border-left:1px solid #37333a"><span style="display:block;color:#8f8790;font-size:8px;font-weight:900;letter-spacing:.1em">DATA EMITERII</span><strong style="display:block;margin-top:7px;color:#eee8ef;font-size:12px">' . $issueDate . '</strong><span style="display:block;margin-top:12px;color:#8f8790;font-size:8px;font-weight:900;letter-spacing:.1em">COMANDA</span><strong style="display:block;margin-top:5px;color:#ffb77a;font-size:10px;overflow-wrap:anywhere">' . $safeOrderNumber . '</strong></td>'
+            . '</tr></table>'
+            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:15px;border:1px solid #4a4035;border-radius:20px;background:#272018"><tr><td style="width:48px;padding:14px 0 14px 15px"><span style="display:block;width:38px;height:38px;line-height:38px;text-align:center;border-radius:13px;background:' . $accent . ';color:#1d1510;font-size:10px;font-weight:1000">PDF</span></td><td style="padding:14px"><strong style="display:block;color:#fff8f3;font-size:12px">Document atașat</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:10px;line-height:1.45">Factura este inclusă în acest e-mail doar în format PDF.</span></td></tr></table>'
+            . '<p style="margin:23px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.65">Document generat automat pentru comanda <strong style="color:#aaa2ac">' . $safeOrderNumber . '</strong>.<br>Ai nevoie de ajutor? Răspunde direct la acest mesaj.</p>'
+            . '</td></tr></table></td></tr></table></body></html>';
+        return ['subject' => ($isReturn ? 'Factura de retur ' : 'Factura ') . $number . ' – Cubis Shop', 'html' => gtEmailLightDocument($html)];
+    }
+
+    public static function sendEmail(PDO $db, string $id, array $config): array
+    {
+        $invoice = self::find($db, trim($id));
+        if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+        $recipient = mb_strtolower(trim((string)($invoice['customer_email'] ?? '')));
+        if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            $result = ['sent' => false, 'recipient' => $recipient, 'error' => 'Comanda nu are o adresă de e-mail validă.'];
+            self::recordEmailResult($db, (string)$invoice['id'], $result);
+            return $result;
+        }
+
+        try {
+            $pdfFile = self::download($db, (string)$invoice['id'], 'pdf', $config);
+            $email = self::buildEmail($invoice, $config);
+            gtSmtpSend($config, $recipient, $email['subject'], $email['html'], array_map(static fn(array $file): array => [
+                'file_name' => (string)$file['file_name'],
+                'mime_type' => (string)$file['mime_type'],
+                'content' => base64_decode((string)$file['content_base64'], true) ?: '',
+            ], [$pdfFile]));
+            $result = ['sent' => true, 'recipient' => $recipient];
+            self::recordEmailResult($db, (string)$invoice['id'], $result);
+            return $result;
+        } catch (Throwable $error) {
+            error_log('[Cubis invoice email] ' . $error->getMessage());
+            $result = ['sent' => false, 'recipient' => $recipient, 'error' => mb_substr($error->getMessage(), 0, 500)];
+            self::recordEmailResult($db, (string)$invoice['id'], $result);
+            return $result;
+        }
+    }
+
+    /**
+     * Automatic flows use this method so two overlapping requests cannot send
+     * the same invoice twice. A deliberate resend from the invoice screen still
+     * calls sendEmail() directly.
+     */
+    public static function sendEmailOnce(PDO $db, string $id, array $config): array
+    {
+        $id = trim($id);
+        if ($id === '') throw new InvalidArgumentException('Factura nu a fost selectată.');
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $lockName = 'cubis-invoice-email-' . preg_replace('/[^a-zA-Z0-9-]/', '', $id);
+        $locked = false;
+
+        if ($driver !== 'sqlite') {
+            $lock = $db->prepare('SELECT GET_LOCK(?, 15)');
+            $lock->execute([$lockName]);
+            $locked = (int)$lock->fetchColumn() === 1;
+            if (!$locked) return ['sent' => false, 'error' => 'Trimiterea facturii este deja în curs.'];
+        }
+
+        try {
+            $invoice = self::find($db, $id);
+            if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+            if (!empty($invoice['email_sent_at'])) {
+                return [
+                    'sent' => true,
+                    'recipient' => mb_strtolower(trim((string)($invoice['customer_email'] ?? ''))),
+                    'skipped' => true,
+                    'already_sent' => true,
+                ];
+            }
+            return self::sendEmail($db, $id, $config);
+        } finally {
+            if ($locked) {
+                try {
+                    $release = $db->prepare('SELECT RELEASE_LOCK(?)');
+                    $release->execute([$lockName]);
+                } catch (Throwable $error) {
+                    error_log('[Cubis invoice email lock] ' . $error->getMessage());
+                }
+            }
+        }
+    }
+
+    public static function publicLink(PDO $db, string $id, array $config, string $format = 'pdf'): array
+    {
+        $invoice = self::find($db, trim($id));
+        if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+        if (!self::storageEnabled($config)) throw new RuntimeException('Stocarea facturilor nu este configurată pe server.');
+        $format = strtolower(trim($format));
+        if (!in_array($format, ['pdf', 'xlsx', 'xml'], true)) throw new InvalidArgumentException('Formatul facturii nu este acceptat.');
+        $stored = self::storedDocument($db, $invoice, $format, $config);
+        return [
+            'url' => (string)$stored['public_url'],
+            'file_name' => (string)$stored['file_name'],
+            'mime_type' => (string)$stored['mime_type'],
+            'format' => $format,
+        ];
+    }
+
+    public static function refreshStoredForOrder(PDO $db, string $orderId, array $config): void
+    {
+        if (!self::storageEnabled($config)) return;
+        $invoice = self::findByOrder($db, trim($orderId), false);
+        if (!$invoice || trim((string)($invoice['smartbill_document_id'] ?? '')) !== '') return;
+        foreach (['pdf', 'xlsx', 'xml'] as $format) {
+            try {
+                self::storedDocument($db, $invoice, $format, $config, true);
+            } catch (Throwable $error) {
+                error_log('[Cubis invoice storage refresh ' . $format . '] ' . $error->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Keeps the fiscal snapshot in sync with the current order while the
+     * invoice is still editable. The conditional UPDATE closes the race with
+     * an SPV upload that may start after the invoice was read.
+     */
+    public static function refreshUnsentPayloadForOrder(PDO $db, string $orderId): bool
+    {
+        $orderId = trim($orderId);
+        if ($orderId === '') return false;
+
+        $invoice = self::findByOrder($db, $orderId, true);
+        $editableSpvStatuses = ['not_sent', 'error', 'rejected'];
+        if (!$invoice
+            || trim((string)($invoice['smartbill_document_id'] ?? '')) !== ''
+            || !in_array((string)($invoice['spv_status'] ?? 'not_sent'), $editableSpvStatuses, true)) return false;
+
+        $orderStmt = $db->prepare('SELECT * FROM shop_orders WHERE id = ? LIMIT 1');
+        $orderStmt->execute([$orderId]);
+        $order = $orderStmt->fetch();
+        if (!$order) throw new InvalidArgumentException('Comanda nu există.');
+
+        $company = $db->query('SELECT * FROM shop_company_settings ORDER BY is_default DESC, id ASC LIMIT 1')->fetch() ?: [];
+        $oldPayload = json_decode((string)($invoice['payload_json'] ?? ''), true);
+        $notes = is_array($oldPayload) ? (string)($oldPayload['notes'] ?? '') : '';
+        $status = self::statusForOrder($order);
+        $payload = self::payload(
+            $db,
+            $order,
+            $company,
+            (string)$invoice['id'],
+            (string)$invoice['series'],
+            (string)$invoice['invoice_number'],
+            (string)$invoice['issue_date'],
+            (string)($invoice['due_date'] ?? $invoice['issue_date']),
+            $status
+        );
+        // Notes may already include the customer's note and promotion text;
+        // preserve the exact issued text instead of appending those fragments
+        // again every time the buyer data is refreshed.
+        if ($notes !== '') $payload['notes'] = $notes;
+        $payload['theme'] = (string)$invoice['theme'];
+        $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $update = $db->prepare(
+            "UPDATE shop_invoices
+             SET document_status = ?, currency = ?, total = ?, buyer_name = ?, buyer_cui = ?, payload_json = ?, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ? AND spv_status IN ('not_sent', 'error', 'rejected')"
+        );
+        $update->execute([
+            $status,
+            strtoupper(trim((string)($order['currency'] ?? 'RON'))) ?: 'RON',
+            round((float)($order['total'] ?? 0), 2),
+            (string)($payload['buyer']['name'] ?? ''),
+            (string)($payload['buyer']['cui'] ?? ''),
+            $encoded,
+            (string)$invoice['id'],
+        ]);
+        return $update->rowCount() === 1;
+    }
+
+    /**
+     * Rebuilds an invoice which has not reached SPV yet, keeping its fiscal
+     * number. The old stock/FIFO posting is reversed before the corrected
+     * order lines are posted again.
+     */
+    public static function reviseUnsentForOrder(PDO $db, string $orderId, array $actor): ?array
+    {
+        $invoice = self::findByOrder($db, trim($orderId), true);
+        if (!$invoice) return null;
+        $spvStatus = (string)($invoice['spv_status'] ?? 'not_sent');
+        if ($spvStatus === 'sent') throw new InvalidArgumentException('Factura a fost trimisă în SPV și nu poate fi rescrisă. Este necesară corecția fiscală.');
+        if ($spvStatus === 'processing') throw new InvalidArgumentException('Factura este în curs de transmitere către SPV. Așteaptă confirmarea înainte de schimbarea produsului.');
+
+        self::rollbackStock($db, $invoice);
+        $orderStmt = $db->prepare('SELECT * FROM shop_orders WHERE id = ? LIMIT 1');
+        $orderStmt->execute([$orderId]);
+        $order = $orderStmt->fetch();
+        if (!$order) throw new InvalidArgumentException('Comanda nu există.');
+        self::postStock($db, $order, (string)$invoice['id'], (string)$invoice['series'], (string)$invoice['invoice_number'], $actor);
+
+        $company = $db->query('SELECT * FROM shop_company_settings ORDER BY is_default DESC, id ASC LIMIT 1')->fetch() ?: [];
+        $oldPayload = json_decode((string)($invoice['payload_json'] ?? ''), true);
+        $notes = is_array($oldPayload) ? (string)($oldPayload['notes'] ?? '') : '';
+        $status = self::statusForOrder($order);
+        $payload = self::payload(
+            $db,
+            $order,
+            $company,
+            (string)$invoice['id'],
+            (string)$invoice['series'],
+            (string)$invoice['invoice_number'],
+            (string)$invoice['issue_date'],
+            (string)($invoice['due_date'] ?? $invoice['issue_date']),
+            $status,
+            $notes
+        );
+        $payload['theme'] = (string)$invoice['theme'];
+        $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $update = $db->prepare(
+            "UPDATE shop_invoices
+             SET document_status = ?, currency = ?, total = ?, buyer_name = ?, buyer_cui = ?, payload_json = ?,
+                 email_sent_at = NULL, email_last_error = NULL, spv_status = 'not_sent', spv_sent_at = NULL, spv_submission_id = NULL
+             WHERE id = ?"
+        );
+        $update->execute([
+            $status,
+            strtoupper(trim((string)($order['currency'] ?? 'RON'))) ?: 'RON',
+            round((float)($order['total'] ?? 0), 2),
+            (string)($payload['buyer']['name'] ?? ''),
+            (string)($payload['buyer']['cui'] ?? ''),
+            $encoded,
+            (string)$invoice['id'],
+        ]);
+        if (class_exists('GtrotsSpvService')) GtrotsSpvService::enqueue($db, (string)$invoice['id'], 'invoice');
+        return self::find($db, (string)$invoice['id']);
+    }
+
+    /**
+     * Issues the replacement positive invoice after the original invoice has
+     * been neutralised by its credit note and customer-return NIR.
+     */
+    public static function issueCorrection(PDO $db, string $orderId, string $originalInvoiceId, array $actor, array $orderItemIds, bool $includeShipping = false): array
+    {
+        $existing = self::findByOrderType($db, $orderId, 'corrected_invoice', true);
+        if ($existing) return self::row($existing, true, false);
+        $original = self::findForUpdate($db, $originalInvoiceId);
+        if (!$original || (string)($original['spv_status'] ?? '') === 'processing') {
+            throw new InvalidArgumentException('Factura inițială nu este disponibilă pentru emiterea facturii produsului înlocuitor.');
+        }
+        $orderStmt = $db->prepare('SELECT * FROM shop_orders WHERE id = ? LIMIT 1');
+        $orderStmt->execute([$orderId]);
+        $order = $orderStmt->fetch();
+        if (!$order) throw new InvalidArgumentException('Comanda nu există.');
+        $orderItemIds = array_values(array_unique(array_filter(array_map('strval', $orderItemIds))));
+        if (!$orderItemIds && !$includeShipping) throw new InvalidArgumentException('Factura corectată nu conține nicio poziție.');
+        $lineStmt = $db->prepare('SELECT id, discounted_line_total, line_total FROM shop_order_items WHERE order_id = ? AND id = ? LIMIT 1');
+        $correctionProductsTotal = 0.0;
+        foreach ($orderItemIds as $orderItemId) {
+            $lineStmt->execute([$orderId, $orderItemId]);
+            $line = $lineStmt->fetch();
+            if (!$line) throw new InvalidArgumentException('O poziție corectată nu mai există în comandă.');
+            $correctionProductsTotal += (float)($line['discounted_line_total'] ?? $line['line_total'] ?? 0);
+        }
+        $correctionProductsTotal = round($correctionProductsTotal, 2);
+        $correctionShipping = $includeShipping ? max(0.0, round((float)($order['shipping_cost'] ?? 0), 2)) : 0.0;
+        $correctionTotal = round($correctionProductsTotal + $correctionShipping, 2);
+        $correctionOrder = $order;
+        $correctionOrder['subtotal'] = $correctionProductsTotal;
+        $correctionOrder['total'] = $correctionTotal;
+        $correctionOrder['shipping_cost'] = $correctionShipping;
+        $correctionOrder['discount_total'] = 0;
+        $correctionOrder['promotion_id'] = null;
+        $correctionOrder['promotion_code'] = null;
+        $correctionOrder['promotion_scope'] = null;
+        $company = $db->query('SELECT * FROM shop_company_settings ORDER BY is_default DESC, id ASC LIMIT 1')->fetch() ?: [];
+        $settings = GtrotsInvoiceThemeStore::settings($db);
+        $series = (string)($settings['invoice_series'] ?? $original['series'] ?? 'CS');
+        $number = self::nextNumber($db, $series);
+        $id = self::uuid();
+        $issueDate = date('Y-m-d');
+        $status = self::statusForOrder($order);
+        $dueDays = max(0, min(365, (int)($settings['due_days'] ?? 7)));
+        $dueDate = $status === 'paid' ? $issueDate : date('Y-m-d', strtotime($issueDate . ' +' . $dueDays . ' days'));
+        self::postStock($db, $correctionOrder, $id, $series, $number, $actor, $orderItemIds);
+        $payload = self::payload($db, $correctionOrder, $company, $id, $series, $number, $issueDate, $dueDate, $status, (string)($settings['default_notes'] ?? ''), $orderItemIds);
+        $payload['related_invoice'] = [
+            'series' => (string)$original['series'],
+            'number' => (string)$original['invoice_number'],
+            'date' => (string)$original['issue_date'],
+        ];
+        $payload['notes'] = trim('Factură corectată pentru ' . (string)$original['series'] . ' ' . (string)$original['invoice_number'] . '. ' . (string)($payload['notes'] ?? ''));
+        $assignedBy = mb_substr(trim((string)($actor['display_name'] ?? $actor['username'] ?? 'Administrator')), 0, 180);
+        $assignment = GtrotsInvoiceThemeStore::pin($db, $payload, $assignedBy);
+        $payload['theme'] = $assignment['theme'];
+        $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $insert = $db->prepare(
+            'INSERT INTO shop_invoices
+             (id, order_id, series, invoice_number, invoice_type, original_invoice_id, document_status, theme, issue_date, due_date, currency, total, buyer_name, buyer_cui, payload_json, issued_by)
+             VALUES (?, ?, ?, ?, "corrected_invoice", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $insert->execute([
+            $id, $orderId, $series, $number, $originalInvoiceId, $status, (string)$assignment['theme'], $issueDate, $dueDate,
+            strtoupper(trim((string)($order['currency'] ?? 'RON'))) ?: 'RON', $correctionTotal,
+            (string)($payload['buyer']['name'] ?? ''), (string)($payload['buyer']['cui'] ?? ''), $encoded, $assignedBy,
+        ]);
+        if (class_exists('GtrotsSpvService')) GtrotsSpvService::enqueue($db, $id, 'invoice');
+        $saved = self::find($db, $id);
+        if (!$saved) throw new RuntimeException('Factura corectată a fost emisă, dar nu a putut fi recitită.');
+        return self::row($saved, false, false);
+    }
+
+    public static function markSpvSent(PDO $db, string $id, string $submissionId = ''): array
+    {
+        $id = trim($id);
+        if ($id === '') throw new InvalidArgumentException('Factura nu a fost selectată.');
+        $invoice = self::find($db, $id);
+        if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+        if ((string)($invoice['spv_status'] ?? 'not_sent') !== 'sent') {
+            $stmt = $db->prepare("UPDATE shop_invoices SET spv_status = 'sent', spv_sent_at = ?, spv_submission_id = ? WHERE id = ?");
+            $stmt->execute([date('Y-m-d H:i:s'), mb_substr(trim($submissionId), 0, 180) ?: null, $id]);
+        }
+        return self::get($db, $id);
+    }
+
+    /**
+     * Deletes only the final, never-submitted invoice and rolls back every
+     * inventory/FIFO effect produced by issuing it. The released sequence is
+     * intentionally reused by the next invoice in the same series.
+     */
+    public static function delete(PDO $db, string $id, array $config, bool $manageTransaction = true): array
+    {
+        $id = trim($id);
+        if ($id === '') throw new InvalidArgumentException('Factura nu a fost selectată.');
+        $deletedInvoice = null;
+        if ($manageTransaction) $db->beginTransaction();
+        try {
+            $invoice = self::findForUpdate($db, $id);
+            if (!$invoice) throw new InvalidArgumentException('Factura nu există.');
+            if (trim((string)($invoice['smartbill_document_id'] ?? '')) !== '') {
+                throw new InvalidArgumentException('Factura este emisă în SmartBill și nu poate fi ștearsă doar din Cubis. Folosește operațiunea fiscală corespunzătoare după aprobarea fluxului de anulare/storno.');
+            }
+            if ((string)($invoice['spv_status'] ?? 'not_sent') === 'sent') {
+                throw new InvalidArgumentException('Factura a fost trimisă în SPV și nu mai poate fi ștearsă.');
+            }
+            if (!self::canDelete($db, $invoice, true)) {
+                throw new InvalidArgumentException('Poți șterge numai ultima factură emisă. Există deja un document emis după aceasta.');
+            }
+
+            self::rollbackStock($db, $invoice);
+            $db->prepare('DELETE FROM shop_invoice_theme_assignments WHERE document_id = ? OR (invoice_series = ? AND invoice_number = ?)')
+                ->execute([(string)$invoice['id'], (string)$invoice['series'], (string)$invoice['invoice_number']]);
+            $db->prepare('DELETE FROM shop_invoices WHERE id = ?')->execute([$id]);
+            self::resetSequence($db, (string)$invoice['series']);
+            if ($manageTransaction) $db->commit();
+            $deletedInvoice = $invoice;
+        } catch (Throwable $error) {
+            if ($manageTransaction && $db->inTransaction()) $db->rollBack();
+            throw $error;
+        }
+
+        // When this method participates in the caller's transaction, the caller
+        // removes files only after its own commit. Otherwise a later rollback
+        // could restore the DB row while its immutable documents were gone.
+        if ($manageTransaction && is_array($deletedInvoice)) self::removeStoredDocuments($deletedInvoice, $config);
+        return [
+            'deleted' => true,
+            'id' => $id,
+            'order_id' => (string)($deletedInvoice['order_id'] ?? ''),
+            'released_number' => trim((string)($deletedInvoice['series'] ?? '') . ' ' . (string)($deletedInvoice['invoice_number'] ?? '')),
+        ];
+    }
+
+    public static function orderSummary(array $row): ?array
+    {
+        $id = trim((string)($row['issued_invoice_id'] ?? ''));
+        if ($id === '') return null;
+        return [
+            'id' => $id,
+            'order_id' => (string)($row['id'] ?? $row['order_id'] ?? ''),
+            'series' => (string)($row['issued_invoice_series'] ?? ''),
+            'number' => (string)($row['issued_invoice_number'] ?? ''),
+            'display_number' => trim((string)($row['issued_invoice_series'] ?? '') . ' ' . (string)($row['issued_invoice_number'] ?? '')),
+            'status' => self::statusForOrder($row),
+            'theme' => (string)($row['issued_invoice_theme'] ?? 'orange'),
+            'provider' => trim((string)($row['issued_invoice_smartbill_document_id'] ?? '')) !== '' ? 'smartbill' : 'legacy',
+            'smartbill_document_id' => ($row['issued_invoice_smartbill_document_id'] ?? null) !== null ? (string)$row['issued_invoice_smartbill_document_id'] : null,
+            'spv_status' => (string)($row['issued_invoice_spv_status'] ?? 'not_sent'),
+            'spv_sent_at' => ($row['issued_invoice_spv_sent_at'] ?? null) !== null ? (string)$row['issued_invoice_spv_sent_at'] : null,
+            'customer_email' => (string)($row['customer_email'] ?? ''),
+            'issue_date' => (string)($row['issued_invoice_date'] ?? ''),
+            'total' => round((float)($row['issued_invoice_total'] ?? $row['total'] ?? 0), 2),
+            'currency' => strtoupper(trim((string)($row['issued_invoice_currency'] ?? $row['currency'] ?? 'RON'))) ?: 'RON',
+            'issued_at' => (string)($row['issued_invoice_at'] ?? ''),
+        ];
+    }
+
+    public static function orderReturnSummary(array $row): ?array
+    {
+        $id = trim((string)($row['return_invoice_join_id'] ?? ''));
+        if ($id === '') return null;
+        return [
+            'id' => $id,
+            'order_id' => (string)($row['id'] ?? $row['order_id'] ?? ''),
+            'series' => (string)($row['return_invoice_join_series'] ?? ''),
+            'number' => (string)($row['return_invoice_join_number'] ?? ''),
+            'display_number' => trim((string)($row['return_invoice_join_series'] ?? '') . ' ' . (string)($row['return_invoice_join_number'] ?? '')),
+            'invoice_type' => (string)($row['return_invoice_join_type'] ?? 'return'),
+            'original_invoice_id' => ($row['return_invoice_join_original_id'] ?? null) !== null ? (string)$row['return_invoice_join_original_id'] : null,
+            'status' => 'return',
+            'theme' => (string)($row['return_invoice_join_theme'] ?? 'orange'),
+            'spv_status' => (string)($row['return_invoice_join_spv_status'] ?? 'not_sent'),
+            'spv_sent_at' => ($row['return_invoice_join_spv_sent_at'] ?? null) !== null ? (string)$row['return_invoice_join_spv_sent_at'] : null,
+            'customer_email' => (string)($row['customer_email'] ?? ''),
+            'issue_date' => (string)($row['return_invoice_join_date'] ?? ''),
+            'total' => round((float)($row['return_invoice_join_total'] ?? 0), 2),
+            'currency' => strtoupper(trim((string)($row['return_invoice_join_currency'] ?? $row['currency'] ?? 'RON'))) ?: 'RON',
+            'issued_at' => (string)($row['return_invoice_join_at'] ?? ''),
+            'email_sent_at' => ($row['return_invoice_join_email_sent_at'] ?? null) !== null ? (string)$row['return_invoice_join_email_sent_at'] : null,
+            'can_delete' => false,
+        ];
+    }
+
+    public static function orderJoinSql(string $orderAlias = 'o'): string
+    {
+        return " LEFT JOIN shop_invoices original_invoice_join ON original_invoice_join.order_id = {$orderAlias}.id AND original_invoice_join.invoice_type = 'invoice'"
+            . " LEFT JOIN shop_invoices corrected_invoice_join ON corrected_invoice_join.order_id = {$orderAlias}.id AND corrected_invoice_join.invoice_type = 'corrected_invoice'"
+            . " LEFT JOIN shop_invoices return_invoice_join ON return_invoice_join.order_id = {$orderAlias}.id AND return_invoice_join.invoice_type IN ('return', 'correction_return') ";
+    }
+
+    public static function orderJoinColumns(): string
+    {
+        return ', COALESCE(corrected_invoice_join.id, original_invoice_join.id) AS issued_invoice_id,
+                  COALESCE(corrected_invoice_join.series, original_invoice_join.series) AS issued_invoice_series,
+                  COALESCE(corrected_invoice_join.invoice_number, original_invoice_join.invoice_number) AS issued_invoice_number,
+                  COALESCE(corrected_invoice_join.theme, original_invoice_join.theme) AS issued_invoice_theme,
+                  COALESCE(corrected_invoice_join.smartbill_document_id, original_invoice_join.smartbill_document_id) AS issued_invoice_smartbill_document_id,
+                  COALESCE(corrected_invoice_join.spv_status, original_invoice_join.spv_status) AS issued_invoice_spv_status,
+                  COALESCE(corrected_invoice_join.spv_sent_at, original_invoice_join.spv_sent_at) AS issued_invoice_spv_sent_at,
+                  COALESCE(corrected_invoice_join.issue_date, original_invoice_join.issue_date) AS issued_invoice_date,
+                  COALESCE(corrected_invoice_join.issued_at, original_invoice_join.issued_at) AS issued_invoice_at,
+                  COALESCE(corrected_invoice_join.total, original_invoice_join.total) AS issued_invoice_total,
+                  COALESCE(corrected_invoice_join.currency, original_invoice_join.currency) AS issued_invoice_currency,
+                  return_invoice_join.id AS return_invoice_join_id,
+                  return_invoice_join.series AS return_invoice_join_series,
+                  return_invoice_join.invoice_number AS return_invoice_join_number,
+                  return_invoice_join.invoice_type AS return_invoice_join_type,
+                  return_invoice_join.original_invoice_id AS return_invoice_join_original_id,
+                  return_invoice_join.theme AS return_invoice_join_theme,
+                  return_invoice_join.spv_status AS return_invoice_join_spv_status,
+                  return_invoice_join.spv_sent_at AS return_invoice_join_spv_sent_at,
+                  return_invoice_join.issue_date AS return_invoice_join_date,
+                  return_invoice_join.total AS return_invoice_join_total,
+                  return_invoice_join.currency AS return_invoice_join_currency,
+                  return_invoice_join.email_sent_at AS return_invoice_join_email_sent_at,
+                  return_invoice_join.issued_at AS return_invoice_join_at';
+    }
+
+    private static function find(PDO $db, string $id): ?array
+    {
+        $stmt = $db->prepare(
+            'SELECT i.*, o.order_number, o.payment_status, o.payment_method, o.stripe_paid_at, o.customer_name, o.customer_email, o.customer_phone
+             FROM shop_invoices i
+             INNER JOIN shop_orders o ON o.id = i.order_id
+             WHERE i.id = ?
+             LIMIT 1'
+        );
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    private static function findForUpdate(PDO $db, string $id): ?array
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $stmt = $db->prepare('SELECT * FROM shop_invoices WHERE id = ? LIMIT 1' . ($driver === 'sqlite' ? '' : ' FOR UPDATE'));
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    private static function findByOrder(PDO $db, string $orderId, bool $lock): ?array
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $suffix = $lock && $driver !== 'sqlite' ? ' FOR UPDATE' : '';
+        $stmt = $db->prepare(
+            'SELECT i.*, o.order_number, o.payment_status, o.payment_method, o.stripe_paid_at, o.customer_name, o.customer_email, o.customer_phone
+             FROM shop_invoices i
+             INNER JOIN shop_orders o ON o.id = i.order_id
+             WHERE i.order_id = ? AND i.invoice_type IN ("invoice", "corrected_invoice")
+             ORDER BY CASE WHEN i.invoice_type = "corrected_invoice" THEN 0 ELSE 1 END, i.issued_at DESC
+             LIMIT 1' . $suffix
+        );
+        $stmt->execute([$orderId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    private static function findByOrderType(PDO $db, string $orderId, string $invoiceType, bool $lock): ?array
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $suffix = $lock && $driver !== 'sqlite' ? ' FOR UPDATE' : '';
+        $stmt = $db->prepare(
+            'SELECT i.*, o.order_number, o.payment_status, o.payment_method, o.stripe_paid_at, o.customer_name, o.customer_email, o.customer_phone
+             FROM shop_invoices i
+             INNER JOIN shop_orders o ON o.id = i.order_id
+             WHERE i.order_id = ? AND i.invoice_type = ? LIMIT 1' . $suffix
+        );
+        $stmt->execute([$orderId, $invoiceType]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    private static function row(array $row, bool $existing, bool $canDelete = false): array
+    {
+        $status = self::effectiveStatus($row);
+        return [
+            'id' => (string)$row['id'],
+            'order_id' => (string)$row['order_id'],
+            'order_number' => (string)($row['order_number'] ?? ''),
+            'series' => (string)$row['series'],
+            'number' => (string)$row['invoice_number'],
+            'display_number' => trim((string)$row['series'] . ' ' . (string)$row['invoice_number']),
+            'invoice_type' => (string)($row['invoice_type'] ?? 'invoice'),
+            'original_invoice_id' => ($row['original_invoice_id'] ?? null) !== null ? (string)$row['original_invoice_id'] : null,
+            'status' => $status,
+            'theme' => (string)$row['theme'],
+            'provider' => trim((string)($row['smartbill_document_id'] ?? '')) !== '' ? 'smartbill' : 'legacy',
+            'smartbill_document_id' => ($row['smartbill_document_id'] ?? null) !== null ? (string)$row['smartbill_document_id'] : null,
+            'smartbill_document_url' => ($row['smartbill_document_url'] ?? null) !== null ? (string)$row['smartbill_document_url'] : null,
+            'smartbill_pdf_url' => ($row['smartbill_pdf_url'] ?? null) !== null ? (string)$row['smartbill_pdf_url'] : null,
+            'issue_date' => (string)$row['issue_date'],
+            'due_date' => $row['due_date'] !== null ? (string)$row['due_date'] : null,
+            'currency' => (string)$row['currency'],
+            'total' => round((float)$row['total'], 2),
+            'buyer_name' => (string)$row['buyer_name'],
+            'buyer_cui' => (string)($row['buyer_cui'] ?? ''),
+            'payment_status' => (string)($row['payment_status'] ?? ''),
+            'payment_method' => (string)($row['payment_method'] ?? ''),
+            'issued_by' => (string)($row['issued_by'] ?? ''),
+            'issued_at' => (string)$row['issued_at'],
+            'updated_at' => (string)$row['updated_at'],
+            'customer_email' => (string)($row['customer_email'] ?? ''),
+            'email_sent_at' => ($row['email_sent_at'] ?? null) !== null ? (string)$row['email_sent_at'] : null,
+            'email_last_error' => ($row['email_last_error'] ?? null) !== null ? (string)$row['email_last_error'] : null,
+            'spv_status' => in_array((string)($row['spv_status'] ?? 'not_sent'), ['sent', 'processing', 'error', 'rejected'], true)
+                ? (string)$row['spv_status']
+                : 'not_sent',
+            'spv_sent_at' => ($row['spv_sent_at'] ?? null) !== null ? (string)$row['spv_sent_at'] : null,
+            'spv_submission_id' => ($row['spv_submission_id'] ?? null) !== null ? (string)$row['spv_submission_id'] : null,
+            'can_delete' => $canDelete && trim((string)($row['smartbill_document_id'] ?? '')) === '',
+            'existing' => $existing,
+        ];
+    }
+
+    private static function effectiveStatus(array $row): string
+    {
+        if ((string)($row['invoice_type'] ?? '') === 'return' || (string)($row['document_status'] ?? '') === 'return') return 'return';
+        if (array_key_exists('payment_status', $row)) return self::statusForOrder($row);
+        return in_array((string)($row['document_status'] ?? ''), ['paid', 'unpaid'], true)
+            ? (string)$row['document_status']
+            : 'unpaid';
+    }
+
+    private static function refreshPayloadState(array $invoice, array $payload): array
+    {
+        $status = self::effectiveStatus($invoice);
+        $payload['status'] = $status;
+        $payload['theme'] = (string)$invoice['theme'];
+        $payload['document_id'] = (string)$invoice['id'];
+        $payload['amount_paid'] = $status === 'paid' ? abs((float)($invoice['total'] ?? 0)) : 0.0;
+        if (!is_array($payload['payment'] ?? null)) $payload['payment'] = [];
+        $payload['payment']['paid_at'] = $status === 'paid'
+            ? (trim((string)($invoice['stripe_paid_at'] ?? '')) ?: (string)($invoice['issue_date'] ?? ''))
+            : '';
+        return $payload;
+    }
+
+    /**
+     * Adds navigation metadata without changing the immutable fiscal snapshot.
+     * Older invoices did not persist product_id, so their positions are matched
+     * to the original order in the same stable order used at issue time.
+     */
+    private static function detailPayload(PDO $db, array $invoice, array $payload): array
+    {
+        $stmt = $db->prepare(
+            'SELECT oi.id, oi.product_id, oi.product_name, oi.product_sku, oi.quantity,
+                    oi.unit_price, oi.line_total, oi.discount_total, oi.discounted_unit_price, oi.discounted_line_total,
+                    (SELECT pi.image_path FROM shop_product_images pi WHERE pi.product_id = oi.product_id ORDER BY pi.sort_order ASC, pi.created_at ASC LIMIT 1) AS image_path
+             FROM shop_order_items oi
+             WHERE oi.order_id = ?
+             ORDER BY oi.id ASC'
+        );
+        $stmt->execute([(string)$invoice['order_id']]);
+        $orderItems = $stmt->fetchAll();
+        $orderStmt = $db->prepare('SELECT discount_total, promotion_code, promotion_scope FROM shop_orders WHERE id = ? LIMIT 1');
+        $orderStmt->execute([(string)$invoice['order_id']]);
+        $order = $orderStmt->fetch() ?: [];
+        $orderDiscount = max(0.0, (float)($order['discount_total'] ?? 0));
+        if ($orderDiscount > 0) {
+            $payload['discount_total'] = round($orderDiscount, 2);
+            $payload['discount_code'] = trim((string)($order['promotion_code'] ?? ''));
+            $payload['discount_scope'] = trim((string)($order['promotion_scope'] ?? ''));
+        }
+
+        // Comenzile mai vechi păstrează reducerea globală doar pe antet, nu și
+        // pe fiecare poziție. O distribuim proporțional pentru ca fișa și toate
+        // formatele fiscale regenerate să o declare explicit, fără a schimba totalul.
+        $recordedLineDiscount = array_reduce($orderItems, static fn(float $sum, array $row): float => $sum + max(0.0, (float)($row['discount_total'] ?? 0)), 0.0);
+        $remainingGlobalDiscount = round(max(0.0, $orderDiscount - $recordedLineDiscount), 2);
+        $discountableBase = array_reduce($orderItems, static fn(float $sum, array $row): float => $sum + max(0.0, (float)($row['line_total'] ?? 0) - max(0.0, (float)($row['discount_total'] ?? 0))), 0.0);
+        $legacyDiscountAllocations = [];
+        $allocatedLegacyDiscount = 0.0;
+        foreach ($orderItems as $index => $row) {
+            $base = max(0.0, (float)($row['line_total'] ?? 0) - max(0.0, (float)($row['discount_total'] ?? 0)));
+            $allocation = $index === array_key_last($orderItems)
+                ? round(max(0.0, $remainingGlobalDiscount - $allocatedLegacyDiscount), 2)
+                : round($discountableBase > 0 ? $remainingGlobalDiscount * ($base / $discountableBase) : 0.0, 2);
+            $legacyDiscountAllocations[$index] = min($base, $allocation);
+            $allocatedLegacyDiscount += $legacyDiscountAllocations[$index];
+        }
+
+        $productByImage = $db->prepare('SELECT product_id FROM shop_product_images WHERE image_path = ? LIMIT 1');
+        $productBySku = $db->prepare(
+            'SELECT id FROM shop_products
+             WHERE UPPER(TRIM(sku)) = UPPER(TRIM(?)) OR UPPER(TRIM(supplier_product_code)) = UPPER(TRIM(?))
+             ORDER BY CASE WHEN UPPER(TRIM(sku)) = UPPER(TRIM(?)) THEN 0 ELSE 1 END, created_at DESC
+             LIMIT 1'
+        );
+        if (!is_array($payload['items'] ?? null)) $payload['items'] = [];
+        $position = 0;
+        foreach ($payload['items'] as &$item) {
+            if (!is_array($item) || strtoupper(trim((string)($item['sku'] ?? ''))) === 'TRANSPORT') {
+                if (is_array($item)) $item['product_id'] = null;
+                continue;
+            }
+            $source = $orderItems[$position] ?? [];
+            if (trim((string)($item['image_path'] ?? '')) === '') $item['image_path'] = (string)($source['image_path'] ?? '');
+            $productId = trim((string)($item['product_id'] ?? $source['product_id'] ?? ''));
+            if ($productId === '' && trim((string)($item['image_path'] ?? '')) !== '') {
+                $productByImage->execute([(string)$item['image_path']]);
+                $productId = trim((string)($productByImage->fetchColumn() ?: ''));
+            }
+            $sku = trim((string)($item['sku'] ?? $source['product_sku'] ?? ''));
+            if ($productId === '' && $sku !== '') {
+                $productBySku->execute([$sku, $sku, $sku]);
+                $productId = trim((string)($productBySku->fetchColumn() ?: ''));
+            }
+            $item['product_id'] = $productId !== '' ? $productId : null;
+
+            $sourceDiscount = max(0.0, (float)($source['discount_total'] ?? 0)) + max(0.0, (float)($legacyDiscountAllocations[$position] ?? 0));
+            $sourceOriginalGross = max(0.0, (float)($source['line_total'] ?? 0));
+            $sourceDiscountedGross = $sourceDiscount > 0
+                ? max(0.0, $sourceOriginalGross - $sourceDiscount)
+                : max(0.0, (float)($source['discounted_line_total'] ?? $sourceOriginalGross));
+            if ($sourceDiscount > 0.0 && $sourceOriginalGross > 0.0 && $sourceDiscountedGross < $sourceOriginalGross) {
+                $quantity = max(0.000001, abs((float)($item['quantity'] ?? $source['quantity'] ?? 1)));
+                $vatMultiplier = 1 + max(0.0, (float)($item['vat_rate'] ?? 0)) / 100;
+                $item['unit_price'] = round(($sourceOriginalGross / $quantity) / $vatMultiplier, 8);
+                $item['discount_percent'] = round((1 - $sourceDiscountedGross / $sourceOriginalGross) * 100, 8);
+                $item['discount_amount'] = round(($sourceOriginalGross - $sourceDiscountedGross) / $vatMultiplier, 2);
+                $item['discount_amount_gross'] = round($sourceOriginalGross - $sourceDiscountedGross, 2);
+            }
+            $position++;
+        }
+        unset($item);
+        return $payload;
+    }
+
+    private static function storageEnabled(array $config): bool
+    {
+        return trim((string)($config['invoice_storage_dir'] ?? '')) !== ''
+            || trim((string)($config['website_base_url'] ?? '')) !== '';
+    }
+
+    private static function storageSettings(array $invoice, array $config, string $format): array
+    {
+        $directory = trim((string)($config['invoice_storage_dir'] ?? ''));
+        if ($directory === '') $directory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fact';
+        $publicBase = rtrim(trim((string)($config['invoice_public_base_url'] ?? '')), '/');
+        if ($publicBase === '') $publicBase = rtrim((string)($config['website_base_url'] ?? ''), '/') . '/fact';
+        if ($publicBase === '/fact') throw new RuntimeException('Adresa publică pentru facturi nu este configurată.');
+
+        $safeSeries = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string)$invoice['series']) ?: 'CS';
+        $safeNumber = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string)$invoice['invoice_number']) ?: 'factura';
+        $isReturn = (string)($invoice['invoice_type'] ?? '') === 'return' || (string)($invoice['document_status'] ?? '') === 'return';
+        $secret = (string)($config['api_key'] ?? '');
+        $token = substr(hash('sha256', (string)$invoice['id'] . '|' . $secret . '|cubis-invoice-public-v1'), 0, 32);
+        $storedName = strtolower(($isReturn ? 'factura-retur-' : 'factura-') . $safeSeries . '-' . $safeNumber . '-' . $token . '.' . $format);
+        $friendlyName = ($format === 'xml' ? ($isReturn ? 'e-Factura-retur-' : 'e-Factura-') : ($isReturn ? 'Factura-retur-' : 'Factura-')) . $safeSeries . '-' . $safeNumber . '.' . $format;
+        return [
+            'directory' => $directory,
+            'stored_name' => $storedName,
+            'file_name' => $friendlyName,
+            'public_url' => $publicBase . '/' . rawurlencode($storedName),
+            'mime_type' => $format === 'pdf' ? 'application/pdf' : ($format === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/xml'),
+        ];
+    }
+
+    private static function warmStoredDocuments(PDO $db, array $invoice, array $config): void
+    {
+        if (!self::storageEnabled($config)) return;
+        try {
+            self::storedDocument($db, $invoice, 'pdf', $config);
+            self::storedDocument($db, $invoice, 'xlsx', $config);
+        } catch (Throwable $error) {
+            // Emiterea fiscală rămâne validă chiar dacă hostingul refuză temporar scrierea cache-ului.
+            error_log('[Cubis invoice storage warmup] ' . $error->getMessage());
+        }
+    }
+
+    private static function storedDocument(PDO $db, array $invoice, string $format, array $config, bool $force = false): array
+    {
+        $settings = self::storageSettings($invoice, $config, $format);
+        $directory = (string)$settings['directory'];
+        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
+            throw new RuntimeException('Folderul public pentru facturi nu a putut fi creat.');
+        }
+        $indexPath = $directory . DIRECTORY_SEPARATOR . 'index.html';
+        if (!is_file($indexPath)) @file_put_contents($indexPath, '<!doctype html><title>Facturi Cubis Shop</title>', LOCK_EX);
+        $htaccessPath = $directory . DIRECTORY_SEPARATOR . '.htaccess';
+        if (!is_file($htaccessPath)) @file_put_contents($htaccessPath, "Options -Indexes\n", LOCK_EX);
+
+        $payload = json_decode((string)($invoice['payload_json'] ?? ''), true, 512, JSON_THROW_ON_ERROR);
+        if (!is_array($payload)) throw new RuntimeException('Datele facturii nu mai sunt disponibile.');
+        $payload = self::detailPayload($db, $invoice, self::refreshPayloadState($invoice, $payload));
+        $rendererPath = __DIR__ . ($format === 'pdf' ? '/invoice-pdf.php' : ($format === 'xlsx' ? '/invoice-xlsx.php' : '/invoice-ubl.php'));
+        $validationRevision = $format === 'xml' ? date('Y-m-d') : '';
+        $signature = hash('sha256', $format . '|' . $validationRevision . '|' . (string)@filemtime($rendererPath) . '|' . json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+        $path = $directory . DIRECTORY_SEPARATOR . (string)$settings['stored_name'];
+        $signaturePath = $path . '.sha256';
+        $currentSignature = is_file($signaturePath) ? trim((string)@file_get_contents($signaturePath)) : '';
+
+        if ($force || !is_file($path) || filesize($path) === 0 || !hash_equals($signature, $currentSignature)) {
+            if ($format === 'pdf') {
+                require_once __DIR__ . '/invoice-pdf.php';
+                $bytes = GtrotsInvoicePdf::renderPinned($db, $payload, (string)($invoice['issued_by'] ?? ''));
+            } elseif ($format === 'xlsx') {
+                require_once __DIR__ . '/invoice-xlsx.php';
+                $bytes = GtrotsInvoiceXlsx::render($payload);
+            } else {
+                require_once __DIR__ . '/invoice-ubl.php';
+                $bytes = GtrotsInvoiceUbl::render($payload);
+                GtrotsInvoiceUbl::validateWithAnaf($bytes, $config);
+            }
+            $temporary = $path . '.tmp-' . bin2hex(random_bytes(5));
+            if (file_put_contents($temporary, $bytes, LOCK_EX) === false) throw new RuntimeException('Factura nu a putut fi salvată pe server.');
+            if (!@rename($temporary, $path)) {
+                @unlink($path);
+                if (!@rename($temporary, $path)) {
+                    @unlink($temporary);
+                    throw new RuntimeException('Factura stocată nu a putut fi actualizată.');
+                }
+            }
+            if (file_put_contents($signaturePath, $signature, LOCK_EX) === false) throw new RuntimeException('Versiunea facturii stocate nu a putut fi confirmată.');
+        }
+
+        return array_merge($settings, ['path' => $path]);
+    }
+
+    private static function deletableInvoiceId(PDO $db): string
+    {
+        $cast = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME)) === 'sqlite' ? 'INTEGER' : 'UNSIGNED';
+        $row = $db->query("SELECT * FROM shop_invoices WHERE invoice_type = 'invoice' ORDER BY issued_at DESC, CAST(invoice_number AS {$cast}) DESC, series DESC LIMIT 1")->fetch();
+        return $row && self::canDelete($db, $row) ? (string)$row['id'] : '';
+    }
+
+    private static function canDelete(PDO $db, array $invoice, bool $lock = false): bool
+    {
+        if ((string)($invoice['invoice_type'] ?? 'invoice') !== 'invoice') return false;
+        // Fail closed for return/credit documents, including migrated rows whose
+        // type may be inconsistent but still retain the original invoice link.
+        if ((string)($invoice['document_status'] ?? '') === 'return') return false;
+        if (trim((string)($invoice['original_invoice_id'] ?? '')) !== '') return false;
+        if ((string)($invoice['spv_status'] ?? 'not_sent') === 'sent') return false;
+        $series = (string)($invoice['series'] ?? '');
+        $number = (int)($invoice['invoice_number'] ?? 0);
+        if ($series === '' || $number <= 0) return false;
+
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $cast = $driver === 'sqlite' ? 'INTEGER' : 'UNSIGNED';
+        $suffix = $lock && $driver !== 'sqlite' ? ' FOR UPDATE' : '';
+        // There is exactly one deletable fiscal document: the last document
+        // issued globally. This also handles invoices created in the same second,
+        // where a simple `issued_at > current` comparison is ambiguous.
+        $latest = $db->query("SELECT id FROM shop_invoices ORDER BY issued_at DESC, CAST(invoice_number AS {$cast}) DESC, series DESC, id DESC LIMIT 1{$suffix}");
+        if ((string)$latest->fetchColumn() !== (string)($invoice['id'] ?? '')) return false;
+
+        $invoices = $db->prepare("SELECT invoice_number FROM shop_invoices WHERE series = ? ORDER BY CAST(invoice_number AS {$cast}) DESC LIMIT 1{$suffix}");
+        $invoices->execute([$series]);
+        if ((int)$invoices->fetchColumn() !== $number) return false;
+        $assignments = $db->prepare("SELECT invoice_number FROM shop_invoice_theme_assignments WHERE invoice_series = ? ORDER BY CAST(invoice_number AS {$cast}) DESC LIMIT 1{$suffix}");
+        $assignments->execute([$series]);
+        $assignmentNumber = (int)$assignments->fetchColumn();
+        return $assignmentNumber <= $number;
+    }
+
+    private static function rollbackStock(PDO $db, array $invoice): void
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $lock = $driver === 'sqlite' ? '' : ' FOR UPDATE';
+        $movements = $db->prepare("SELECT * FROM shop_inventory_movements WHERE sales_invoice_id = ? AND movement_type = 'sale'" . $lock);
+        $movements->execute([(string)$invoice['id']]);
+        $product = $db->prepare('SELECT stock_quantity, accounting_stock_quantity FROM shop_products WHERE id = ?' . $lock);
+        $updateProduct = $db->prepare('UPDATE shop_products SET stock_quantity = ?, accounting_stock_quantity = ? WHERE id = ?');
+        foreach ($movements->fetchAll() as $movement) {
+            $productId = trim((string)($movement['product_id'] ?? ''));
+            if ($productId === '') continue;
+            $product->execute([$productId]);
+            $current = $product->fetch();
+            if (!$current) continue;
+            $quantity = abs((float)($movement['quantity_delta'] ?? 0));
+            $accountingQuantity = abs((float)($movement['accounting_quantity_delta'] ?? $quantity));
+            $stockAfter = round((float)($current['stock_quantity'] ?? 0) + $quantity, 4);
+            $accountingAfter = round((float)($current['accounting_stock_quantity'] ?? 0) + $accountingQuantity, 4);
+            $updateProduct->execute([$stockAfter, $accountingAfter, $productId]);
+        }
+
+        $consumptions = $db->prepare(
+            "SELECT c.id, c.inventory_cost_layer_id, c.quantity
+             FROM shop_inventory_layer_consumptions c
+             WHERE c.source_document_type = 'SALES_INVOICE' AND c.source_document_id = ? AND c.reversed_at IS NULL" . $lock
+        );
+        $consumptions->execute([(string)$invoice['id']]);
+        $layer = $db->prepare('SELECT original_quantity, remaining_quantity, is_reversed FROM shop_inventory_cost_layers WHERE id = ?' . $lock);
+        $updateLayer = $db->prepare('UPDATE shop_inventory_cost_layers SET remaining_quantity = ?, status = ?, row_version = row_version + 1 WHERE id = ?');
+        $deleteConsumption = $db->prepare('DELETE FROM shop_inventory_layer_consumptions WHERE id = ?');
+        foreach ($consumptions->fetchAll() as $consumption) {
+            $layer->execute([(string)$consumption['inventory_cost_layer_id']]);
+            $current = $layer->fetch();
+            if (!$current || !empty($current['is_reversed'])) continue;
+            $remaining = min((float)$current['original_quantity'], (float)$current['remaining_quantity'] + (float)$consumption['quantity']);
+            $status = abs($remaining - (float)$current['original_quantity']) <= 0.00005 ? 'open' : 'partially_consumed';
+            $updateLayer->execute([round($remaining, 4), $status, (string)$consumption['inventory_cost_layer_id']]);
+            $deleteConsumption->execute([(string)$consumption['id']]);
+        }
+        $db->prepare("DELETE FROM shop_inventory_movements WHERE sales_invoice_id = ? AND movement_type = 'sale'")->execute([(string)$invoice['id']]);
+    }
+
+    private static function resetSequence(PDO $db, string $series): void
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $cast = $driver === 'sqlite' ? 'INTEGER' : 'UNSIGNED';
+        $invoice = $db->prepare("SELECT MAX(CAST(invoice_number AS {$cast})) FROM shop_invoices WHERE series = ?");
+        $invoice->execute([$series]);
+        $assignment = $db->prepare("SELECT MAX(CAST(invoice_number AS {$cast})) FROM shop_invoice_theme_assignments WHERE invoice_series = ?");
+        $assignment->execute([$series]);
+        $last = max((int)$invoice->fetchColumn(), (int)$assignment->fetchColumn());
+        $insert = $driver === 'sqlite'
+            ? 'INSERT INTO shop_invoice_sequences (series, last_number) VALUES (?, ?) ON CONFLICT(series) DO UPDATE SET last_number = excluded.last_number, updated_at = CURRENT_TIMESTAMP'
+            : 'INSERT INTO shop_invoice_sequences (series, last_number) VALUES (?, ?) ON DUPLICATE KEY UPDATE last_number = VALUES(last_number), updated_at = CURRENT_TIMESTAMP';
+        $db->prepare($insert)->execute([$series, $last]);
+    }
+
+    private static function removeStoredDocuments(array $invoice, array $config): void
+    {
+        if (!self::storageEnabled($config)) return;
+        foreach (['pdf', 'xlsx', 'xml'] as $format) {
+            try {
+                $settings = self::storageSettings($invoice, $config, $format);
+                $path = (string)$settings['directory'] . DIRECTORY_SEPARATOR . (string)$settings['stored_name'];
+                if (is_file($path)) @unlink($path);
+                if (is_file($path . '.sha256')) @unlink($path . '.sha256');
+            } catch (Throwable $error) {
+                error_log('[Cubis invoice storage delete] ' . $error->getMessage());
+            }
+        }
+    }
+
+    private static function statusForOrder(array $order): string
+    {
+        return (string)($order['payment_status'] ?? '') === 'paid' ? 'paid' : 'unpaid';
+    }
+
+    private static function recordEmailResult(PDO $db, string $id, array $result): void
+    {
+        $sent = !empty($result['sent']);
+        $stmt = $db->prepare('UPDATE shop_invoices SET email_sent_at = ?, email_last_error = ? WHERE id = ?');
+        $stmt->execute([$sent ? date('Y-m-d H:i:s') : null, $sent ? null : mb_substr((string)($result['error'] ?? 'Trimiterea a eșuat.'), 0, 500), $id]);
+    }
+
+    private static function nextNumber(PDO $db, string $series): string
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $insert = $driver === 'sqlite'
+            ? 'INSERT OR IGNORE INTO shop_invoice_sequences (series, last_number) VALUES (?, 0)'
+            : 'INSERT IGNORE INTO shop_invoice_sequences (series, last_number) VALUES (?, 0)';
+        $db->prepare($insert)->execute([$series]);
+
+        $lock = $driver === 'sqlite' ? '' : ' FOR UPDATE';
+        $sequence = $db->prepare('SELECT last_number FROM shop_invoice_sequences WHERE series = ?' . $lock);
+        $sequence->execute([$series]);
+        $last = (int)$sequence->fetchColumn();
+
+        $cast = $driver === 'sqlite' ? 'INTEGER' : 'UNSIGNED';
+        $invoiceMax = $db->prepare("SELECT MAX(CAST(invoice_number AS {$cast})) FROM shop_invoices WHERE series = ?");
+        $invoiceMax->execute([$series]);
+        $assignmentMax = $db->prepare("SELECT MAX(CAST(invoice_number AS {$cast})) FROM shop_invoice_theme_assignments WHERE invoice_series = ?");
+        $assignmentMax->execute([$series]);
+        $next = max($last, (int)$invoiceMax->fetchColumn(), (int)$assignmentMax->fetchColumn()) + 1;
+        $db->prepare('UPDATE shop_invoice_sequences SET last_number = ? WHERE series = ?')->execute([$next, $series]);
+        return str_pad((string)$next, 3, '0', STR_PAD_LEFT);
+    }
+
+    private static function postStock(PDO $db, array $order, string $invoiceId, string $series, string $number, array $actor, ?array $onlyItemIds = null): void
+    {
+        $items = $db->prepare('SELECT id, product_id, quantity, unit_price, line_total, discounted_unit_price, discounted_line_total FROM shop_order_items WHERE order_id = ? AND product_id IS NOT NULL');
+        $items->execute([(string)$order['id']]);
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $product = $db->prepare('SELECT id, name, stock_mode, stock_quantity, accounting_stock_quantity, is_accounting_stock_tracked FROM shop_products WHERE id = ?' . ($driver === 'sqlite' ? '' : ' FOR UPDATE'));
+        $existing = $db->prepare("SELECT id FROM shop_inventory_movements WHERE order_id = ? AND product_id = ? AND movement_type = 'sale' AND sales_invoice_id IS NULL LIMIT 1");
+        $updateExisting = $db->prepare("UPDATE shop_inventory_movements SET sales_invoice_id = ?, sales_invoice_line_id = ?, warehouse_id = ?, accounting_quantity_delta = ?, accounting_quantity_after = ?, inventory_unit_cost_ron = ?, inventory_cost_total_ron = ?, sale_unit_price_ron = ?, sale_total_ron = ?, fifo_status = ?, fifo_quantity_allocated = ?, fifo_quantity_pending = ?, note = ? WHERE order_id = ? AND product_id = ? AND movement_type = 'sale' AND sales_invoice_id IS NULL");
+        $updateStock = $db->prepare('UPDATE shop_products SET stock_quantity = ?, accounting_stock_quantity = ? WHERE id = ?');
+        $movement = $db->prepare('INSERT INTO shop_inventory_movements (id, product_id, warehouse_id, order_id, sales_invoice_id, sales_invoice_line_id, movement_type, quantity_delta, quantity_after, accounting_quantity_delta, accounting_quantity_after, inventory_unit_cost_ron, inventory_cost_total_ron, sale_unit_price_ron, sale_total_ron, fifo_status, fifo_quantity_allocated, fifo_quantity_pending, note, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $actorName = mb_substr(trim((string)($actor['display_name'] ?? $actor['username'] ?? 'Administrator')), 0, 180);
+        $invoiceLabel = trim($series . ' ' . $number);
+        $warehouseId = '';
+        if (function_exists('shopNirConsumeFifoAvailable')) {
+            $warehouseId = trim((string)($db->query('SELECT default_warehouse_id FROM shop_nir_settings WHERE id = 1 LIMIT 1')->fetchColumn() ?: ''));
+        }
+
+        $orderItems = $items->fetchAll();
+        if ($onlyItemIds !== null) {
+            $allowedItemIds = array_fill_keys(array_map('strval', $onlyItemIds), true);
+            $orderItems = array_values(array_filter($orderItems, static fn(array $item): bool => isset($allowedItemIds[(string)($item['id'] ?? '')])));
+        }
+        $productGrossTarget = round(max(0.0, (float)($order['total'] ?? 0) - (float)($order['shipping_cost'] ?? 0)), 2);
+        $sourceGrossTotal = array_reduce($orderItems, static fn(float $sum, array $item): float => $sum + (float)($item['discounted_line_total'] ?? $item['line_total'] ?? 0), 0.0);
+        $allocatedGross = 0.0;
+        foreach ($orderItems as $index => $item) {
+            $productId = trim((string)($item['product_id'] ?? ''));
+            $quantity = max(0, (int)($item['quantity'] ?? 0));
+            if ($productId === '' || $quantity === 0) continue;
+            $rawGross = max(0.0, (float)($item['discounted_line_total'] ?? $item['line_total'] ?? 0));
+            $saleTotal = $index === array_key_last($orderItems)
+                ? round(max(0.0, $productGrossTarget - $allocatedGross), 2)
+                : round($sourceGrossTotal > 0 ? $productGrossTarget * ($rawGross / $sourceGrossTotal) : 0, 2);
+            $allocatedGross += $saleTotal;
+            $saleUnitPrice = round($saleTotal / $quantity, 6);
+            $product->execute([$productId]);
+            $row = $product->fetch();
+            if (!$row) continue;
+            $onlineTracked = (string)$row['stock_mode'] === 'tracked';
+            $accountingTracked = !array_key_exists('is_accounting_stock_tracked', $row) || (bool)$row['is_accounting_stock_tracked'];
+            if (!$onlineTracked && !$accountingTracked) continue;
+            $accountingCurrent = (float)($row['accounting_stock_quantity'] ?? $row['stock_quantity'] ?? 0);
+            $fifo = ['consumptions' => [], 'allocated_quantity' => 0, 'shortage_quantity' => $quantity, 'total_cost_ron' => 0];
+            if ($accountingTracked && $warehouseId !== '' && function_exists('shopNirConsumeFifoAvailable')) {
+                $fifo = shopNirConsumeFifoAvailable($db, $productId, $warehouseId, $quantity, 'SALES_INVOICE', $invoiceId, (string)$item['id'], 'invoice:' . $invoiceId . ':' . (string)$item['id'], false);
+            }
+            $fifoConsumptions = (array)($fifo['consumptions'] ?? []);
+            $fifoAllocated = $accountingTracked ? round((float)($fifo['allocated_quantity'] ?? array_reduce($fifoConsumptions, static fn(float $sum, array $allocation): float => $sum + (float)($allocation['quantity'] ?? 0), 0.0)), 4) : 0.0;
+            $fifoPending = $accountingTracked ? round(max(0.0, $quantity - $fifoAllocated), 4) : 0.0;
+            $fifoTotalCost = round((float)($fifo['total_cost_ron'] ?? array_reduce($fifoConsumptions, static fn(float $sum, array $allocation): float => $sum + (float)($allocation['cost_ron'] ?? $allocation['total_cost_ron'] ?? 0), 0.0)), 2);
+            $fifoUnitCost = $fifoAllocated > 0 ? round($fifoTotalCost / $fifoAllocated, 6) : null;
+            $fifoStatus = !$accountingTracked ? 'not_tracked' : ($fifoPending <= 0.00005 ? 'allocated' : ($fifoAllocated > 0 ? 'partial' : 'pending'));
+            $accountingAfter = $accountingTracked ? round($accountingCurrent - $quantity, 4) : $accountingCurrent;
+            $note = 'Ieșire prin factura ' . $invoiceLabel . ' · comanda ' . (string)$order['order_number'];
+            if ($fifoStatus === 'not_tracked') $note .= ' · produs exclus din Stocuri Conta';
+            elseif ($fifoStatus !== 'allocated') $note .= ' · proveniența lotului și costul de achiziție se completează la confirmarea NIR-ului';
+            $existing->execute([(string)$order['id'], $productId]);
+            if ($existing->fetchColumn()) {
+                // Comenzile create înaintea acestei funcționalități au rezervat deja stocul.
+                // Le legăm de factură fără o a doua scădere.
+                $updateStock->execute([(int)$row['stock_quantity'], $accountingAfter, $productId]);
+                $updateExisting->execute([$invoiceId, (string)$item['id'], $accountingTracked ? ($warehouseId ?: null) : null, $accountingTracked ? -$quantity : 0, $accountingAfter, $fifoUnitCost, $fifoAllocated > 0 ? $fifoTotalCost : null, $saleUnitPrice, $saleTotal, $fifoStatus, $fifoAllocated, $fifoPending, $note, (string)$order['id'], $productId]);
+                continue;
+            }
+            $current = (int)$row['stock_quantity'];
+            if ($onlineTracked && $current < $quantity) {
+                throw new InvalidArgumentException('Stoc insuficient pentru emiterea facturii: ' . (string)($row['name'] ?? 'produs') . '. Disponibil ' . $current . ', necesar ' . $quantity . '.');
+            }
+            $after = $onlineTracked ? $current - $quantity : $current;
+            $updateStock->execute([$after, $accountingAfter, $productId]);
+            $movement->execute([self::uuid(), $productId, $accountingTracked ? ($warehouseId ?: null) : null, (string)$order['id'], $invoiceId, (string)$item['id'], 'sale', $onlineTracked ? -$quantity : 0, $after, $accountingTracked ? -$quantity : 0, $accountingAfter, $fifoUnitCost, $fifoAllocated > 0 ? $fifoTotalCost : null, $saleUnitPrice, $saleTotal, $fifoStatus, $fifoAllocated, $fifoPending, $note, $actorName]);
+        }
+    }
+
+    /**
+     * Creates the customer-return receipt and reverses the original FIFO sale.
+     * This method is called only after the return invoice was inserted, so an
+     * order without a return invoice can never add stock accidentally.
+     */
+    private static function postReturnStock(PDO $db, array $original, array $returnSelection, string $returnInvoiceId, string $series, string $number, string $reason, array $actor): void
+    {
+        $driver = strtolower((string)$db->getAttribute(PDO::ATTR_DRIVER_NAME));
+        $lock = $driver === 'sqlite' ? '' : ' FOR UPDATE';
+        $alreadyDocumented = $db->prepare("SELECT id FROM shop_nir_documents WHERE return_invoice_id = ? LIMIT 1" . $lock);
+        $alreadyDocumented->execute([$returnInvoiceId]);
+        if ($alreadyDocumented->fetchColumn()) return;
+
+        $movements = $db->prepare(
+            "SELECT m.*, COALESCE(oi.product_name, p.name, 'Produs') AS product_name,
+                    COALESCE(oi.product_sku, p.sku, '') AS product_sku
+             FROM shop_inventory_movements m
+             LEFT JOIN shop_order_items oi ON oi.id = m.sales_invoice_line_id
+             LEFT JOIN shop_products p ON p.id = m.product_id
+             WHERE m.sales_invoice_id = ? AND m.movement_type = 'sale'" . $lock
+        );
+        $movements->execute([(string)$original['id']]);
+        $saleMovements = $movements->fetchAll();
+        if (!$saleMovements) return;
+
+        $selectionByLine = [];
+        foreach ($returnSelection as $item) $selectionByLine[(string)$item['order_item_id']] = $item;
+        $saleMovements = array_values(array_filter($saleMovements, static fn(array $movement): bool => isset($selectionByLine[(string)($movement['sales_invoice_line_id'] ?? '')])));
+        if (!$saleMovements) throw new RuntimeException('Produsele acceptate nu mai pot fi asociate ieșirilor de stoc ale facturii inițiale.');
+
+        // Produsele excluse din Stocuri Conta revin numai in stocul online.
+        // Pastram o miscare idempotenta pentru trasabilitate, dar nu cream NIR,
+        // linie NIR, strat FIFO sau valoare de stoc contabila.
+        $onlineOnlyMovements = array_values(array_filter($saleMovements, static function (array $movement): bool {
+            $accountingDelta = array_key_exists('accounting_quantity_delta', $movement) && $movement['accounting_quantity_delta'] !== null
+                ? (float)$movement['accounting_quantity_delta']
+                : (float)($movement['quantity_delta'] ?? 0);
+            return abs($accountingDelta) <= 0.00005;
+        }));
+        if ($onlineOnlyMovements) {
+            $onlineProduct = $db->prepare('SELECT stock_quantity, accounting_stock_quantity FROM shop_products WHERE id = ?' . $lock);
+            $updateOnlineProduct = $db->prepare('UPDATE shop_products SET stock_quantity = ? WHERE id = ?');
+            $existingOnlineReturn = $db->prepare("SELECT id FROM shop_inventory_movements WHERE sales_invoice_id = ? AND movement_type IN ('return', 'RETURN_IN') AND reversal_of_movement_id = ? LIMIT 1");
+            $insertOnlineReturn = $db->prepare(
+                'INSERT INTO shop_inventory_movements
+                 (id, product_id, warehouse_id, order_id, nir_document_id, nir_line_id, sales_invoice_id, sales_invoice_line_id, movement_type,
+                  quantity_delta, quantity_after, accounting_quantity_delta, accounting_quantity_after, inventory_unit_cost_ron,
+                  inventory_cost_total_ron, sale_unit_price_ron, sale_total_ron, fifo_status, fifo_quantity_allocated,
+                  fifo_quantity_pending, reversal_of_movement_id, note, created_by)
+                 VALUES (?, ?, NULL, ?, NULL, NULL, ?, ?, "RETURN_IN", ?, ?, 0, ?, NULL, NULL, ?, ?, "not_tracked", 0, 0, ?, ?, ?)'
+            );
+            $actorName = mb_substr(trim((string)($actor['display_name'] ?? $actor['username'] ?? 'Sistem retururi')), 0, 180);
+            $returnLabel = trim($series . ' ' . $number);
+            foreach ($onlineOnlyMovements as $movement) {
+                $movementId = (string)($movement['id'] ?? '');
+                $productId = trim((string)($movement['product_id'] ?? ''));
+                if ($movementId === '' || $productId === '') continue;
+                $existingOnlineReturn->execute([$returnInvoiceId, $movementId]);
+                if ($existingOnlineReturn->fetchColumn()) continue;
+                $onlineProduct->execute([$productId]);
+                $current = $onlineProduct->fetch();
+                if (!$current) continue;
+                $selectionItem = $selectionByLine[(string)($movement['sales_invoice_line_id'] ?? '')];
+                $quantity = (float)$selectionItem['accepted_quantity'];
+                $onlineQuantity = abs((float)($movement['quantity_delta'] ?? 0)) > 0.00005 ? $quantity : 0.0;
+                $stockAfter = round((float)($current['stock_quantity'] ?? 0) + $onlineQuantity, 4);
+                $updateOnlineProduct->execute([$stockAfter, $productId]);
+                $insertOnlineReturn->execute([
+                    self::uuid(), $productId, $original['order_id'] ?? null, $returnInvoiceId,
+                    $movement['sales_invoice_line_id'] ?? null, $onlineQuantity, $stockAfter,
+                    (float)($current['accounting_stock_quantity'] ?? 0), $movement['sale_unit_price_ron'] ?? null,
+                    isset($movement['sale_total_ron']) ? -abs((float)$movement['sale_total_ron']) : null,
+                    $movementId,
+                    'Retur client ' . $returnLabel . ' · produs exclus din Stocuri Conta · refacere exclusivă stoc online',
+                    $actorName,
+                ]);
+            }
+        }
+
+        $saleMovements = array_values(array_filter($saleMovements, static function (array $movement): bool {
+            $accountingDelta = array_key_exists('accounting_quantity_delta', $movement) && $movement['accounting_quantity_delta'] !== null
+                ? (float)$movement['accounting_quantity_delta']
+                : (float)($movement['quantity_delta'] ?? 0);
+            return abs($accountingDelta) > 0.00005;
+        }));
+        if (!$saleMovements) return;
+
+        $settings = $db->query('SELECT * FROM shop_nir_settings WHERE id = 1' . $lock)->fetch() ?: [];
+        $warehouseId = trim((string)($saleMovements[0]['warehouse_id'] ?? $settings['default_warehouse_id'] ?? ''));
+        if ($warehouseId === '') throw new RuntimeException('Gestiunea implicită nu este configurată pentru recepția returului.');
+        $receiptLocation = $db->query('SELECT * FROM shop_company_receipt_locations ORDER BY is_default DESC, sort_order ASC, name ASC, id ASC LIMIT 1')->fetch() ?: [];
+        $receiptLocationId = trim((string)($receiptLocation['id'] ?? '')) ?: null;
+        $receiptLocationAddress = implode(', ', array_values(array_filter([
+            trim((string)($receiptLocation['address'] ?? '')),
+            trim((string)($receiptLocation['city'] ?? '')),
+            trim((string)($receiptLocation['county'] ?? '')),
+            trim((string)($receiptLocation['postal_code'] ?? '')),
+        ])));
+        $receiptLocationName = trim((string)($receiptLocation['name'] ?? '')) ?: 'Gestiune principală';
+        $receiptLocationLabel = mb_substr($receiptLocationName . ($receiptLocationAddress !== '' ? ' — ' . $receiptLocationAddress : ''), 0, 500);
+        $sequence = max(1, (int)($settings['next_sequence'] ?? 1));
+        $prefix = trim((string)($settings['number_prefix'] ?? 'NIR')) ?: 'NIR';
+        $receiptDate = date('Y-m-d');
+        $receiptTime = date('H:i:s');
+        $nirNumber = $prefix . '-' . substr($receiptDate, 0, 4) . '-' . str_pad((string)$sequence, 6, '0', STR_PAD_LEFT);
+        if (array_key_exists('next_sequence', $settings)) {
+            $db->prepare('UPDATE shop_nir_settings SET next_sequence = ? WHERE id = 1')->execute([$sequence + 1]);
+        }
+
+        $receiptId = self::uuid();
+        $actorName = mb_substr(trim((string)($actor['display_name'] ?? $actor['username'] ?? 'Sistem retururi')), 0, 180);
+        $returnLabel = trim($series . ' ' . $number);
+        $originalLabel = trim((string)$original['series'] . ' ' . (string)$original['invoice_number']);
+        $orderNumber = trim((string)($original['order_number'] ?? ''));
+        $inventoryTotal = 0.0;
+        $notes = 'Intrare în stoc – Retur client. Factura de retur ' . $returnLabel . ' corectează factura fiscală ' . $originalLabel . ($orderNumber !== '' ? ' pentru comanda ' . $orderNumber : '') . '.';
+        if (trim($reason) !== '') $notes .= ' Motiv: ' . trim($reason);
+        $returnCost = 0.0;
+        try {
+            $returnCostStmt = $db->prepare('SELECT return_shipping_cost FROM shop_orders WHERE id = ? LIMIT 1');
+            $returnCostStmt->execute([(string)($original['order_id'] ?? '')]);
+            $returnCost = max(0.0, round((float)($returnCostStmt->fetchColumn() ?: 0), 2));
+        } catch (PDOException $error) {
+            $returnCost = 0.0;
+        }
+        if ($returnCost > 0) $notes .= ' Cost direct retur curier reținut din rambursare: ' . number_format($returnCost, 2, ',', '.') . ' RON; acest cost nu intră în valoarea contabilă a stocului recepționat.';
+
+        $insertDocument = $db->prepare(
+            'INSERT INTO shop_nir_documents
+             (id, temporary_number, nir_number, status, supplier_id, warehouse_id, reception_location_id, reception_location, supplier_invoice_series, supplier_invoice_number,
+              supplier_invoice_date, nir_date, nir_time, reception_date, reception_time, currency, exchange_rate, exchange_rate_date,
+              notes, source_type, operation_type, order_id, sales_invoice_id, return_invoice_id, customer_name, customer_email,
+              return_reason, external_identifier, subtotal, vat_total, grand_total, subtotal_ron, vat_total_ron, grand_total_ron,
+              inventory_cost_total_ron, total_difference_ron, row_version, confirmed_at, confirmed_by, created_by, updated_by)
+             VALUES (?, ?, ?, "confirmed", NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "RON", 1, ?, ?, "customer_return", "customer_return", ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, 0, ?, ?, 0, 1, CURRENT_TIMESTAMP, ?, ?, ?)'
+        );
+        $insertDocument->execute([
+            $receiptId, 'SYSTEM-RT-' . substr(str_replace('-', '', $receiptId), 0, 12), $nirNumber, $warehouseId, $receiptLocationId, $receiptLocationLabel,
+            $series, $number, $receiptDate, $receiptDate, $receiptTime, $receiptDate, $receiptTime, $receiptDate,
+            $notes, (string)($original['order_id'] ?? ''), (string)$original['id'], $returnInvoiceId,
+            mb_substr(trim((string)($original['customer_name'] ?? '')), 0, 255) ?: null,
+            mb_substr(trim((string)($original['customer_email'] ?? '')), 0, 255) ?: null,
+            mb_substr(trim($reason), 0, 1000) ?: null, $orderNumber ?: null,
+            $inventoryTotal, $inventoryTotal, $inventoryTotal, $inventoryTotal, $inventoryTotal,
+            $actorName, $actorName, $actorName,
+        ]);
+
+        $insertLine = $db->prepare(
+            'INSERT INTO shop_nir_lines
+             (id, nir_document_id, line_number, product_id, supplier_product_code, supplier_product_name, product_snapshot_name,
+              sku_snapshot, purchase_unit, stock_unit, invoiced_quantity, received_quantity, accepted_quantity, rejected_quantity,
+              conversion_factor, stock_quantity, unit_price, discount_percent, discount_value, vat_rate, line_net, line_vat,
+              line_total, line_net_ron, line_vat_ron, line_total_ron, allocated_cost_ron, inventory_unit_cost_ron,
+              inventory_cost_total_ron, resolution_status, match_method, match_confidence, is_stock_item, row_version)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, "buc", "buc", ?, ?, ?, 0, 1, ?, ?, 0, 0, 0, ?, 0, ?, ?, 0, ?, 0, ?, ?, "matched", "return_invoice", 1, ?, 1)'
+        );
+        $product = $db->prepare('SELECT stock_quantity, accounting_stock_quantity FROM shop_products WHERE id = ?' . $lock);
+        $updateProduct = $db->prepare('UPDATE shop_products SET stock_quantity = ?, accounting_stock_quantity = ? WHERE id = ?');
+        $existingReturn = $db->prepare("SELECT id FROM shop_inventory_movements WHERE sales_invoice_id = ? AND movement_type IN ('return', 'RETURN_IN') AND reversal_of_movement_id = ? LIMIT 1");
+        $insertReturn = $db->prepare(
+            'INSERT INTO shop_inventory_movements
+             (id, product_id, warehouse_id, order_id, nir_document_id, nir_line_id, sales_invoice_id, sales_invoice_line_id, movement_type, quantity_delta, quantity_after,
+              accounting_quantity_delta, accounting_quantity_after, inventory_unit_cost_ron, inventory_cost_total_ron, sale_unit_price_ron,
+              sale_total_ron, fifo_status, fifo_quantity_allocated, fifo_quantity_pending, reversal_of_movement_id, note, created_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, "RETURN_IN", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)'
+        );
+        $lineConsumptions = $db->prepare("SELECT quantity, unit_cost_ron FROM shop_inventory_layer_consumptions WHERE source_document_type = 'SALES_INVOICE' AND source_document_id = ? AND source_line_id = ? AND reversed_at IS NULL ORDER BY created_at, id" . $lock);
+
+        $returnNirLineBySalesLineId = [];
+        foreach ($saleMovements as $index => $movement) {
+            $movementId = (string)($movement['id'] ?? '');
+            $productId = trim((string)($movement['product_id'] ?? ''));
+            if ($movementId === '' || $productId === '') continue;
+            $existingReturn->execute([$returnInvoiceId, $movementId]);
+            if ($existingReturn->fetchColumn()) continue;
+            $product->execute([$productId]);
+            $current = $product->fetch();
+            if (!$current) continue;
+            $selectionItem = $selectionByLine[(string)($movement['sales_invoice_line_id'] ?? '')];
+            $quantity = (float)$selectionItem['accepted_quantity'];
+            $onlineWasTracked = abs((float)($movement['quantity_delta'] ?? 0)) > 0.00005;
+            $accountingMovement = array_key_exists('accounting_quantity_delta', $movement) && $movement['accounting_quantity_delta'] !== null
+                ? (float)$movement['accounting_quantity_delta']
+                : (float)($movement['quantity_delta'] ?? 0);
+            $accountingWasTracked = abs($accountingMovement) > 0.00005;
+            $onlineQuantity = $onlineWasTracked ? $quantity : 0.0;
+            $accountingQuantity = $accountingWasTracked ? $quantity : 0.0;
+            $lineConsumptions->execute([(string)$original['id'], (string)($movement['sales_invoice_line_id'] ?? '')]);
+            $costRemaining = $accountingQuantity;
+            $costTotal = 0.0;
+            foreach ($lineConsumptions->fetchAll() as $fifoConsumption) {
+                if ($costRemaining <= 0.00005) break;
+                $used = min($costRemaining, (float)$fifoConsumption['quantity']);
+                $costTotal += $used * (float)$fifoConsumption['unit_cost_ron'];
+                $costRemaining -= $used;
+            }
+            if ($accountingQuantity > 0 && $costRemaining > 0.00005) {
+                $fallbackUnit = abs((float)($movement['inventory_unit_cost_ron'] ?? 0));
+                $costTotal += $costRemaining * $fallbackUnit;
+            }
+            $costTotal = round($costTotal, 2);
+            $unitCost = $accountingQuantity > 0 ? round($costTotal / $accountingQuantity, 6) : 0.0;
+            $inventoryTotal = round($inventoryTotal + $costTotal, 2);
+            $lineId = self::uuid();
+            $insertLine->execute([
+                $lineId, $receiptId, $index + 1, $productId, (string)($movement['product_sku'] ?? ''),
+                (string)($movement['product_name'] ?? 'Produs'), (string)($movement['product_name'] ?? 'Produs'),
+                (string)($movement['product_sku'] ?? ''), $quantity, $quantity, $quantity, $accountingQuantity,
+                $unitCost, $costTotal, $costTotal, $costTotal, $costTotal, $unitCost, $costTotal,
+                $accountingWasTracked ? 1 : 0,
+            ]);
+            $returnNirLineBySalesLineId[(string)($movement['sales_invoice_line_id'] ?? '')] = $lineId;
+            $stockAfter = round((float)($current['stock_quantity'] ?? 0) + $onlineQuantity, 4);
+            $accountingAfter = round((float)($current['accounting_stock_quantity'] ?? 0) + $accountingQuantity, 4);
+            $updateProduct->execute([$stockAfter, $accountingAfter, $productId]);
+            $insertReturn->execute([
+                self::uuid(), $productId, trim((string)($movement['warehouse_id'] ?? '')) ?: $warehouseId, $original['order_id'] ?? null,
+                $receiptId, $lineId, $returnInvoiceId, $movement['sales_invoice_line_id'] ?? null, $quantity, $stockAfter,
+                $accountingQuantity, $accountingAfter, $unitCost,
+                $costTotal,
+                $movement['sale_unit_price_ron'] ?? null,
+                isset($movement['sale_total_ron']) ? -abs((float)$movement['sale_total_ron']) : null,
+                $accountingWasTracked ? 'restored' : 'not_tracked',
+                min($accountingQuantity, (float)($movement['fifo_quantity_allocated'] ?? 0)), $movementId,
+                'Intrare în stoc prin ' . $nirNumber . ' · retur client · factura de retur ' . $returnLabel . ' · corectează ' . $originalLabel,
+                $actorName,
+            ]);
+        }
+
+        $db->prepare('UPDATE shop_nir_documents SET subtotal = ?, grand_total = ?, subtotal_ron = ?, grand_total_ron = ?, inventory_cost_total_ron = ? WHERE id = ?')
+            ->execute([$inventoryTotal, $inventoryTotal, $inventoryTotal, $inventoryTotal, $inventoryTotal, $receiptId]);
+
+        $consumptions = $db->prepare(
+            "SELECT c.*,
+                    l.nir_document_id AS original_nir_document_id,
+                    l.nir_line_id AS original_nir_line_id,
+                    l.supplier_id AS original_supplier_id,
+                    l.unit_cost_ron AS original_unit_cost_ron
+             FROM shop_inventory_layer_consumptions c
+             INNER JOIN shop_inventory_cost_layers l ON l.id = c.inventory_cost_layer_id
+             WHERE c.source_document_type = 'SALES_INVOICE' AND c.source_document_id = ? AND c.reversed_at IS NULL
+             ORDER BY c.source_line_id, c.created_at, c.id" . $lock
+        );
+        $consumptions->execute([(string)$original['id']]);
+        $layer = $db->prepare(
+            'SELECT l.original_quantity, l.remaining_quantity, l.is_reversed, l.product_id, l.supplier_id,
+                    l.nir_document_id, l.nir_line_id, l.unit_cost_ron,
+                    COALESCE((SELECT SUM(ABS(sl.stock_quantity))
+                              FROM shop_nir_lines sl
+                              INNER JOIN shop_nir_documents sd ON sd.id = sl.nir_document_id
+                              WHERE sd.reversal_of_id = l.nir_document_id AND sl.storno_of_line_id = l.nir_line_id), 0) AS supplier_storned_quantity
+             FROM shop_inventory_cost_layers l WHERE l.id = ?' . $lock
+        );
+        $updateLayer = $db->prepare('UPDATE shop_inventory_cost_layers SET remaining_quantity = ?, status = ?, row_version = row_version + 1 WHERE id = ?');
+        $reverseConsumption = $db->prepare('UPDATE shop_inventory_layer_consumptions SET reversed_at = CURRENT_TIMESTAMP, reversal_consumption_id = ?, row_version = row_version + 1 WHERE id = ? AND reversed_at IS NULL');
+        $remainingByLine = [];
+        foreach ($returnSelection as $item) $remainingByLine[(string)$item['order_item_id']] = (float)$item['accepted_quantity'];
+        $partialConsumption = $db->prepare('UPDATE shop_inventory_layer_consumptions SET original_quantity = COALESCE(original_quantity, quantity), quantity = ?, total_cost_ron = ?, reversed_quantity = reversed_quantity + ?, reversal_consumption_id = ?, row_version = row_version + 1 WHERE id = ? AND reversed_at IS NULL');
+        $insertReturnOrigin = $db->prepare(
+            'INSERT INTO shop_customer_return_fifo_origins
+             (id, customer_return_nir_id, customer_return_nir_line_id, return_invoice_id, sales_invoice_id, sales_invoice_line_id,
+              inventory_cost_layer_id, original_nir_document_id, original_nir_line_id, product_id, supplier_id,
+              restored_quantity, unit_cost_ron, created_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        foreach ($consumptions->fetchAll() as $consumption) {
+            $lineKey = (string)($consumption['source_line_id'] ?? '');
+            $toRestore = min((float)($remainingByLine[$lineKey] ?? 0), (float)$consumption['quantity']);
+            if ($toRestore <= 0.00005) continue;
+            $layer->execute([(string)$consumption['inventory_cost_layer_id']]);
+            $current = $layer->fetch();
+            if (!$current || !empty($current['is_reversed'])) continue;
+            // A later customer return may restore a sold unit after other units
+            // from the same supplier lot were returned to the supplier. Never
+            // restore above the net quantity that can still exist in our stock.
+            $maximumRemaining = max(0.0, (float)$current['original_quantity'] - (float)($current['supplier_storned_quantity'] ?? 0));
+            $remaining = min($maximumRemaining, (float)$current['remaining_quantity'] + $toRestore);
+            $status = abs($remaining - $maximumRemaining) <= 0.00005 ? 'open' : 'partially_consumed';
+            $updateLayer->execute([round($remaining, 4), $status, (string)$consumption['inventory_cost_layer_id']]);
+            if (abs($toRestore - (float)$consumption['quantity']) <= 0.00005) {
+                $reverseConsumption->execute([$receiptId, (string)$consumption['id']]);
+            } else {
+                $remainingConsumption = round((float)$consumption['quantity'] - $toRestore, 4);
+                $remainingCost = round($remainingConsumption * (float)$consumption['unit_cost_ron'], 2);
+                $partialConsumption->execute([$remainingConsumption, $remainingCost, $toRestore, $receiptId, (string)$consumption['id']]);
+            }
+            $returnNirLineId = (string)($returnNirLineBySalesLineId[$lineKey] ?? '');
+            $originalNirId = trim((string)($current['nir_document_id'] ?? $consumption['original_nir_document_id'] ?? ''));
+            $originalNirLineId = trim((string)($current['nir_line_id'] ?? $consumption['original_nir_line_id'] ?? ''));
+            if ($returnNirLineId !== '' && $originalNirId !== '' && $originalNirLineId !== '') {
+                $insertReturnOrigin->execute([
+                    self::uuid(), $receiptId, $returnNirLineId, $returnInvoiceId, (string)$original['id'], $lineKey,
+                    (string)$consumption['inventory_cost_layer_id'], $originalNirId, $originalNirLineId,
+                    (string)($current['product_id'] ?? $consumption['product_id'] ?? ''),
+                    trim((string)($current['supplier_id'] ?? $consumption['original_supplier_id'] ?? '')) ?: null,
+                    round($toRestore, 4), (string)($current['unit_cost_ron'] ?? $consumption['unit_cost_ron'] ?? 0), $actorName,
+                ]);
+            }
+            $remainingByLine[$lineKey] = round((float)$remainingByLine[$lineKey] - $toRestore, 4);
+        }
+    }
+
+    private static function returnSelection(PDO $db, string $orderId): array
+    {
+        $items = [];
+        $selectionTableAvailable = true;
+        try {
+            $stmt = $db->prepare("SELECT ri.*, oi.quantity AS ordered_quantity
+                FROM shop_order_return_items ri
+                INNER JOIN shop_order_items oi ON oi.id = ri.order_item_id
+                WHERE ri.order_id = ? AND ri.decision_status IN ('accepted', 'partial') AND ri.accepted_quantity > 0
+                ORDER BY ri.created_at, ri.id");
+            $stmt->execute([$orderId]);
+            $items = $stmt->fetchAll();
+        } catch (PDOException $error) {
+            $selectionTableAvailable = false;
+        }
+        if (!$items) {
+            if ($selectionTableAvailable) {
+                $count = $db->prepare('SELECT COUNT(*) FROM shop_order_return_items WHERE order_id = ?');
+                $count->execute([$orderId]);
+                if ((int)$count->fetchColumn() > 0) throw new InvalidArgumentException('Evaluează produsele și acceptă cel puțin unul înainte de emiterea facturii de retur.');
+            }
+            // Anularea unei comenzi cu factură rămâne un retur fiscal integral,
+            // fără cerere comercială prealabilă și fără cost de curier reținut.
+            $fallback = $db->prepare('SELECT id AS order_item_id, product_id, product_name, product_sku, quantity AS ordered_quantity, quantity AS requested_quantity, quantity AS accepted_quantity FROM shop_order_items WHERE order_id = ? ORDER BY id');
+            $fallback->execute([$orderId]);
+            $items = $fallback->fetchAll();
+        }
+        if (!$items) throw new InvalidArgumentException('Comanda nu are produse care pot fi incluse în factura de retur.');
+        return $items;
+    }
+
+    private static function payload(PDO $db, array $order, array $company, string $invoiceId, string $series, string $number, string $issueDate, string $dueDate, string $status, string $defaultNotes = '', ?array $onlyItemIds = null): array
+    {
+        $itemsStmt = $db->prepare(
+            'SELECT oi.*,
+                    (SELECT pi.image_path FROM shop_product_images pi WHERE pi.product_id = oi.product_id ORDER BY pi.sort_order ASC, pi.created_at ASC LIMIT 1) AS image_path
+             FROM shop_order_items oi
+             WHERE oi.order_id = ?
+             ORDER BY oi.id ASC'
+        );
+        $itemsStmt->execute([(string)$order['id']]);
+        $orderItems = $itemsStmt->fetchAll();
+        if ($onlyItemIds !== null) {
+            $allowedItemIds = array_fill_keys(array_map('strval', $onlyItemIds), true);
+            $orderItems = array_values(array_filter($orderItems, static fn(array $item): bool => isset($allowedItemIds[(string)($item['id'] ?? '')])));
+        }
+        if (!$orderItems && (float)($order['shipping_cost'] ?? 0) <= 0) throw new InvalidArgumentException('Comanda nu conține produse care pot fi facturate.');
+
+        $vatRate = !empty($order['vat_payer']) ? max(0.0, min(100.0, (float)($order['vat_rate'] ?? 0))) : 0.0;
+        $grossProductTarget = round(max(0.0, (float)$order['total'] - (float)($order['shipping_cost'] ?? 0)), 2);
+        $lineGrossValues = [];
+        $sourceGrossTotal = array_reduce($orderItems, static fn(float $sum, array $item): float => $sum + (float)($item['discounted_line_total'] ?? $item['line_total'] ?? 0), 0.0);
+        $allocated = 0.0;
+        foreach ($orderItems as $index => $item) {
+            $rawGross = max(0.0, (float)($item['discounted_line_total'] ?? $item['line_total'] ?? 0));
+            $isLast = $index === array_key_last($orderItems);
+            $lineGross = $isLast
+                ? round(max(0.0, $grossProductTarget - $allocated), 2)
+                : round($sourceGrossTotal > 0 ? $grossProductTarget * ($rawGross / $sourceGrossTotal) : 0, 2);
+            $lineGrossValues[] = $lineGross;
+            $allocated += $lineGross;
+        }
+
+        $items = [];
+        foreach ($orderItems as $index => $item) {
+            $quantity = max(1, (int)($item['quantity'] ?? 1));
+            $finalGross = max(0.0, (float)($lineGrossValues[$index] ?? 0));
+            $originalGross = max($finalGross, (float)($item['line_total'] ?? $finalGross));
+            $discountGross = max(0.0, $originalGross - $finalGross);
+            $discountPercent = $originalGross > 0 ? ($discountGross / $originalGross) * 100 : 0.0;
+            $grossUnit = $originalGross / $quantity;
+            $netUnit = $vatRate > 0 ? $grossUnit / (1 + $vatRate / 100) : $grossUnit;
+            $items[] = [
+                'order_item_id' => (string)($item['id'] ?? ''),
+                'product_id' => trim((string)($item['product_id'] ?? '')) ?: null,
+                'name' => (string)($item['product_name'] ?? 'Produs'),
+                'sku' => (string)($item['product_sku'] ?? ''),
+                'image_path' => (string)($item['image_path'] ?? ''),
+                'unit' => 'buc.',
+                'quantity' => $quantity,
+                'unit_price' => round($netUnit, 8),
+                'discount_percent' => round($discountPercent, 8),
+                'discount_amount' => round($vatRate > 0 ? $discountGross / (1 + $vatRate / 100) : $discountGross, 2),
+                'discount_amount_gross' => round($discountGross, 2),
+                'vat_rate' => $vatRate,
+            ];
+        }
+        $shipping = round((float)($order['shipping_cost'] ?? 0), 2);
+        if ($shipping > 0) {
+            $shippingNet = $vatRate > 0 ? $shipping / (1 + $vatRate / 100) : $shipping;
+            $items[] = [
+                'name' => 'Serviciu de livrare – ' . trim((string)($order['shipping_method_name'] ?? 'Livrare')),
+                'sku' => 'TRANSPORT',
+                'unit' => 'serv.',
+                'quantity' => 1,
+                'unit_price' => round($shippingNet, 8),
+                'discount_percent' => 0,
+                'vat_rate' => $vatRate,
+            ];
+        }
+
+        $isCompany = (string)($order['customer_type'] ?? 'individual') === 'company';
+        $buyerAddress = $isCompany && trim((string)($order['company_address'] ?? '')) !== ''
+            ? (string)$order['company_address']
+            : (string)($order['address'] ?? '');
+        $buyer = [
+            'type' => $isCompany ? 'company' : 'individual',
+            'name' => $isCompany ? (string)($order['company_name'] ?? $order['customer_name']) : (string)$order['customer_name'],
+            'cui' => $isCompany ? (string)($order['company_cui'] ?? '') : '',
+            'registration_number' => $isCompany ? (string)($order['company_registration_number'] ?? '') : '',
+            'address' => $buyerAddress,
+            'city' => (string)($order['city'] ?? ''),
+            'county' => (string)($order['county'] ?? ''),
+            'postal_code' => (string)($order['postal_code'] ?? ''),
+            'country' => 'România',
+            'email' => (string)($order['customer_email'] ?? ''),
+            'phone' => (string)($order['customer_phone'] ?? ''),
+        ];
+        $seller = [
+            'name' => (string)$company['legal_name'],
+            'trade_name' => (string)($company['trade_name'] ?? ''),
+            'cui' => (string)$company['cui'],
+            'registration_number' => (string)($company['registration_number'] ?? ''),
+            'address' => (string)($company['address'] ?? ''),
+            'city' => (string)($company['city'] ?? ''),
+            'county' => (string)($company['county'] ?? ''),
+            'postal_code' => (string)($company['postal_code'] ?? ''),
+            'country' => (string)($company['country'] ?? 'România'),
+            'email' => (string)($company['email'] ?? ''),
+            'phone' => (string)($company['phone'] ?? ''),
+            'website' => (string)($company['website'] ?? ''),
+            'bank_name' => (string)($company['bank_name'] ?? ''),
+            'iban' => (string)($company['iban'] ?? ''),
+            'share_capital' => (string)($company['share_capital'] ?? ''),
+            'vat_payer' => !empty($company['vat_payer']),
+        ];
+        $paymentMethod = (string)($order['payment_method'] ?? '') === 'card' ? 'Card online' : 'Ramburs la curier';
+        $promotionNote = trim((string)($order['promotion_code'] ?? '')) !== ''
+            ? 'Reducerea aferentă codului ' . trim((string)$order['promotion_code']) . ' este inclusă în prețurile pozițiilor.'
+            : '';
+
+        return [
+            'document_id' => $invoiceId,
+            'status' => $status,
+            'series' => $series,
+            'number' => $number,
+            'issue_date' => $issueDate,
+            'due_date' => $dueDate,
+            'delivery_date' => $issueDate,
+            'currency' => strtoupper(trim((string)($order['currency'] ?? 'RON'))) ?: 'RON',
+            'seller' => $seller,
+            'buyer' => $buyer,
+            'items' => $items,
+            'discount_total' => round(max(0.0, (float)($order['discount_total'] ?? 0)), 2),
+            'discount_code' => trim((string)($order['promotion_code'] ?? '')),
+            'discount_scope' => trim((string)($order['promotion_scope'] ?? '')),
+            'payment' => [
+                'method' => $paymentMethod,
+                'reference' => $series . ' ' . $number,
+                'iban' => (string)($company['iban'] ?? ''),
+                'bank_name' => (string)($company['bank_name'] ?? ''),
+                'paid_at' => $status === 'paid' ? (trim((string)($order['stripe_paid_at'] ?? '')) ?: $issueDate) : '',
+                'transaction_id' => (string)($order['stripe_payment_intent_id'] ?? ''),
+            ],
+            'notes' => implode("\n", array_filter([trim($defaultNotes), (string)($order['customer_notes'] ?? ''), $promotionNote])),
+            'order_reference' => (string)($order['order_number'] ?? ''),
+            'tax_note' => $vatRate > 0
+                ? 'Prețurile comerciale includ TVA ' . rtrim(rtrim(number_format($vatRate, 2, '.', ''), '0'), '.') . '%, evidențiată separat în factură.'
+                : 'Societate neînregistrată în scopuri de TVA. TVA aplicată: 0%.',
+        ];
+    }
+
+    private static function uuid(): string
+    {
+        $data = random_bytes(16);
+        $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
+        $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+}
