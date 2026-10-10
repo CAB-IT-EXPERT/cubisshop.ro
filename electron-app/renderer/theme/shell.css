@@ -547,29 +547,63 @@
 }
 
 .auth-brand {
-  display: block;
-  margin: 0 0 34px;
-  text-align: left;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  margin: 0 0 32px !important;
+  text-align: left !important;
 }
 
 .auth-brand-kicker {
-  color: var(--color-brand-action-secondary);
+  min-height: 32px;
+  gap: 9px;
+  padding: 4px 12px 4px 5px;
+  border: 1px solid rgba(9, 201, 229, 0.22);
+  border-radius: 999px;
+  color: #087d9e;
+  background: linear-gradient(135deg, rgba(9, 201, 229, 0.11), rgba(8, 127, 245, 0.06));
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.auth-brand-kicker-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: #0787aa;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.auth-brand-kicker-icon svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 :root[data-theme="cubis-light"] .auth-card .auth-brand h1 {
-  margin: 18px 0 9px;
+  margin: 17px 0 8px !important;
   color: var(--color-text-primary);
-  font-size: clamp(32px, 3vw, 42px);
-  line-height: 1.05;
-  font-weight: 780;
+  font-size: clamp(34px, 3vw, 42px) !important;
+  line-height: 1.04 !important;
+  font-weight: 790 !important;
   letter-spacing: -.04em;
 }
 
 :root[data-theme="cubis-light"] .auth-card .auth-brand p {
-  margin: 0;
+  max-width: 360px;
+  margin: 0 !important;
   color: var(--color-text-muted);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .auth-login-panel .auth-field {
@@ -1078,11 +1112,11 @@
   .auth-login-panel { padding: 28px 24px; }
   .auth-mobile-brand { height: 46px; margin-bottom: 20px; }
   .auth-mobile-brand img { width: 112px; }
-  .auth-brand { margin-bottom: 25px; }
+  .auth-brand { margin-bottom: 25px !important; }
 
   :root[data-theme="cubis-light"] .auth-card .auth-brand h1 {
-    margin-top: 14px;
-    font-size: 30px;
+    margin-top: 14px !important;
+    font-size: 30px !important;
   }
 
   .auth-login-panel .auth-field { margin-bottom: 14px; }
