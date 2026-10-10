@@ -2,9 +2,9 @@ import { Theme } from '@/constants/colors';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Building2, Check, Landmark, MapPin, Pencil, Plus, Save, ShieldCheck, Stamp, Trash2, Upload, X } from 'lucide-react-native';
+import { Building2, Check, Landmark, MapPin, Save, ShieldCheck, Stamp, Trash2, Upload } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { ShopCompanySettings, ShopReceiptLocation, shopApi } from '@/services/shopApi';
+import { ShopCompanySettings, shopApi } from '@/services/shopApi';
 
 const FieldFocusContext = React.createContext<((target: number) => void) | undefined>(undefined);
 
@@ -17,10 +17,6 @@ export default function ShopCompanySettingsManager({ onFieldFocus }: { onFieldFo
   const [companies, setCompanies] = useState<ShopCompanySettings[]>([]);
   const [company, setCompany] = useState<ShopCompanySettings>(emptyCompany());
   const [stampPreview, setStampPreview] = useState<string | null>(null);
-  const [receiptLocations, setReceiptLocations] = useState<ShopReceiptLocation[]>([]);
-  const [editingReceiptLocationId, setEditingReceiptLocationId] = useState<string | null>(null);
-  const [receiptDraft, setReceiptDraft] = useState<Omit<ShopReceiptLocation, 'id'> | null>(null);
-  const [receiptSaving, setReceiptSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -32,9 +28,8 @@ export default function ShopCompanySettingsManager({ onFieldFocus }: { onFieldFo
     if (!token) return;
     setLoading(true);
     try {
-      const [list, locations] = await Promise.all([shopApi.listCompanySettings(token), shopApi.listReceiptLocations(token, preferredId)]);
+      const list = await shopApi.listCompanySettings(token);
       setCompanies(list);
-      setReceiptLocations(locations);
       selectCompany(list.find((item) => item.id === preferredId) || list.find((item) => item.is_default) || list[0] || emptyCompany());
     } catch (error) { Alert.alert('Firmele nu s-au putut încărca', error instanceof Error ? error.message : 'Încearcă din nou.'); }
     finally { setLoading(false); }
@@ -71,35 +66,6 @@ export default function ShopCompanySettingsManager({ onFieldFocus }: { onFieldFo
       catch (error) { Alert.alert('Firma nu s-a putut șterge', error instanceof Error ? error.message : 'Încearcă din nou.'); }
     } }]);
   };
-  const newReceiptLocation = () => {
-    if (!company.id) return Alert.alert('Salvează firma', 'Salvează mai întâi datele firmei.');
-    setEditingReceiptLocationId(null);
-    setReceiptDraft({ company_id: company.id, name: '', address: '', city: '', county: '', postal_code: '', is_default: receiptLocations.length === 0, sort_order: receiptLocations.length });
-  };
-  const editReceiptLocation = (location: ShopReceiptLocation) => {
-    setEditingReceiptLocationId(location.id);
-    setReceiptDraft({ ...location });
-  };
-  const saveReceiptLocation = async () => {
-    if (!token || !receiptDraft || receiptSaving) return;
-    if (!receiptDraft.name.trim()) return Alert.alert('Denumire obligatorie', 'Completează denumirea punctului de recepție.');
-    setReceiptSaving(true);
-    try {
-      if (editingReceiptLocationId) await shopApi.updateReceiptLocation(token, editingReceiptLocationId, receiptDraft);
-      else await shopApi.createReceiptLocation(token, receiptDraft);
-      setReceiptDraft(null); setEditingReceiptLocationId(null);
-      setReceiptLocations(await shopApi.listReceiptLocations(token, company.id));
-    } catch (error) { Alert.alert('Punctul nu s-a putut salva', error instanceof Error ? error.message : 'Încearcă din nou.'); }
-    finally { setReceiptSaving(false); }
-  };
-  const deleteReceiptLocation = (location: ShopReceiptLocation) => {
-    if (!token) return;
-    Alert.alert('Ștergi punctul de recepție?', `„${location.name}” nu va mai putea fi ales pe NIR-uri noi. Documentele existente își păstrează locul salvat.`, [{ text: 'Renunță', style: 'cancel' }, { text: 'Șterge', style: 'destructive', onPress: async () => {
-      try { await shopApi.deleteReceiptLocation(token, location.id); setReceiptLocations(await shopApi.listReceiptLocations(token, company.id)); }
-      catch (error) { Alert.alert('Punctul nu s-a putut șterge', error instanceof Error ? error.message : 'Încearcă din nou.'); }
-    } }]);
-  };
-
   if (loading) return <View style={styles.loading}><ActivityIndicator color="#087FF5" /><Text style={styles.loadingText}>Se încarcă firmele</Text></View>;
   return <FieldFocusContext.Provider value={onFieldFocus}><View style={styles.page}>
     <View style={styles.hero}><View style={styles.heroIcon}><Building2 size={27} color="#09BFD9" /></View><View style={styles.heroCopy}><Text style={styles.kicker}>IDENTITATE COMERCIALĂ</Text><Text style={styles.title}>Datele firmei</Text><Text style={styles.subtitle}>Configurează societatea folosită pentru documente, comenzi și facturare.</Text></View></View>
@@ -122,11 +88,6 @@ export default function ShopCompanySettingsManager({ onFieldFocus }: { onFieldFo
     </Section>
     <Section Icon={MapPin} title="Adresă publică" description="Locația sau zona afișată clienților în footer, Contact și hartă.">
       <Field label="ADRESĂ FIZICĂ / ZONĂ DESERVITĂ" value={company.physical_address} onChangeText={(value) => update('physical_address', value)} placeholder="București–Ilfov" />
-    </Section>
-    <Section Icon={MapPin} title="Puncte de recepție" description="Locurile fizice care pot fi selectate pe NIR-uri.">
-      <View style={styles.receiptHeader}><View style={styles.defaultCopy}><Text style={styles.toggleTitle}>Locuri disponibile</Text><Text style={styles.toggleText}>Punctul implicit este ales automat pe orice NIR nou.</Text></View><TouchableOpacity style={styles.receiptAdd} onPress={newReceiptLocation}><Plus size={17} color="#FFFFFF" /><Text style={styles.receiptAddText}>Adaugă</Text></TouchableOpacity></View>
-      {receiptLocations.map((location) => <View key={location.id} style={[styles.receiptCard, location.is_default && styles.receiptCardDefault]}><View style={styles.receiptPin}><MapPin size={18} color={location.is_default ? '#168457' : '#09BFD9'} /></View><View style={styles.receiptCopy}><View style={styles.receiptTitleRow}><Text style={styles.receiptTitle}>{location.name}</Text>{location.is_default ? <Text style={styles.receiptDefaultBadge}>IMPLICIT</Text> : null}</View><Text style={styles.receiptMeta}>{[location.address, location.city, location.county, location.postal_code].filter(Boolean).join(', ') || 'Fără adresă detaliată'}</Text></View><TouchableOpacity style={styles.receiptIconButton} onPress={() => editReceiptLocation(location)}><Pencil size={16} color="#C8C0C6" /></TouchableOpacity><TouchableOpacity style={styles.receiptDeleteButton} onPress={() => deleteReceiptLocation(location)}><Trash2 size={16} color="#FB7185" /></TouchableOpacity></View>)}
-      {receiptDraft ? <View style={styles.receiptEditor}><View style={styles.receiptEditorHead}><View><Text style={styles.receiptEditorTitle}>{editingReceiptLocationId ? 'Editează punctul' : 'Punct nou'}</Text><Text style={styles.receiptEditorText}>Denumirea și adresa vor apărea în selectorul NIR.</Text></View><TouchableOpacity style={styles.receiptClose} onPress={() => { setReceiptDraft(null); setEditingReceiptLocationId(null); }}><X size={18} color="#AAA2A8" /></TouchableOpacity></View><Field label="DENUMIRE *" value={receiptDraft.name} onChangeText={(name) => setReceiptDraft({ ...receiptDraft, name })} placeholder="Ex: Gestiune principală" /><Field label="ADRESĂ" value={receiptDraft.address} onChangeText={(address) => setReceiptDraft({ ...receiptDraft, address })} /><Row><Field label="LOCALITATE" value={receiptDraft.city} onChangeText={(city) => setReceiptDraft({ ...receiptDraft, city })} /><Field label="JUDEȚ" value={receiptDraft.county} onChangeText={(county) => setReceiptDraft({ ...receiptDraft, county })} /></Row><Row><Field label="COD POȘTAL" value={receiptDraft.postal_code} onChangeText={(postal_code) => setReceiptDraft({ ...receiptDraft, postal_code })} /><View style={styles.receiptDefaultToggle}><View style={styles.defaultCopy}><Text style={styles.toggleTitle}>Punct implicit</Text><Text style={styles.toggleText}>Selectat automat pe NIR.</Text></View><Switch value={receiptDraft.is_default} onValueChange={(is_default) => setReceiptDraft({ ...receiptDraft, is_default })} trackColor={{ false: '#3B363D', true: '#24563F' }} thumbColor={receiptDraft.is_default ? '#168457' : '#8D858E'} /></View></Row><TouchableOpacity disabled={receiptSaving} style={[styles.receiptSave, receiptSaving && styles.disabled]} onPress={() => void saveReceiptLocation()}>{receiptSaving ? <ActivityIndicator color="#FFFFFF" /> : <><Save size={17} color="#FFFFFF" /><Text style={styles.receiptSaveText}>Salvează punctul</Text></>}</TouchableOpacity></View> : null}
     </Section>
     <Section Icon={Landmark} title="Date bancare" description="Informații folosite în documentele financiare.">
       <Row><Field label="BANCA" value={company.bank_name} onChangeText={(value) => update('bank_name', value)} /><Field label="IBAN" value={company.iban} onChangeText={(value) => update('iban', value.toUpperCase().replace(/\s/g, ''))} autoCapitalize="characters" /></Row>
@@ -152,6 +113,5 @@ const styles = StyleSheet.create({
   toggle: { minHeight: 65, padding: 11, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 17, backgroundColor: Theme.colors.surface.muted }, toggleTitle: { color: Theme.colors.text.primary, fontSize: 11, fontWeight: '900' }, toggleText: { marginTop: 3, color: Theme.colors.text.muted, fontSize: 9 },
   vatRateCard: { minHeight: 74, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 18, backgroundColor: Theme.colors.surface.brandSoft }, vatRateInput: { width: 92, height: 48, paddingHorizontal: 11, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 14, backgroundColor: Theme.colors.surface.base }, vatRateText: { flex: 1, color: Theme.colors.brand.secondary, fontSize: 17, fontWeight: '900', textAlign: 'right' }, vatRateSuffix: { marginLeft: 4, color: Theme.colors.brand.secondary, fontSize: 13, fontWeight: '900' },
   stampRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }, stampPreview: { width: 150, height: 110, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 18, backgroundColor: Theme.colors.surface.muted }, stampImage: { width: '100%', height: '100%' }, stampActions: { minWidth: 180, flex: 1, justifyContent: 'center', gap: 8 }, stampButton: { minHeight: 48, paddingHorizontal: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 15, backgroundColor: Theme.colors.surface.brandSoft }, stampDelete: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 14, backgroundColor: Theme.colors.state.errorSoft },
-  receiptHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 }, receiptAdd: { minHeight: 41, paddingHorizontal: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 13, backgroundColor: Theme.colors.brand.primaryAction }, receiptAddText: { color: Theme.colors.text.onBrand, fontSize: 10, fontWeight: '900' }, receiptCard: { minHeight: 72, padding: 10, flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 17, backgroundColor: Theme.colors.surface.base }, receiptCardDefault: { borderColor: Theme.colors.state.success, backgroundColor: Theme.colors.surface.base }, receiptPin: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: Theme.colors.surface.muted }, receiptCopy: { minWidth: 0, flex: 1 }, receiptTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 }, receiptTitle: { color: Theme.colors.text.primary, fontSize: 11, fontWeight: '900' }, receiptDefaultBadge: { paddingHorizontal: 6, paddingVertical: 3, overflow: 'hidden', borderRadius: 6, color: '#0F6B45', backgroundColor: Theme.colors.surface.cyanSoft, fontSize: 7, fontWeight: '900' }, receiptMeta: { marginTop: 4, color: Theme.colors.text.muted, fontSize: 9, lineHeight: 13 }, receiptIconButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.muted }, receiptDeleteButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.state.errorSoft }, receiptEditor: { padding: 12, gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 18, backgroundColor: Theme.colors.surface.brandSoft }, receiptEditorHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, receiptEditorTitle: { color: Theme.colors.text.primary, fontSize: 13, fontWeight: '900' }, receiptEditorText: { marginTop: 3, color: Theme.colors.text.muted, fontSize: 9 }, receiptClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.muted }, receiptDefaultToggle: { minWidth: 220, minHeight: 66, padding: 11, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 15, backgroundColor: Theme.colors.surface.base }, receiptSave: { minHeight: 49, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 15, backgroundColor: Theme.colors.brand.primaryAction }, receiptSaveText: { color: Theme.colors.text.onBrand, fontSize: 11, fontWeight: '900' },
   actions: { flexDirection: 'row', gap: 8 }, save: { minHeight: 59, paddingLeft: 18, paddingRight: 6, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 19, backgroundColor: Theme.colors.brand.primaryAction }, disabled: { opacity: .62 }, saveText: { color: Theme.colors.text.onBrand, fontSize: 12, fontWeight: '900' }, saveIcon: { width: 47, height: 47, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: Theme.colors.surface.muted }, deleteCompany: { width: 59, height: 59, alignItems: 'center', justifyContent: 'center', borderRadius: 19, backgroundColor: Theme.colors.state.errorSoft },
 });
