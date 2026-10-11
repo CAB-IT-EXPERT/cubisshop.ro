@@ -1,0 +1,1787 @@
+/* Orders workspace ------------------------------------------------------ */
+
+:root[data-theme="cubis-light"] #tab-shop-orders {
+  --orders-blue: #087ff5;
+  --orders-cyan: #08a6c8;
+  --orders-navy: #172f47;
+  --orders-muted: #637a90;
+  --orders-border: #d6e5ef;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-page {
+  height: 100%;
+  padding: 24px clamp(20px, 3.4vw, 52px) 64px;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(8, 166, 200, .105), transparent 25rem),
+    radial-gradient(circle at 99% 68%, rgba(8, 127, 245, .07), transparent 30rem),
+    linear-gradient(180deg, #f8fbfe, #f2f8fc 56%, #f8fbfd);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-page > :is(.shop-back-btn, .shop-commerce-hero, .shop-commerce-content) {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-page > .shop-back-btn {
+  width: 46px;
+  height: 46px;
+  min-height: 46px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(8, 127, 245, .2);
+  border-radius: 15px;
+  color: var(--orders-blue);
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 8px 24px rgba(31, 82, 126, .085), inset 0 1px 0 #fff;
+  backdrop-filter: blur(14px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-page > .shop-back-btn:hover {
+  border-color: rgba(8, 127, 245, .42);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+/* Compact hero */
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero[data-commerce-kind="orders"] {
+  min-height: 152px;
+  grid-template-columns: minmax(430px, 1fr) auto;
+  grid-template-areas: "title actions";
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(8, 166, 200, .17);
+  border-radius: 28px;
+  padding: 25px 28px;
+  background:
+    radial-gradient(circle at 89% -18%, rgba(21, 206, 224, .2), transparent 35%),
+    radial-gradient(circle at 70% 130%, rgba(8, 127, 245, .09), transparent 38%),
+    linear-gradient(120deg, rgba(255, 255, 255, .99), rgba(245, 252, 253, .97));
+  box-shadow: 0 22px 58px rgba(31, 82, 126, .1), inset 0 1px 0 #fff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero[data-commerce-kind="orders"]::before {
+  content: "";
+  width: 250px;
+  height: 250px;
+  position: absolute;
+  right: 112px;
+  top: -184px;
+  border: 42px solid rgba(8, 166, 200, .045);
+  border-radius: 50%;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero[data-commerce-kind="orders"]::after {
+  opacity: .21;
+  background-image: radial-gradient(rgba(8, 127, 245, .25) .65px, transparent .65px);
+  background-size: 17px 17px;
+  mask-image: linear-gradient(90deg, transparent 42%, #000);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  column-gap: 17px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title-icon {
+  width: 62px;
+  height: 62px;
+  grid-column: 1;
+  grid-row: 1 / 4;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(8, 166, 200, .21);
+  border-radius: 20px;
+  color: var(--orders-cyan);
+  background: linear-gradient(145deg, #fff, #e9fbfd);
+  box-shadow: 0 14px 30px rgba(8, 166, 200, .13), inset 0 1px 0 #fff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders :is(.shop-commerce-title-icon, .shop-commerce-hero-symbol) svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title > :is(span, h1, p):not(.shop-commerce-title-icon) {
+  grid-column: 2;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title > span:not(.shop-commerce-title-icon) {
+  color: #087e98;
+  font-size: 9px;
+  letter-spacing: .15em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title h1 {
+  margin: 4px 0 0;
+  color: var(--orders-navy);
+  font-size: clamp(29px, 3vw, 39px);
+  font-weight: 790;
+  letter-spacing: -.04em;
+  line-height: 1.04;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title p {
+  max-width: 610px;
+  margin-top: 7px;
+  color: var(--orders-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero-symbol {
+  width: 100px;
+  height: 100px;
+  right: 116px;
+  border: 0;
+  color: rgba(8, 127, 245, .16);
+  background: transparent;
+  box-shadow: none;
+  transform: translateY(-50%) rotate(-7deg);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero-symbol svg {
+  width: 72px;
+  height: 72px;
+  stroke-width: 1.15;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-head-actions {
+  align-self: center;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-refresh {
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  border: 1px solid rgba(8, 166, 200, .22);
+  border-radius: 14px;
+  color: #087e98;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 9px 22px rgba(31, 82, 126, .08), inset 0 1px 0 #fff;
+}
+
+/* Metrics */
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi {
+  min-height: 96px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--kpi-color) 20%, var(--orders-border));
+  border-radius: 20px;
+  padding: 12px;
+  background:
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--kpi-color) 8%, transparent), transparent 52%),
+    rgba(255, 255, 255, .95);
+  box-shadow: 0 12px 30px rgba(31, 82, 126, .07), inset 0 1px 0 #fff;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi:hover {
+  border-color: color-mix(in srgb, var(--kpi-color) 40%, var(--orders-border));
+  box-shadow: 0 16px 34px rgba(31, 82, 126, .1), inset 0 1px 0 #fff;
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi::after {
+  right: -30px;
+  bottom: -48px;
+  background: color-mix(in srgb, var(--kpi-color) 7%, transparent);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--kpi-color) 18%, transparent);
+  border-radius: 13px;
+  color: var(--kpi-color);
+  background: color-mix(in srgb, var(--kpi-color) 10%, #fff);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi > div {
+  gap: 2px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi small {
+  color: color-mix(in srgb, var(--kpi-color) 82%, #23415c);
+  overflow: hidden;
+  font-size: 7.5px;
+  letter-spacing: .035em;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi strong {
+  overflow: visible;
+  color: var(--orders-navy);
+  font-size: clamp(13px, 1.12vw, 16px);
+  letter-spacing: -.015em;
+  text-overflow: clip;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi em {
+  color: #71869a;
+  font-size: 8px;
+}
+
+/* Filters */
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters {
+  margin-bottom: 14px;
+  border: 1px solid var(--orders-border);
+  border-radius: 23px;
+  padding: 14px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 14px 34px rgba(31, 82, 126, .075), inset 0 1px 0 #fff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header {
+  min-height: 42px;
+  align-items: center;
+  border-bottom: 1px solid #e8eff5;
+  padding: 0 1px 11px;
+  margin-bottom: 12px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-heading > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--orders-blue);
+  background: #eef6ff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header strong {
+  color: var(--orders-navy);
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-heading small {
+  color: #7a8ea1;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #cfe1ee;
+  border-radius: 11px;
+  padding: 0 11px;
+  color: #42617d;
+  background: #f7fafc;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header button svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header button:hover:not(:disabled) {
+  border-color: #b8d8fa;
+  color: var(--orders-blue);
+  background: #eef6ff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header button:disabled {
+  border-color: #e2eaf0;
+  color: #a4b1bd;
+  background: #f7f9fb;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid {
+  grid-template-columns: minmax(280px, 1.65fr) repeat(3, minmax(145px, 1fr));
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid label {
+  gap: 6px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid label > small {
+  color: #62798e;
+  font-size: 8px;
+  letter-spacing: .045em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid :is(input, select) {
+  height: 45px;
+  border: 1px solid #cfdde8;
+  border-radius: 13px;
+  color: var(--orders-navy);
+  background-color: #f9fbfd;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid input {
+  padding-left: 41px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23087ff5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  background-position: 13px center;
+  background-repeat: no-repeat;
+  background-size: 17px 17px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: linear-gradient(45deg, transparent 50%, #698199 50%), linear-gradient(135deg, #698199 50%, transparent 50%);
+  background-position: calc(100% - 17px) 19px, calc(100% - 12px) 19px;
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid input::placeholder {
+  color: #91a2b1;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid :is(input, select):focus {
+  border-color: #83bff8;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(8, 127, 245, .08);
+}
+
+/* Table */
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table-wrap {
+  overflow: hidden;
+  border: 1px solid var(--orders-border);
+  border-radius: 23px;
+  background: #fff;
+  box-shadow: 0 15px 38px rgba(31, 82, 126, .08);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders {
+  min-width: 980px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders thead {
+  background: linear-gradient(180deg, #f1f7fc, #edf5fb);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th {
+  height: 46px;
+  border-bottom: 1px solid #d9e6ef;
+  padding: 0 14px;
+  color: #5a7086;
+  background: transparent;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .035em;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders td {
+  height: 78px;
+  border-bottom: 1px solid #e4ecf3;
+  padding: 10px 14px;
+  color: var(--orders-navy);
+  background: #fff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders tbody tr:nth-child(even) td {
+  background: #fbfdff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders tbody tr:hover td {
+  background: #f2f8ff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 var(--orders-blue);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(1) { width: 16%; }
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(2) { width: 20%; }
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(3) { width: 11%; }
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(4),
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders td:nth-child(4) { width: 25%; min-width: 220px; }
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(5) { width: 9%; }
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(6) { width: 12%; }
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders th:nth-child(7) { width: 56px; }
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders td > strong,
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-client-heading strong {
+  color: var(--orders-navy);
+  font-size: 10px;
+  font-weight: 830;
+  line-height: 1.35;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders td > small,
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-client-heading + small {
+  display: block;
+  margin-top: 5px;
+  color: #73889c;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-client-heading {
+  gap: 6px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-client-heading .shop-order-customer-badge {
+  border-color: #b8ddf5;
+  color: #1684b8;
+  background: #eaf8ff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .commerce-pill {
+  min-height: 30px;
+  border: 1px solid color-mix(in srgb, var(--pill) 30%, transparent);
+  padding: 0 10px;
+  color: color-mix(in srgb, var(--pill) 76%, #16324d);
+  background: color-mix(in srgb, var(--pill) 10%, #fff);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-payment-cell {
+  gap: 6px;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-payment-method {
+  min-width: 94px;
+  height: 36px;
+  border-radius: 11px;
+  padding: 0 10px;
+  font-size: 8px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-payment-method.card {
+  border-color: #cfc4ed;
+  color: #654ab1;
+  background: #f5f2ff;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-payment-method.cash {
+  border-color: #b9e3ea;
+  color: #087e98;
+  background: #edfbfd;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-payment-state {
+  min-height: 28px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 8px;
+  background: color-mix(in srgb, currentColor 7%, #fff);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders td:nth-child(5) > b {
+  color: var(--orders-navy);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-invoice-button {
+  min-width: 112px;
+  height: 38px;
+  gap: 6px;
+  border-color: #f3c998;
+  border-radius: 12px;
+  padding: 0 10px;
+  color: #b66a10;
+  background: #fff8ef;
+  font-size: 9px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-invoice-button > span {
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-invoice-button:hover {
+  border-color: #f0ae5f;
+  background: #fff4e5;
+  box-shadow: 0 9px 20px rgba(201, 117, 25, .11);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-invoice-button.issued {
+  border-color: #addfc3;
+  color: #168457;
+  background: #effaf5;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-order-open-indicator {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #c9dded;
+  border-radius: 13px;
+  color: var(--orders-blue);
+  background: #eef6ff;
+  box-shadow: 0 7px 17px rgba(31, 82, 126, .09);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table.orders tbody tr:hover .shop-order-open-indicator {
+  border-color: var(--orders-blue);
+  color: #fff;
+  background: var(--orders-blue);
+  transform: translateX(2px);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-pagination {
+  min-height: 62px;
+  margin-top: 12px;
+  border: 1px solid var(--orders-border);
+  border-radius: 20px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 12px 30px rgba(31, 82, 126, .065);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-pagination :is(label, .shop-commerce-pagination-range) {
+  color: #6d8295;
+  font-size: 8px;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-orders :is(.shop-commerce-pagination button, .shop-commerce-page-size select) {
+  border-color: #cbdde9;
+  color: var(--orders-navy);
+  background: #f8fbfd;
+}
+
+/* Order dialog shell --------------------------------------------------- */
+:root[data-theme="cubis-light"] #shop-order-modal {
+  padding: 12px;
+  background: rgba(14, 35, 54, .58);
+  backdrop-filter: blur(14px) saturate(1.08);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal.compact {
+  width: min(1100px, calc(100vw - 30px));
+  height: min(930px, calc(100dvh - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+  border: 1px solid rgba(203, 221, 233, .98);
+  border-radius: 28px;
+  color: var(--color-text-primary);
+  background: #f6f9fc;
+  box-shadow: 0 34px 100px rgba(8, 38, 65, .3), inset 0 1px 0 #fff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header {
+  min-height: 88px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 13px;
+  border-bottom: 1px solid #dfe9f1;
+  padding: 14px 17px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(8, 166, 200, .1), transparent 34%),
+    rgba(255, 255, 255, .98);
+  box-shadow: 0 8px 24px rgba(31, 82, 126, .065);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #bee7ec;
+  border-radius: 16px;
+  color: #078aa5;
+  background: linear-gradient(145deg, #f4fdff, #e8f9fc);
+  box-shadow: 0 10px 24px rgba(8, 166, 200, .1);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header small {
+  color: #078aa5;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header h2 {
+  overflow: hidden;
+  margin: 0;
+  color: #172f47;
+  font-size: 20px;
+  font-weight: 820;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header p {
+  margin: 0;
+  color: #71869a;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header > button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d2e1eb;
+  border-radius: 13px;
+  color: #547088;
+  background: #f4f8fb;
+  cursor: pointer;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header > button:hover {
+  border-color: #b8d8fa;
+  color: #087ff5;
+  background: #eef6ff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header > button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal-scroll {
+  padding: 18px 20px 24px;
+  background:
+    radial-gradient(circle at 0 0, rgba(8, 166, 200, .05), transparent 24rem),
+    #f6f9fc;
+  scrollbar-color: #b8cbd9 transparent;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #dfe9f1;
+  padding: 11px 17px;
+  background: rgba(255, 255, 255, .98);
+  box-shadow: 0 -8px 24px rgba(31, 82, 126, .06);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-right: auto;
+  color: #71869a;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > span svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #078aa5;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > button {
+  min-width: 132px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 14px;
+  padding: 0 16px;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > button.btn-ghost {
+  border: 1px solid #ccdde8;
+  color: #35536f;
+  background: #f5f9fc;
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > button.btn-primary {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #087ff5, #0786a4);
+  box-shadow: 0 11px 24px rgba(8, 112, 194, .2);
+}
+
+:root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Quick order summary */
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview {
+  display: grid;
+  grid-template-columns: minmax(205px, .82fr) minmax(0, 2.18fr);
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl {
+  border: 1px solid color-mix(in srgb, var(--order-status) 24%, #d7e5ef);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 82, 126, .065);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--order-status) 10%, #fff), #fff 72%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status > span {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: color-mix(in srgb, var(--order-status) 84%, #15314a);
+  background: color-mix(in srgb, var(--order-status) 13%, #fff);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status small {
+  color: #72879a;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview-status strong {
+  overflow: hidden;
+  color: #172f47;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 9px 4px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl > div {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  border-left: 1px solid #e7eef4;
+  padding: 4px 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl > div:first-child {
+  border-left: 0;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dt {
+  color: #73889b;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .025em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dd {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #172f47;
+  font-size: 11px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dd i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px #fff5d8;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dd i.paid { background: #22a873; box-shadow: 0 0 0 3px #e8f8f1; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dd i.failed { background: #e15368; box-shadow: 0 0 0 3px #fff0f2; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dd i.refunded { background: #8b6bc9; box-shadow: 0 0 0 3px #f2edff; }
+
+/* Client, delivery and form cards */
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-grid {
+  align-items: start;
+  gap: 16px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-grid .shop-order-summary-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid #d5e4ee;
+  border-radius: 24px;
+  padding: 15px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(8, 127, 245, .055), transparent 14rem),
+    #fff;
+  box-shadow: 0 16px 38px rgba(31, 82, 126, .075), inset 0 1px 0 #fff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-grid .shop-order-summary-card::before {
+  content: "";
+  height: 4px;
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  background: linear-gradient(90deg, #087ff5, #08a6c8 68%, transparent);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-grid .delivery-card::before {
+  background: linear-gradient(90deg, #08a6c8, #38bdf8 68%, transparent);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-head {
+  min-height: 62px;
+  border: 1px solid #e1ebf2;
+  border-radius: 18px;
+  padding: 9px 10px;
+  margin-bottom: 10px;
+  background: rgba(247, 251, 254, .88);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-title > span {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #c8def2;
+  border-radius: 13px;
+  color: #087ff5;
+  background: linear-gradient(145deg, #fff, #eaf4ff);
+  box-shadow: 0 7px 16px rgba(8, 127, 245, .1);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .delivery-card .shop-order-card-title > span {
+  border-color: #bce4ea;
+  color: #078da8;
+  background: linear-gradient(145deg, #fff, #e9fafc);
+  box-shadow: 0 7px 16px rgba(8, 166, 200, .1);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-title svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-title > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-card-title small, .shop-order-company-block > small) {
+  color: #087e98;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: .11em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-title strong {
+  overflow: hidden;
+  color: #17324b;
+  font-size: 11px;
+  font-weight: 820;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-client-kind {
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d6e7f3;
+  border-radius: 999px;
+  padding: 3px 8px 3px 4px;
+  background: #fff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-client-kind > em, .shop-order-card-actions > em) {
+  color: #5d748a;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 820;
+  letter-spacing: .035em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions > em:not(.complete) {
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d4e0e9;
+  border-radius: 999px;
+  padding: 0 9px;
+  color: #536a80;
+  background: #f2f7fb;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions > em.complete {
+  min-height: 27px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #b9dfcc;
+  border-radius: 999px;
+  padding: 0 9px;
+  color: #168457;
+  background: #effaf5;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-card-actions > button {
+  min-height: 34px;
+  border-radius: 11px;
+  padding: 0 11px;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-detail-row, .shop-order-delivery-field) {
+  min-height: 46px;
+  grid-template-columns: minmax(104px, .7fr) minmax(0, 1.3fr);
+  gap: 13px;
+  border: 1px solid #e1eaf1;
+  border-radius: 14px;
+  padding: 6px 10px;
+  margin: 6px 0 0 !important;
+  background: #f8fbfd;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-detail-row > small, .shop-order-delivery-field > small) {
+  color: #637a90;
+  font-size: 7.5px;
+  font-weight: 780;
+  letter-spacing: .025em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-detail-row > span, .shop-order-delivery-field > input) {
+  min-width: 0;
+  color: #18344e;
+  font-size: 9.5px;
+  font-weight: 730;
+  text-align: right;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-detail-row > span.strong, .shop-order-delivery-field.strong > input) {
+  color: #102d46;
+  font-size: 10.5px;
+  font-weight: 850;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-delivery-field > input:read-only {
+  min-height: 34px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: text;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-delivery-field > input:not([readonly]) {
+  min-height: 36px;
+  border: 1px solid #b8d8fa;
+  border-radius: 10px;
+  padding: 0 9px;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(8, 127, 245, .055);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-delivery-field:focus-within {
+  border-color: #8ec4f7;
+  background: #f3f9ff;
+  box-shadow: 0 0 0 3px rgba(8, 127, 245, .065);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-payment-method {
+  min-height: 60px;
+  margin-top: 9px;
+  border-radius: 17px;
+  padding: 9px 11px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-payment-method > span {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .7);
+  box-shadow: 0 6px 14px rgba(31, 82, 126, .07);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-payment-method small { color: #5d748a; font-size: 7px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-payment-method strong { color: #17324b; font-size: 10.5px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-customer-locked {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-color: #f0c4cc;
+  border-radius: 14px;
+  padding: 7px 9px;
+  margin-top: 9px;
+  color: #b5364d;
+  background: linear-gradient(90deg, #fff4f6, #fff9fa);
+  font-size: 8px;
+  font-weight: 650;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-customer-locked > span {
+  width: 29px;
+  height: 29px;
+  flex: 0 0 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #c43650;
+  background: #ffe6eb;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-customer-locked svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions {
+  gap: 9px;
+  padding-top: 0;
+  margin-top: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions > button {
+  min-height: 42px;
+  border: 1px solid;
+  border-radius: 14px;
+  font-size: 9px;
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions > button:not(.whatsapp) {
+  border-color: #bfdcf5;
+  color: #0667c8;
+  background: #eef6ff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions > button.whatsapp {
+  border-color: #b2ddc6;
+  color: #168457;
+  background: #effaf5;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-contact-actions > button:hover {
+  filter: none;
+  box-shadow: 0 8px 18px rgba(31, 82, 126, .1);
+  transform: translateY(-1px);
+}
+
+/* Products */
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-products-head {
+  min-height: 58px;
+  margin-top: 14px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-products-head > span small {
+  color: #087e98;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-products-head > span strong {
+  color: #71869a;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-products-head > button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 13px;
+  color: #fff;
+  background: linear-gradient(135deg, #087ff5, #0786a4);
+  font-size: 9px;
+  box-shadow: 0 9px 20px rgba(8, 112, 194, .16);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-items {
+  border: 1px solid #d7e5ef;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 82, 126, .055);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-items > .shop-order-product-line {
+  min-height: 84px;
+  grid-template-columns: 52px minmax(0, 1fr) auto 40px;
+  gap: 12px;
+  border-top-color: #e7eef4;
+  padding: 11px 13px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-items > .shop-order-product-line > :is(img, .shop-order-product-placeholder) {
+  width: 52px;
+  height: 52px;
+  border: 1px solid #dbe8f0;
+  border-radius: 14px;
+  background: #f5f9fc;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-copy {
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-copy > strong {
+  color: #172f47;
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-meta {
+  gap: 6px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-meta > span {
+  min-width: 94px;
+  border: 1px solid #dce7ef;
+  border-radius: 10px;
+  padding: 6px 8px;
+  background: #f8fbfd;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-meta small {
+  color: #7b8fa2;
+  font-size: 7px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-meta b {
+  color: #203950;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-product-meta > button, .shop-order-item-actions > button) {
+  min-height: 36px;
+  border-color: #bad8f4;
+  border-radius: 10px;
+  padding: 0 10px;
+  color: #176dbd;
+  background: #eef6ff;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-product-meta > button.remove, .shop-order-item-actions > button.remove) {
+  border-color: #efc7ce;
+  color: #c43650;
+  background: #fff1f3;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-line-total {
+  min-width: 86px;
+  color: #172f47;
+  font-size: 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-product-open {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-total {
+  min-height: 56px;
+  margin: 10px 0;
+  border: 1px solid #b8d8fa;
+  border-radius: 17px;
+  padding: 12px 15px;
+  background: linear-gradient(110deg, #eef6ff, #f6fbff);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-total span { font-size: 9px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-total strong { font-size: 14px; }
+
+/* Fiscal and workflow cards */
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card {
+  min-height: 94px;
+  gap: 13px;
+  margin: 10px 0;
+  border-radius: 19px;
+  padding: 13px 14px;
+  box-shadow: 0 10px 28px rgba(31, 82, 126, .055);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card > div small { font-size: 8px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card > div strong { margin-top: 3px; font-size: 15px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card > div p { margin-top: 3px; font-size: 9px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-invoice-card aside button {
+  min-height: 38px;
+  border-radius: 12px;
+  padding: 0 12px;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-timeline, .shop-order-status-section) {
+  margin: 10px 0;
+  border: 1px solid #d7e5ef;
+  border-radius: 20px;
+  padding: 14px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 82, 126, .055);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-section-title {
+  margin-bottom: 11px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-section-title > span {
+  color: #087e98;
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-section-title > strong {
+  color: #172f47;
+  font-size: 13px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-flow {
+  gap: 5px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step {
+  min-height: 69px;
+  grid-template-rows: 36px auto auto;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail {
+  height: 36px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail > span,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail > i {
+  left: calc(50% + 19px);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step > strong,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option strong { font-size: 9px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step > small,
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option small { font-size: 7px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state {
+  min-height: 64px;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px;
+  border-radius: 16px;
+  padding: 9px 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state > span {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state strong { font-size: 11px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state p { font-size: 8px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-picker {
+  padding-bottom: 4px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option {
+  min-width: 122px;
+  min-height: 101px;
+  flex-basis: 122px;
+  grid-template-rows: 37px auto;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option::after {
+  left: 39px;
+  top: 17px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option > span:nth-of-type(2) {
+  min-height: 53px;
+  border-radius: 13px;
+  padding: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option > i {
+  width: 19px;
+  height: 19px;
+  color: #fff;
+  background: var(--status-color);
+}
+
+/* Notices and fields */
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-correction-hint {
+  border: 1px solid #bdd8ed;
+  color: #47718f;
+  background: #eef7fd;
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(.shop-order-cancellation-field, .shop-order-return-field) {
+  border-radius: 19px;
+  padding: 14px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 82, 126, .055);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-cancellation-field {
+  border-color: #efbdc7;
+  background: linear-gradient(135deg, #fff1f3, #fff 52%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-cancellation-field > span b { color: #c43650; font-size: 8px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-cancellation-field > span strong { color: #172f47; font-size: 12px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-cancellation-field > span small { color: #7b6670; font-size: 8px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-return-field {
+  border-color: #decce0;
+  background: linear-gradient(135deg, #fff6fb, #fff 52%);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-notify {
+  min-height: 68px;
+  margin: 10px 0;
+  border: 1px solid #d7e5ef;
+  border-radius: 18px;
+  padding: 10px 12px;
+  color: #172f47;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(31, 82, 126, .055);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-notify-copy > strong { color: #172f47; font-size: 10px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-notify-copy > small { color: #71869a; font-size: 8px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-status-send {
+  min-height: 58px;
+  margin: -2px 0 12px;
+  border: 1px solid #b8d8fa;
+  border-radius: 16px;
+  color: #2b6faf;
+  background: linear-gradient(135deg, #eef6ff, #f7fbff);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-status-send:hover:not(:disabled) {
+  border-color: #76b7f5;
+  background: #e8f4ff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-status-send strong { color: #234f78; font-size: 9px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-status-send small { color: #68849e; font-size: 7px; }
+
+:root[data-theme="cubis-light"] #shop-order-details > .shop-commerce-columns {
+  gap: 10px;
+  margin: 10px 0;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details label {
+  color: #4f687f;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .025em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(input, textarea, select) {
+  border: 1px solid #ccdde8;
+  border-radius: 12px;
+  color: #172f47;
+  background: #fff;
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details :is(input, textarea, select):focus {
+  border-color: #83bff8;
+  box-shadow: 0 0 0 4px rgba(8, 127, 245, .08);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details > label:last-child textarea {
+  min-height: 74px;
+  margin-top: 6px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-note {
+  border: 1px solid #d7e5ef;
+  border-radius: 16px;
+  color: #435e76;
+  background: #fff;
+  font-size: 9px;
+  box-shadow: 0 9px 24px rgba(31, 82, 126, .05);
+}
+
+/* Product picker and replacement dialogs opened from an order. */
+:root[data-theme="cubis-light"] :is(.shop-order-product-picker, .shop-order-replacement-dialog) {
+  background: rgba(14, 35, 54, .62);
+  backdrop-filter: blur(14px);
+}
+
+:root[data-theme="cubis-light"] .shop-order-product-picker > section,
+:root[data-theme="cubis-light"] .shop-order-replacement-dialog > section,
+:root[data-theme="cubis-light"] .shop-order-replacement-dialog.price-only > section {
+  border: 1px solid #cbdde9;
+  color: #172f47;
+  background: #fff;
+  box-shadow: 0 30px 90px rgba(8, 38, 65, .3);
+}
+
+:root[data-theme="cubis-light"] :is(.shop-order-product-picker, .shop-order-replacement-dialog) header strong {
+  color: #172f47;
+}
+
+:root[data-theme="cubis-light"] :is(.shop-order-product-picker, .shop-order-replacement-dialog) header button {
+  color: #547088;
+  background: #f2f7fb;
+}
+
+:root[data-theme="cubis-light"] .shop-order-product-picker [data-picker-product],
+:root[data-theme="cubis-light"] .shop-order-replacement-dialog article {
+  border-color: #d7e5ef;
+  background: #f8fbfd;
+}
+
+:root[data-theme="cubis-light"] .shop-order-product-picker [data-picker-product] > span strong,
+:root[data-theme="cubis-light"] .shop-order-replacement-dialog article strong {
+  color: #172f47;
+}
+
+@media (max-width: 1180px) {
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid {
+    grid-template-columns: minmax(260px, 1.7fr) repeat(3, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-page {
+    padding-inline: 16px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero[data-commerce-kind="orders"] {
+    grid-template-columns: 1fr auto;
+    padding: 22px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero-symbol {
+    display: none;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid .search {
+    grid-column: 1 / -1;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-page {
+    padding: 14px 11px 48px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-hero[data-commerce-kind="orders"] {
+    min-height: 130px;
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title {
+    grid-template-columns: 50px minmax(0, 1fr);
+    column-gap: 13px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title h1 { font-size: 28px; }
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-title p { font-size: 9px; }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-head-actions {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi {
+    min-height: 88px;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filter-grid .search {
+    grid-column: auto;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-commerce-table-wrap {
+    overflow-x: auto;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal {
+    padding: 5px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal.compact {
+    width: calc(100vw - 10px);
+    height: calc(100dvh - 10px);
+    max-height: calc(100dvh - 10px);
+    border-radius: 22px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header {
+    min-height: 76px;
+    grid-template-columns: 42px minmax(0, 1fr) 38px;
+    gap: 10px;
+    padding: 11px 12px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header h2 { font-size: 16px; }
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-header p { display: none; }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-commerce-modal-scroll {
+    padding: 12px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl > div:nth-child(n+3) {
+    border-top: 1px solid #e7eef4;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-items > .shop-order-product-line {
+    grid-template-columns: 48px minmax(0, 1fr) 38px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-items > .shop-order-product-line > :is(img, .shop-order-product-placeholder) {
+    width: 48px;
+    height: 48px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-line-total {
+    grid-column: 2;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer {
+    min-height: 68px;
+    padding: 9px 11px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > span {
+    display: none;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-modal .shop-order-modal-footer > button {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  :root[data-theme="cubis-light"] #tab-shop-orders .shop-order-filters > header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl > div {
+    border-top: 1px solid #e7eef4;
+    border-left: 0;
+  }
+
+  :root[data-theme="cubis-light"] #shop-order-details .shop-order-overview dl > div:first-child {
+    border-top: 0;
+  }
+}
