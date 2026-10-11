@@ -21,12 +21,15 @@ import { runWhenIdle } from '@/utils/runWhenIdle';
 import * as ImagePicker from 'expo-image-picker';
 import {
   Check,
+  CircleCheck,
+  CircleX,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Eye,
   GripVertical,
   ImagePlus,
+  Info,
   MessageSquare,
   Package,
   Pencil,
@@ -44,6 +47,7 @@ import RichTextEditor from '@/components/RichTextEditor';
 import ShopPagination from '@/components/ShopPagination';
 import ShopProductPicture from '@/components/ShopProductPicture';
 import ShopProductExportButton from '@/components/ShopProductExportButton';
+import AutoScrollProductName from '@/components/AutoScrollProductName';
 import useAndroidSearchBack from '@/hooks/useAndroidSearchBack';
 import {
   shopApi,
@@ -186,7 +190,6 @@ type FormState = {
   stock_quantity: string;
   supplier_stock_quantity: string;
   accounting_stock_quantity: string;
-  is_accounting_stock_tracked: boolean;
   low_stock_threshold: string;
   is_active: boolean;
   is_featured: boolean;
@@ -249,7 +252,6 @@ function emptyForm(): FormState {
     stock_quantity: '0',
     supplier_stock_quantity: '0',
     accounting_stock_quantity: '0',
-    is_accounting_stock_tracked: true,
     low_stock_threshold: '3',
     is_active: true,
     is_featured: false,
@@ -344,6 +346,7 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
   const [smartBillSettings, setSmartBillSettings] = useState<ShopSmartBillSettings | null>(null);
   const [smartBillLookup, setSmartBillLookup] = useState<ShopSmartBillSkuLookup | null>(null);
   const [smartBillLookupBusy, setSmartBillLookupBusy] = useState(false);
+  const [smartBillLookupError, setSmartBillLookupError] = useState('');
   const smartBillLookupSequence = useRef(0);
   const requestSequence = useRef(0);
   const metadataLoaded = useRef(Boolean(initialBootstrap?.categories?.length));
@@ -377,16 +380,20 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
     if (!editorVisible || editorLoading || !token || !smartBillSettings?.read_enabled || !sku) {
       setSmartBillLookup(null);
       setSmartBillLookupBusy(false);
+      setSmartBillLookupError('');
       return;
     }
     setSmartBillLookupBusy(true);
+    setSmartBillLookupError('');
     const timer = setTimeout(() => {
       shopApi.lookupSmartBillSku(token, sku, warehouseId).then((result) => {
         if (sequence !== smartBillLookupSequence.current) return;
         setSmartBillLookup(result);
+        setSmartBillLookupError('');
       }).catch(() => {
         if (sequence !== smartBillLookupSequence.current) return;
-        setSmartBillLookup({ status: 'not_found', sku, match: null });
+        setSmartBillLookup(null);
+        setSmartBillLookupError('Nu am putut contacta SmartBill. Verifică conexiunea și încearcă din nou.');
       }).finally(() => {
         if (sequence === smartBillLookupSequence.current) setSmartBillLookupBusy(false);
       });
@@ -498,6 +505,7 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
     setSlugTouched(false);
     setSmartBillLookup(null);
     setSmartBillLookupBusy(false);
+    setSmartBillLookupError('');
     setForm(emptyForm());
   };
 
@@ -572,7 +580,6 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
         stock_quantity: String(full.stock_quantity),
         supplier_stock_quantity: String(full.supplier_stock_quantity || 0),
         accounting_stock_quantity: String(full.accounting_stock_quantity || 0),
-        is_accounting_stock_tracked: full.is_accounting_stock_tracked !== false,
         low_stock_threshold: String(full.low_stock_threshold),
         is_active: full.is_active,
         is_featured: full.is_featured,
@@ -658,7 +665,7 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsMultipleSelection: true,
       selectionLimit: remaining,
       orderedSelection: true,
@@ -745,7 +752,7 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
       unit_of_measure: form.unit_of_measure.trim() || 'buc',
       stock_mode: form.stock_mode,
       stock_quantity: Math.max(0, Number.parseInt(form.stock_quantity || '0', 10) || 0),
-      is_accounting_stock_tracked: form.is_accounting_stock_tracked,
+      is_accounting_stock_tracked: false,
       low_stock_threshold: Math.max(0, Number.parseInt(form.low_stock_threshold || '0', 10) || 0),
       is_active: form.is_active,
       is_featured: form.is_featured,
@@ -834,6 +841,64 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
     : null;
   const seoTitle = form.meta_title.trim() || form.name.trim() || 'Titlul produsului';
   const seoDescription = form.meta_description.trim() || form.short_description.trim() || 'Descrierea produsului va aparea aici.';
+  const smartBillSku = form.sku.trim();
+  const smartBillLookupMatchesSku = Boolean(smartBillSku && smartBillLookup?.sku.trim().toLocaleUpperCase('ro-RO') === smartBillSku.toLocaleUpperCase('ro-RO'));
+  const smartBillSkuState: 'idle' | 'checking' | 'verified' | 'not_found' | 'ambiguous' | 'disabled' | 'error' = !smartBillSku
+    ? 'idle'
+    : smartBillSettings === null || smartBillLookupBusy
+      ? 'checking'
+      : !smartBillSettings.read_enabled
+        ? 'disabled'
+        : smartBillLookupError
+          ? 'error'
+          : smartBillLookupMatchesSku && smartBillLookup?.status === 'verified'
+            ? 'verified'
+            : smartBillLookupMatchesSku && smartBillLookup?.status === 'ambiguous'
+              ? 'ambiguous'
+              : smartBillLookupMatchesSku && smartBillLookup?.status === 'not_found'
+                ? 'not_found'
+                : 'checking';
+  const smartBillFeedbackTitle = smartBillSkuState === 'verified'
+    ? 'Produs găsit în SmartBill'
+    : smartBillSkuState === 'not_found'
+      ? 'Produs negăsit în SmartBill'
+      : smartBillSkuState === 'ambiguous'
+        ? 'SKU neclar în SmartBill'
+        : smartBillSkuState === 'checking'
+          ? 'Se verifică SKU-ul…'
+          : smartBillSkuState === 'error'
+            ? 'Verificarea a eșuat'
+            : smartBillSkuState === 'disabled'
+              ? 'Verificare indisponibilă'
+              : 'Verificare SmartBill';
+  const smartBillFeedbackText = smartBillSkuState === 'verified'
+    ? (smartBillLookup?.match?.name || `Codul ${smartBillSku} există în nomenclator.`)
+    : smartBillSkuState === 'not_found'
+      ? `Nu există niciun produs cu codul „${smartBillSku}”.`
+      : smartBillSkuState === 'ambiguous'
+        ? `Există ${smartBillLookup?.matches || 'mai multe'} potriviri. Introdu codul exact.`
+        : smartBillSkuState === 'checking'
+          ? `Căutăm exact codul „${smartBillSku}”.`
+          : smartBillSkuState === 'error'
+            ? smartBillLookupError
+            : smartBillSkuState === 'disabled'
+              ? 'Citirea SmartBill este oprită în configurația serverului.'
+              : 'Scrie codul produsului pentru verificare.';
+  const smartBillStatusLabel = form.smartbill_link_status === 'linked' && form.smartbill_sku === form.sku
+    ? 'ASOCIAT'
+    : smartBillSkuState === 'verified'
+      ? 'GĂSIT'
+      : smartBillSkuState === 'not_found'
+        ? 'NEGĂSIT'
+        : smartBillSkuState === 'ambiguous'
+          ? 'COD AMBIGUU'
+          : smartBillSkuState === 'checking'
+            ? 'SE VERIFICĂ'
+            : smartBillSkuState === 'error'
+              ? 'EROARE VERIFICARE'
+              : smartBillSkuState === 'disabled'
+                ? 'INDISPONIBIL'
+                : 'AȘTEAPTĂ SKU';
 
   if (loading) return <ScrollView style={styles.wrap} contentContainerStyle={styles.scrollContent}><View style={styles.pageHeader}>{header}</View><View style={styles.state}><ActivityIndicator color={Colors.orange} /><Text style={styles.stateText}>Se incarca produsele...</Text></View></ScrollView>;
   if (error) return <ScrollView style={styles.wrap} contentContainerStyle={styles.scrollContent}><View style={styles.pageHeader}>{header}</View><View style={styles.state}><Text style={styles.error}>{error}</Text><TouchableOpacity style={styles.retry} onPress={() => void load(false, { page, pageSize, query, includeMetadata: !metadataLoaded.current })}><Text style={styles.retryText}>Incearca din nou</Text></TouchableOpacity></View></ScrollView>;
@@ -851,14 +916,14 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
         showsVerticalScrollIndicator={false}>
       <View style={styles.pageHeader}>{header}</View>
       <View style={styles.stickyToolbar}>
+        <View pointerEvents="none" style={styles.toolbarAura} />
         <View style={styles.toolbarSearchRow}>
-          <View style={styles.search}><Search size={17} color={Colors.orange} /><TextInput value={query} onChangeText={(value) => { setQuery(value); setPage(1); }} placeholder="Caută" placeholderTextColor={Colors.textMuted} style={styles.searchInput} />{query ? <TouchableOpacity accessibilityLabel="Șterge căutarea" style={styles.clearSearch} onPress={clearSearch}><X size={16} color={Colors.textSecondary} /></TouchableOpacity> : null}</View>
-          <TouchableOpacity accessibilityLabel="Adaugă produs" style={styles.add} onPress={openNew}><Plus size={22} color={Colors.white} /></TouchableOpacity>
+          <View style={styles.search}><View style={styles.searchIcon}><Search size={17} color="#087FF5" /></View><TextInput value={query} onChangeText={(value) => { setQuery(value); setPage(1); }} placeholder="Caută produse sau coduri" placeholderTextColor={Colors.textMuted} style={styles.searchInput} />{query ? <TouchableOpacity accessibilityLabel="Șterge căutarea" style={styles.clearSearch} onPress={clearSearch}><X size={15} color={Colors.textSecondary} /></TouchableOpacity> : null}</View>
+          <TouchableOpacity accessibilityLabel="Adaugă produs" activeOpacity={0.78} style={styles.add} onPress={openNew}><View pointerEvents="none" style={styles.addHighlight} /><Plus size={23} color={Colors.white} /></TouchableOpacity>
         </View>
         <View style={styles.toolbarMetaRow}>
-          <View accessibilityLabel={`${productTotal} produse`} style={styles.summary}><View style={styles.summaryIcon}><Package size={15} color="#087FF5" /></View><View><Text style={styles.summaryValue}>{productTotal} {productTotal === 1 ? 'produs' : 'produse'}</Text><Text style={styles.summaryLabel}>ÎN CATALOG</Text></View></View>
-          <ShopProductExportButton sources={sources} total={productTotal} compact />
-          <TouchableOpacity style={styles.refresh} onPress={() => void load(true, { page, pageSize, query, includeMetadata: false })}>{listRefreshing ? <ActivityIndicator size="small" color={Colors.orange} /> : <RefreshCw size={18} color={Colors.textSecondary} />}</TouchableOpacity>
+          <View accessibilityLabel={`${productTotal} produse`} style={styles.summary}><View style={styles.summaryIcon}><Package size={16} color="#087FF5" /></View><View style={styles.summaryCopy}><Text style={styles.summaryLabel}>CATALOG PRODUSE</Text><Text style={styles.summaryValue}>{productTotal} {productTotal === 1 ? 'produs disponibil' : 'produse disponibile'}</Text></View></View>
+          <View style={styles.toolbarActions}><ShopProductExportButton sources={sources} total={productTotal} compact /><TouchableOpacity accessibilityLabel="Reîmprospătează produsele" activeOpacity={0.72} style={styles.refresh} onPress={() => void load(true, { page, pageSize, query, includeMetadata: false })}>{listRefreshing ? <ActivityIndicator size="small" color="#087FF5" /> : <RefreshCw size={18} color="#536A80" />}</TouchableOpacity></View>
         </View>
       </View>
       <View style={styles.listContent}>
@@ -867,8 +932,8 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
           <TouchableOpacity style={styles.productMain} activeOpacity={0.72} onPress={() => void openDetail(product)}>
             {product.images?.[0]?.url ? <ShopProductPicture image={product.images[0]} width={78} height={78} borderRadius={18} /> : <View style={styles.productImageFallback}><Package size={27} color="#087FF5" /></View>}
             <View style={styles.productCopy}>
-              <View style={styles.productTitleRow}><Text numberOfLines={2} style={styles.productName}>{product.name}</Text>{product.is_featured ? <View style={styles.featuredIcon}><Star size={12} color="#D97706" fill="#FBBF24" /></View> : null}</View>
-              <View style={styles.productCodeRow}><Text style={styles.productCodeLabel}>COD</Text><Text numberOfLines={1} style={styles.productCode}>{product.sku || product.supplier_product_code || 'Fără cod'}</Text></View>
+              <View style={styles.productTitleRow}><AutoScrollProductName value={product.name} style={styles.productName} containerStyle={styles.productNameMotion} />{product.is_featured ? <View style={styles.featuredIcon}><Star size={12} color="#D97706" fill="#FBBF24" /></View> : null}</View>
+              <View style={styles.productCodeRow}><Text style={styles.productCodeLabel}>COD</Text><AutoScrollProductName value={product.sku || product.supplier_product_code || 'Fără cod'} style={styles.productCode} containerStyle={styles.productCodeMotion} /></View>
               <Text numberOfLines={1} style={styles.productSource}>{product.source_domain || 'cubisshop.ro'}</Text>
             </View>
             <View style={styles.productOpen}><ChevronRight size={18} color="#087FF5" /></View>
@@ -924,13 +989,14 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
 
       {editorVisible ? <Modal visible animationType="none" onRequestClose={closeEditor}>
         <SafeAreaView style={styles.editorSafe} edges={['top', 'bottom']}>
-          <View style={styles.editorHeader}>
+          <View style={[styles.editorHeader, styles.productEditorHeader]}>
+            <View pointerEvents="none" style={styles.editorHeaderAura} />
             <TouchableOpacity style={styles.close} onPress={closeEditor} disabled={saving || editorLoading}><X size={21} color={Colors.textSecondary} /></TouchableOpacity>
-            <View style={styles.editorHeaderCopy}><Text style={styles.editorKicker}>CRM PRODUSE</Text><Text style={styles.editorTitle}>{form.id ? 'Editeaza produsul' : 'Produs nou'}</Text></View>
-            <TouchableOpacity style={[styles.saveTop, (saving || editorLoading) && styles.disabled]} onPress={() => void save()} disabled={saving || editorLoading}>{saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={17} color={Colors.white} /><Text style={styles.saveTopText}>Salveaza</Text></>}</TouchableOpacity>
+            <View style={styles.editorHeaderCopy}><Text style={styles.editorKicker}>CATALOG PRODUSE</Text><Text style={styles.editorTitle}>{form.id ? 'Editează produsul' : 'Produs nou'}</Text></View>
+            <TouchableOpacity style={[styles.saveTop, (saving || editorLoading) && styles.disabled]} onPress={() => void save()} disabled={saving || editorLoading}>{saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={16} color={Colors.white} /><Text style={styles.saveTopText}>Salvează</Text></>}</TouchableOpacity>
           </View>
           {editorLoading ? <View style={styles.editorLoadingState}><View style={styles.editorLoadingIcon}><RefreshCw size={27} color={Colors.orange} /></View><ActivityIndicator size="large" color={Colors.orange} /><Text style={styles.editorLoadingTitle}>Se încarcă produsul</Text><Text style={styles.editorLoadingText}>Pregătim descrierea, imaginile, specificațiile și datele comerciale.</Text></View> : <ScrollView contentContainerStyle={[styles.form, { paddingBottom: Math.max(insets.bottom, 24) + 36 }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-            <SectionTitle number="01" title="Sursa si identitate" text="Alege provenienta produsului si adresa lui publica." />
+            <SectionTitle number="01" title="Sursă și identitate" text="Alege proveniența produsului și adresa lui publică." />
             <Text style={styles.label}>SURSA PRODUSULUI</Text>
             <View style={styles.sourceRow}>
               <Choice label="Fără sursă · produs Cubis Shop" selected={form.source_id === null} onPress={() => { patchForm('source_id', null); patchForm('source_domain', 'cubisshop.ro'); }} />
@@ -938,10 +1004,15 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
             </View>
             <Field label="NUME PRODUS *" value={form.name} onChangeText={(value) => { patchForm('name', value); if (!slugTouched) patchForm('slug', slugify(value)); }} placeholder="Ex: Anvelopa G10 All-Terrain" error={duplicateProductName ? 'Acest nume de produs exista deja.' : undefined} />
             <Field label="SLUG *" value={form.slug} onChangeText={(value) => { setSlugTouched(true); patchForm('slug', slugify(value)); }} placeholder="anvelopa-g10-all-terrain" autoCapitalize="none" prefix="cubisshop.ro/magazin/produs/" />
-            <Field label="SKU / COD PRODUS" value={form.sku} onChangeText={(value) => patchForm('sku', value)} placeholder="Codul exact din SmartBill" hint="Căutarea exactă în SmartBill pornește după 450 ms. Asocierea devine verde numai după salvare." autoCapitalize="characters" maxLength={80} />
+            <Field label="SKU / COD PRODUS" value={form.sku} onChangeText={(value) => patchForm('sku', value)} placeholder="Codul exact din SmartBill" autoCapitalize="characters" maxLength={80} />
+            <View style={[styles.skuFeedback, smartBillSkuState === 'verified' && styles.skuFeedbackSuccess, (smartBillSkuState === 'not_found' || smartBillSkuState === 'ambiguous') && styles.skuFeedbackError]}>
+              <View style={[styles.skuFeedbackIcon, smartBillSkuState === 'verified' && styles.skuFeedbackIconSuccess, (smartBillSkuState === 'not_found' || smartBillSkuState === 'ambiguous') && styles.skuFeedbackIconError]}>
+                {smartBillSkuState === 'checking' ? <ActivityIndicator size="small" color={Theme.colors.brand.primary} /> : smartBillSkuState === 'verified' ? <CircleCheck size={19} color={Theme.colors.state.success} /> : smartBillSkuState === 'not_found' || smartBillSkuState === 'ambiguous' ? <CircleX size={19} color={Theme.colors.state.error} /> : <Info size={19} color={Theme.colors.state.info} />}
+              </View>
+              <View style={styles.skuFeedbackCopy}><Text style={[styles.skuFeedbackTitle, smartBillSkuState === 'verified' && styles.skuFeedbackTitleSuccess, (smartBillSkuState === 'not_found' || smartBillSkuState === 'ambiguous') && styles.skuFeedbackTitleError]}>{smartBillFeedbackTitle}</Text><Text style={styles.skuFeedbackText}>{smartBillFeedbackText}</Text></View>
+            </View>
             <View style={styles.smartBillCard}>
-              <View style={styles.smartBillHead}><View><Text style={styles.smartBillKicker}>SMARTBILL V3 + V1</Text><Text style={styles.smartBillTitle}>Asociere produs și gestiune</Text></View><View style={[styles.smartBillStatus, form.smartbill_link_status === 'linked' && form.smartbill_sku === form.sku ? styles.smartBillStatusOk : smartBillLookup?.status === 'verified' || smartBillLookup?.status === 'ambiguous' ? styles.smartBillStatusPending : smartBillLookup?.status === 'not_found' ? styles.smartBillStatusError : styles.smartBillStatusIdle]}><Text style={styles.smartBillStatusText}>{smartBillLookupBusy ? 'SE VERIFICĂ' : form.smartbill_link_status === 'linked' && form.smartbill_sku === form.sku ? 'SALVAT' : smartBillLookup?.status === 'verified' ? 'GĂSIT · NESALVAT' : smartBillLookup?.status === 'ambiguous' ? 'AMBIGUU' : smartBillLookup?.status === 'not_found' ? 'NEGĂSIT' : 'NEVERIFICAT'}</Text></View></View>
-              {!smartBillSettings?.read_enabled ? <Text style={styles.smartBillHelp}>Citirea SmartBill este oprită în configurația serverului.</Text> : null}
+              <View style={styles.smartBillHead}><View style={styles.smartBillHeadCopy}><Text style={styles.smartBillKicker}>SMARTBILL</Text><Text style={styles.smartBillTitle}>Asociere produs și gestiune</Text></View><View style={[styles.smartBillStatus, (form.smartbill_link_status === 'linked' && form.smartbill_sku === form.sku || smartBillSkuState === 'verified') && styles.smartBillStatusOk, (smartBillSkuState === 'not_found' || smartBillSkuState === 'ambiguous') && styles.smartBillStatusError]}><Text style={styles.smartBillStatusText}>{smartBillStatusLabel}</Text></View></View>
               {smartBillLookup?.match ? <View style={styles.smartBillMatch}><Text style={styles.smartBillMatchName}>{smartBillLookup.match.name}</Text><Text style={styles.smartBillHelp}>ID: {smartBillLookup.match.id} · U.M.: {smartBillLookup.match.measuring_unit || form.unit_of_measure}</Text></View> : null}
               <Text style={styles.label}>GESTIUNE SMARTBILL</Text>
               <View style={styles.smartBillWarehouses}>{(smartBillSettings?.warehouses || []).map((warehouse) => <TouchableOpacity key={warehouse.id} onPress={() => setForm((current) => ({ ...current, smartbill_warehouse_id: warehouse.id, smartbill_warehouse_name: warehouse.name }))} style={[styles.smartBillWarehouse, form.smartbill_warehouse_id === warehouse.id && styles.smartBillWarehouseActive]}><Text style={styles.smartBillWarehouseName}>{warehouse.name}</Text><Text style={styles.smartBillWarehouseId}>{warehouse.id}</Text></TouchableOpacity>)}</View>
@@ -950,13 +1021,13 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
             </View>
             <View style={styles.twoColumns}><View style={styles.column}><Field label="COD PRODUS FURNIZOR" value={form.supplier_product_code} onChangeText={(value) => patchForm('supplier_product_code', value)} placeholder="Opțional · litere și cifre" maxLength={120} autoCapitalize="characters" /></View><View style={styles.column}><Field label="EAN" value={form.ean} onChangeText={(value) => patchForm('ean', value)} placeholder="Opțional · litere și cifre" maxLength={120} autoCapitalize="characters" /></View></View>
 
-            <SectionTitle number="02" title="Galerie foto" text="Incarca pana la 12 poze. Tine de o fotografie si trage-o in pozitia dorita." />
+            <SectionTitle number="02" title="Galerie foto" text="Încarcă până la 12 poze. Ține de o fotografie și mut-o în poziția dorită." />
             <ScrollView horizontal scrollEnabled={!galleryDragging} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
               {form.images.map((image, index) => <DraggableGalleryImage key={image.key} image={image} index={index} total={form.images.length} isMain={index === 0} onRemove={() => patchForm('images', form.images.filter((_, imageIndex) => imageIndex !== index))} onMakeMain={() => makePrimary(index)} onDrop={reorderImages} onDragStateChange={setGalleryDragging} />)}
               {form.images.length < 12 ? <TouchableOpacity style={styles.imageAdd} onPress={() => void chooseImages()}><View style={styles.imageAddIcon}><ImagePlus size={25} color={Colors.orange} /></View><Text style={styles.imageAddText}>Adauga fotografii</Text><Text style={styles.imageCount}>{form.images.length} din 12</Text></TouchableOpacity> : null}
             </ScrollView>
 
-            <SectionTitle number="03" title="Descriere" text="Formatarea si stilurile lipite din alte pagini sunt pastrate." />
+            <SectionTitle number="03" title="Descriere" text="Formatarea și stilurile lipite din alte pagini sunt păstrate." />
             <Field label="DESCRIERE SCURTA" value={form.short_description} onChangeText={(value) => patchForm('short_description', value)} placeholder="Rezumatul afisat in liste si in Google" multiline />
             <Field label="TITLU DESCRIERE LUNGA" value={form.description_title} onChangeText={(value) => patchForm('description_title', value)} placeholder="Ex: Aderenta sigura pentru traseele tale zilnice." maxLength={220} />
             <Text style={styles.label}>DESCRIERE COMPLETA</Text>
@@ -970,11 +1041,11 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
               }}
             />
 
-            <SectionTitle number="04" title="Specificatii" text="Fiecare produs poate avea propriile grupe si caracteristici." />
+            <SectionTitle number="04" title="Specificații" text="Fiecare produs poate avea propriile grupe și caracteristici." />
             <TouchableOpacity style={styles.inlineAdd} onPress={() => patchForm('specifications', [...form.specifications, { key: `spec-${Date.now()}`, group: 'Caracteristici generale', label: '', value: '' }])}><Plus size={16} color={Colors.orange} /><Text style={styles.inlineAddText}>Adauga specificatie</Text></TouchableOpacity>
             {form.specifications.map((specification, index) => <View key={specification.key} style={styles.subEditorCard}><View style={styles.subEditorHead}><Text style={styles.subEditorTitle}>SPECIFICATIE {index + 1}</Text><TouchableOpacity onPress={() => patchForm('specifications', form.specifications.filter((item) => item.key !== specification.key))}><Trash2 size={16} color={Colors.error} /></TouchableOpacity></View><Field label="GRUPA" value={specification.group} onChangeText={(value) => patchForm('specifications', form.specifications.map((item) => item.key === specification.key ? { ...item, group: value } : item))} placeholder="Caracteristici generale" /><Field label="DENUMIRE" value={specification.label} onChangeText={(value) => patchForm('specifications', form.specifications.map((item) => item.key === specification.key ? { ...item, label: value } : item))} placeholder="Ex: Greutate" /><Field label="VALOARE" value={specification.value} onChangeText={(value) => patchForm('specifications', form.specifications.map((item) => item.key === specification.key ? { ...item, value } : item))} placeholder="Ex: 1,2 kg" multiline /></View>)}
 
-            <SectionTitle number="05" title="Intrebari si raspunsuri" text="Sunt afisate numai pe pagina acestui produs." />
+            <SectionTitle number="05" title="Întrebări și răspunsuri" text="Sunt afișate numai pe pagina acestui produs." />
             <TouchableOpacity style={styles.inlineAdd} onPress={() => patchForm('questions', [...form.questions, { key: `question-${Date.now()}`, question: '', answer: '' }])}><Plus size={16} color={Colors.orange} /><Text style={styles.inlineAddText}>Adauga intrebare</Text></TouchableOpacity>
             {form.questions.map((question, index) => <View key={question.key} style={styles.subEditorCard}><View style={styles.subEditorHead}><Text style={styles.subEditorTitle}>INTREBARE {index + 1}</Text><TouchableOpacity onPress={() => patchForm('questions', form.questions.filter((item) => item.key !== question.key))}><Trash2 size={16} color={Colors.error} /></TouchableOpacity></View><Field label="INTREBARE" value={question.question} onChangeText={(value) => patchForm('questions', form.questions.map((item) => item.key === question.key ? { ...item, question: value } : item))} placeholder="Intrebarea clientului" multiline /><Field label="RASPUNS" value={question.answer} onChangeText={(value) => patchForm('questions', form.questions.map((item) => item.key === question.key ? { ...item, answer: value } : item))} placeholder="Raspunsul magazinului" multiline /></View>)}
 
@@ -994,12 +1065,10 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
             <Field label="PREȚ CUBIS SHOP *" value={form.price} onChangeText={(value) => patchForm('price', value)} placeholder="0,00" keyboardType="decimal-pad" hint={isBoomagProduct ? 'Editezi prețul public dorit. Dacă lași 0, se folosește prețul valid al furnizorului și marja pornește de la 0.' : 'Acesta este prețul public folosit când produsul nu are un preț de furnizor valid.'} />
             <Field label="UNITATE DE MĂSURĂ (U.M.)" value={form.unit_of_measure} onChangeText={(value) => patchForm('unit_of_measure', value)} placeholder="buc" maxLength={20} hint="Se preia automat pe avizul de însoțire a mărfii." />
             <Field label={discountType === 'percent' ? 'REDUCERE %' : 'REDUCERE LEI'} value={form.discount_value || ''} onChangeText={(value) => patchForm('discount_value', value)} placeholder="0" keyboardType="decimal-pad" />
-            {form.is_accounting_stock_tracked
-              ? <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Costul real vine din documentele de intrare.</Text><Text style={styles.nirNoteText}>Loturile din NIR păstrează costul fiecărei recepții, iar retururile refac exact costul real al lotului vândut.</Text></View>
-              : <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Cost fixat la momentul comenzii.</Text><Text style={styles.nirNoteText}>Pentru produsul exclus din Stocuri Conta, pretul furnizorului devine costul curent, iar comanda salveaza un instantaneu. Schimbarile viitoare nu modifica statisticile istorice.</Text></View>}
+            <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Stoc contabil administrat în SmartBill.</Text><Text style={styles.nirNoteText}>Cubis folosește SKU-ul și gestiunea asociată pentru sincronizare, fără o gestiune contabilă paralelă.</Text></View>
             {reducedPrice !== null ? <View style={styles.pricePreview}><Text style={styles.oldPrice}>{money(priceValue)}</Text><Text style={styles.newPrice}>{money(reducedPrice)}</Text><Text style={styles.discountBadge}>{discountType === 'percent' ? `-${discountValue}%` : `-${money(discountValue)}`}</Text></View> : null}
 
-            <SectionTitle number="07" title="Catalog si compatibilitate" text="Leaga produsul de structura magazinului." />
+            <SectionTitle number="07" title="Catalog și compatibilitate" text="Leagă produsul de structura magazinului." />
             <Text style={styles.label}>CATEGORIE</Text>
             <CategoryTreeDropdown items={categories} selectedIds={form.category_ids} onChange={(ids) => setForm((current) => ({ ...current, category_ids: ids, category_id: preferredCategoryId(categories, ids) }))} />
             <Text style={styles.label}>PRODUCATOR</Text>
@@ -1007,7 +1076,7 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
             <Text style={styles.label}>COMPATIBILITATI</Text>
             <MultiSelectDropdown items={brands} selectedIds={form.brand_ids} onChange={(ids) => patchForm('brand_ids', ids)} />
 
-            <SectionTitle number="08" title="Garantia produsului" text="Este afisata public pe pagina produsului atunci cand are o valoare mai mare de zero." />
+            <SectionTitle number="08" title="Garanția produsului" text="Este afișată public pe pagina produsului atunci când are o valoare mai mare de zero." />
             <View style={styles.twoColumns}><View style={styles.column}><Field label="GARANTIE LEGALA · LUNI" value={form.legal_warranty_months} onChangeText={(value) => patchForm('legal_warranty_months', value)} keyboardType="number-pad" placeholder="Nesetat" /></View><View style={styles.column}><Field label="GARANTIE COMERCIALA · LUNI" value={form.commercial_warranty_months} onChangeText={(value) => patchForm('commercial_warranty_months', value)} keyboardType="number-pad" placeholder="Nesetat" /></View></View>
 
             <SectionTitle number="09" title="Stoc" text={isBoomagProduct ? 'Alege stoc automat din Boomag sau din receptiile NIR, ori stoc nelimitat pentru aprovizionare din alte surse.' : 'Alege stoc online nelimitat sau cantitate urmarita automat.'} />
@@ -1016,9 +1085,7 @@ export default function ShopProductsManager({ onOpenOrder, header, bottomInset =
               ? <View style={styles.nirNote}><Text style={styles.nirNoteTitle}>Online: {form.stock_quantity} · Boomag: {form.supplier_stock_quantity} · Fizic NIR: {form.accounting_stock_quantity} buc.</Text><Text style={styles.nirNoteText}>{form.stock_mode === 'unlimited' ? 'Stocul online ramane nelimitat chiar daca Boomag si stocul fizic ajung la zero.' : 'Produsul ramane disponibil automat din Boomag sau din stocul fizic receptionat prin NIR, indiferent de furnizorul NIR.'}</Text></View>
               : form.stock_mode === 'tracked' ? <View style={styles.twoColumns}><View style={styles.column}><Field label="CANTITATE" value={form.stock_quantity} onChangeText={(value) => patchForm('stock_quantity', value)} placeholder="0" keyboardType="number-pad" /></View><View style={styles.column}><Field label="ALERTA SUB" value={form.low_stock_threshold} onChangeText={(value) => patchForm('low_stock_threshold', value)} placeholder="3" keyboardType="number-pad" /></View></View> : null}
             {isBoomagProduct && form.stock_mode === 'tracked' ? <Field label="ALERTA SUB" value={form.low_stock_threshold} onChangeText={(value) => patchForm('low_stock_threshold', value)} placeholder="3" keyboardType="number-pad" /> : null}
-            <View style={[styles.toggleCard, styles.accountingToggleCard]}><View style={styles.toggleCopy}><Text style={styles.toggleTitle}>Urmărește în stocul contabil</Text><Text style={styles.toggleText}>Activ implicit. Stocul contabil folosit la facturare este verificat în SmartBill, pe SKU și gestiunea asociată.</Text></View><Switch accessibilityLabel="Urmărește în stocul contabil" value={form.is_accounting_stock_tracked} onValueChange={(value) => patchForm('is_accounting_stock_tracked', value)} trackColor={{ false: '#DEE8F0', true: '#34D39955' }} thumbColor={form.is_accounting_stock_tracked ? '#34D399' : '#8A8A8A'} /></View>
-
-            <SectionTitle number="10" title="SEO si Google" text="Controleaza titlul si descrierea din rezultatele cautarii." />
+            <SectionTitle number="10" title="SEO și Google" text="Controlează titlul și descrierea din rezultatele căutării." />
             <Field label="META TITLU" value={form.meta_title} onChangeText={(value) => patchForm('meta_title', value)} placeholder={form.name || 'Titlul produsului'} />
             <Field label="META DESCRIERE" value={form.meta_description} onChangeText={(value) => patchForm('meta_description', value)} placeholder="Descriere pentru Google" multiline />
             <View style={styles.googlePreview}>
@@ -1087,7 +1154,7 @@ function ProductSaveProgress({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function SectionTitle({ number, title, text }: { number: string; title: string; text: string }) {
-  return <View style={styles.sectionTitle}><Text style={styles.sectionNumber}>{number}</Text><View><Text style={styles.sectionName}>{title}</Text><Text style={styles.sectionText}>{text}</Text></View></View>;
+  return <View style={styles.sectionTitle}><Text style={styles.sectionNumber}>{number}</Text><View style={styles.sectionCopy}><Text style={styles.sectionName}>{title}</Text><Text style={styles.sectionText}>{text}</Text></View></View>;
 }
 
 function DetailGooglePagination({ label, page, pageSize, total, onPageChange }: { label: string; page: number; pageSize: number; total: number; onPageChange: (page: number) => void }) {
@@ -1207,34 +1274,39 @@ const styles = StyleSheet.create({
   stateText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 11 },
   error: { color: Theme.colors.state.error, fontFamily: 'Inter-Regular', fontSize: 11, textAlign: 'center', paddingHorizontal: 22 },
   retry: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: Colors.orangeDim }, retryText: { color: Colors.orange, fontFamily: 'Inter-SemiBold', fontSize: 10 },
-  stickyToolbar: { width: '100%', height: 108, gap: 6, paddingHorizontal: 11, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#D7E5EF', backgroundColor: Colors.bg, elevation: 12, shadowColor: Theme.colors.shadow.color, shadowOpacity: 0.16, shadowRadius: 9, shadowOffset: { width: 0, height: 4 } },
-  toolbarSearchRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  toolbarMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  search: { flex: 1, minWidth: 0, height: 44, flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 15, paddingHorizontal: 12, backgroundColor: Theme.colors.surface.base },
-  searchInput: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 14 },
-  clearSearch: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.muted },
-  refresh: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, backgroundColor: Theme.colors.surface.base },
-  add: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: Theme.colors.brand.primaryAction, shadowColor: Theme.colors.brand.primary, shadowOpacity: .2, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
-  summary: { height: 42, minWidth: 0, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 9, backgroundColor: Theme.colors.surface.base },
-  summaryIcon: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.brandSoft },
-  summaryValue: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 10 }, summaryLabel: { marginTop: 1, color: Theme.colors.text.muted, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: .65 },
+  stickyToolbar: { position: 'relative', width: 'auto', minHeight: 118, gap: 8, overflow: 'hidden', marginHorizontal: 10, marginTop: 8, padding: 10, borderWidth: 1, borderColor: 'rgba(139, 190, 226, 0.38)', borderRadius: 25, backgroundColor: Theme.colors.surface.base, elevation: 7, shadowColor: '#4D7898', shadowOpacity: 0.13, shadowRadius: 15, shadowOffset: { width: 0, height: 7 } },
+  toolbarAura: { position: 'absolute', top: -64, right: -38, width: 180, height: 130, borderRadius: 90, backgroundColor: 'rgba(9, 201, 229, 0.09)' },
+  toolbarSearchRow: { zIndex: 1, flexDirection: 'row', alignItems: 'center', gap: 9 },
+  toolbarMetaRow: { zIndex: 1, minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  search: { flex: 1, minWidth: 0, height: 50, flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1, borderColor: 'rgba(87, 139, 177, 0.24)', borderRadius: 18, paddingLeft: 7, paddingRight: 10, backgroundColor: '#F5F9FC' },
+  searchIcon: { width: 35, height: 35, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: '#E5F1FF' },
+  searchInput: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 13.5 },
+  clearSearch: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: '#E9F0F5' },
+  toolbarActions: { flexDirection: 'row', alignItems: 'center', gap: 5, padding: 3, borderRadius: 16, backgroundColor: '#F2F7FA' },
+  refresh: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(87, 139, 177, 0.2)', borderRadius: 14, backgroundColor: '#FFFFFF' },
+  add: { position: 'relative', width: 50, height: 50, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', borderRadius: 18, backgroundColor: '#087FF5', shadowColor: '#087FF5', shadowOpacity: .28, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  addHighlight: { position: 'absolute', top: -22, right: -14, width: 54, height: 54, borderRadius: 27, backgroundColor: 'rgba(255,255,255,0.16)' },
+  summary: { minWidth: 0, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9, paddingHorizontal: 4 },
+  summaryIcon: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: '#E7F2FF' },
+  summaryCopy: { minWidth: 0, flex: 1 },
+  summaryValue: { marginTop: 2, color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 10.5 }, summaryLabel: { color: '#087FF5', fontFamily: 'Inter-Bold', fontSize: 7.5, letterSpacing: .75 },
   productCard: { gap: 11, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 23, padding: 12, backgroundColor: Theme.colors.surface.base, marginBottom: 9 },
   productMain: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 11 },
   productImage: { width: 78, height: 78, borderRadius: 18, backgroundColor: Theme.colors.surface.muted }, productImageFallback: { width: 78, height: 78, flexShrink: 0, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.brandSoft },
-  productCopy: { flex: 1, minWidth: 0 }, productTitleRow: { minWidth: 0, flexDirection: 'row', alignItems: 'flex-start', gap: 6 }, productName: { minWidth: 0, flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 18 },
+  productCopy: { flex: 1, minWidth: 0 }, productTitleRow: { minWidth: 0, flexDirection: 'row', alignItems: 'flex-start', gap: 6 }, productNameMotion: { flex: 1, height: 20 }, productName: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 18 },
   featuredIcon: { width: 23, height: 23, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#FFF7DF' },
-  productCodeRow: { maxWidth: '100%', alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6, paddingHorizontal: 7, paddingVertical: 4, borderRadius: 8, backgroundColor: Theme.colors.surface.muted }, productCodeLabel: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: .55 }, productCode: { minWidth: 0, flexShrink: 1, color: Theme.colors.text.secondary, fontFamily: 'Inter-SemiBold', fontSize: 8.5 }, productSource: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8.5, marginTop: 5 },
+  productCodeRow: { width: '100%', maxWidth: '100%', alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6, paddingHorizontal: 7, paddingVertical: 4, borderRadius: 8, backgroundColor: Theme.colors.surface.muted }, productCodeLabel: { flexShrink: 0, color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: .55 }, productCodeMotion: { flex: 1, height: 13 }, productCode: { color: Theme.colors.text.secondary, fontFamily: 'Inter-SemiBold', fontSize: 8.5, lineHeight: 12 }, productSource: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8.5, marginTop: 5 },
   productOpen: { width: 34, height: 34, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.brandSoft },
   productCardFooter: { minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: Theme.colors.border.subtle },
   productCommercial: { minWidth: 0, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }, productPrice: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 15 },
   stockPill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 6, borderRadius: 10, backgroundColor: Theme.colors.state.successSoft }, stockPillLow: { backgroundColor: Theme.colors.state.errorSoft }, stockDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Theme.colors.state.success }, stockDotLow: { backgroundColor: Theme.colors.state.error }, stock: { color: Theme.colors.state.success, fontFamily: 'Inter-SemiBold', fontSize: 8 }, stockLow: { color: Theme.colors.state.error },
   productActions: { flexDirection: 'row', alignItems: 'center', gap: 6 }, iconAction: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.brandSoft }, deleteAction: { backgroundColor: Theme.colors.state.errorSoft },
   empty: { minHeight: 330, position: 'relative', overflow: 'hidden', alignItems: 'center', justifyContent: 'center', padding: 23, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 27, backgroundColor: Theme.colors.surface.base }, emptyAura: { width: 240, height: 240, position: 'absolute', left: -145, bottom: -145, borderRadius: 120, backgroundColor: Theme.colors.surface.brandSoft }, emptyIcon: { width: 68, height: 68, alignItems: 'center', justifyContent: 'center', borderRadius: 22, backgroundColor: Theme.colors.surface.brandSoft, transform: [{ rotate: '-4deg' }] }, emptyKicker: { marginTop: 12, color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1.1 }, emptyTitle: { maxWidth: 290, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 18, lineHeight: 23, textAlign: 'center', marginTop: 7 }, emptyText: { maxWidth: 290, color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10.5, lineHeight: 16, textAlign: 'center', marginTop: 7 }, emptyButton: { minHeight: 46, marginTop: 15, paddingHorizontal: 17, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 15, backgroundColor: Theme.colors.brand.primaryAction }, emptyButtonText: { color: Theme.colors.text.onBrand, fontFamily: 'Inter-Bold', fontSize: 11 },
-  editorSafe: { flex: 1, backgroundColor: Colors.bg }, editorHeader: { minHeight: 88, flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 1, borderBottomColor: '#D8E5EF', paddingHorizontal: 12, backgroundColor: Theme.colors.surface.base },
+  editorSafe: { flex: 1, backgroundColor: Colors.bg }, editorHeader: { minHeight: 82, flexDirection: 'row', alignItems: 'center', gap: 9, borderBottomWidth: 1, borderBottomColor: '#D8E5EF', paddingHorizontal: 11, backgroundColor: Theme.colors.surface.base }, productEditorHeader: { position: 'relative', overflow: 'hidden', backgroundColor: Theme.colors.surface.base }, editorHeaderAura: { width: 150, height: 150, position: 'absolute', right: -82, top: -94, borderRadius: 75, backgroundColor: Theme.colors.surface.brandSoft },
   detailHeader: { minHeight: 142, flexDirection: 'column', alignItems: 'stretch', justifyContent: 'center', paddingVertical: 10 }, detailHeaderTop: { width: '100%', minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10 }, detailHeaderName: { marginTop: 3, color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 15, lineHeight: 19 },
   detailHeaderCode: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 9, padding: 8, borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: 14, backgroundColor: Theme.colors.surface.brandSoft }, detailHeaderCodeIcon: { width: 33, height: 33, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: Theme.colors.surface.base }, detailHeaderCodeCopy: { minWidth: 0, flex: 1 }, detailHeaderCodeLabel: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: .75 },
-  close: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.muted }, editorHeaderCopy: { flex: 1, minWidth: 0 }, editorKicker: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 8.5, letterSpacing: 1 }, editorTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 20, marginTop: 2 }, productCodeTop: { flexShrink: 1, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 12, lineHeight: 16, marginTop: 2 }, editorProductName: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 13, lineHeight: 18, marginTop: 2 }, saveTop: { minWidth: 100, height: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 14, backgroundColor: Theme.colors.brand.primaryAction }, saveTopText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 11 }, disabled: { opacity: 0.55 }, editorLoadingState: { flex: 1, paddingHorizontal: 32, alignItems: 'center', justifyContent: 'center' }, editorLoadingIcon: { width: 68, height: 68, marginBottom: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 23, backgroundColor: Theme.colors.surface.brandSoft }, editorLoadingTitle: { marginTop: 17, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 22 }, editorLoadingText: { maxWidth: 330, marginTop: 7, color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 14, lineHeight: 20, textAlign: 'center' },
-  form: { width: '100%', maxWidth: 920, alignSelf: 'center', padding: 16 },
+  close: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.muted }, editorHeaderCopy: { flex: 1, minWidth: 0 }, editorKicker: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 7.5, letterSpacing: .9 }, editorTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 17, lineHeight: 21, marginTop: 2 }, productCodeTop: { flexShrink: 1, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 12, lineHeight: 16, marginTop: 2 }, editorProductName: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 12, lineHeight: 17, marginTop: 2 }, saveTop: { minWidth: 88, height: 40, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, borderRadius: 13, backgroundColor: Theme.colors.brand.primaryAction }, saveTopText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 10 }, disabled: { opacity: 0.55 }, editorLoadingState: { flex: 1, paddingHorizontal: 32, alignItems: 'center', justifyContent: 'center' }, editorLoadingIcon: { width: 62, height: 62, marginBottom: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 21, backgroundColor: Theme.colors.surface.brandSoft }, editorLoadingTitle: { marginTop: 15, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 18 }, editorLoadingText: { maxWidth: 330, marginTop: 7, color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 11, lineHeight: 17, textAlign: 'center' },
+  form: { width: '100%', maxWidth: 920, alignSelf: 'center', paddingHorizontal: 12, paddingTop: 4 },
   detailLoading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }, detailContent: { width: '100%', maxWidth: 920, alignSelf: 'center', padding: 12 }, detailGallery: { gap: 10, paddingBottom: 11, paddingRight: 10 }, detailImage: { position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 24, backgroundColor: Theme.colors.surface.subtle },
   imageIndex: { position: 'absolute', right: 10, bottom: 10, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 9, backgroundColor: '#10243CC8' }, imageIndexText: { color: '#FFFFFF', fontFamily: 'Inter-Bold', fontSize: 8 },
   detailImageEmpty: { alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderStyle: 'dashed', borderColor: Theme.colors.border.brandSoft, borderRadius: 24, backgroundColor: Theme.colors.surface.brandSoft, marginBottom: 11 }, detailImageEmptyTitle: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 13 }, detailImageEmptyText: { color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 9 },
@@ -1244,10 +1316,10 @@ const styles = StyleSheet.create({
   saleCard: { marginTop: 10, padding: 14, borderRadius: 16, backgroundColor: Theme.colors.surface.muted, borderWidth: 1, borderColor: Theme.colors.border.subtle }, saleHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }, saleLabel: { color: Colors.textMuted, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.6 }, saleNumber: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 12, marginTop: 3 }, saleMeta: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 6 }, saleStatus: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, backgroundColor: Theme.colors.surface.brandSoft }, saleStatusText: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 7, textTransform: 'uppercase' }, saleStats: { flexDirection: 'row', gap: 7, marginTop: 12 }, saleStat: { flex: 1, minWidth: 0, padding: 9, borderRadius: 11, backgroundColor: Theme.colors.surface.base }, saleValue: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 10, marginTop: 5 }, saleProfit: { color: '#28D16F', fontFamily: 'Inter-Bold', fontSize: 10, marginTop: 5 }, detailEmpty: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 10, paddingVertical: 18 },
   reviewCard: { borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 18, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, reviewHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }, reviewName: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 11 }, reviewVerified: { alignSelf: 'flex-start', marginTop: 5, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(45,212,191,0.32)', backgroundColor: 'rgba(45,212,191,0.1)' }, reviewVerifiedText: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-Bold', fontSize: 7 }, reviewSource: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 7, marginTop: 5 }, reviewMeta: { color: Theme.colors.state.warningBright, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 5 }, reviewDelete: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: 'rgba(239,68,68,0.1)' }, reviewMessage: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 16, marginVertical: 12 }, reviewReply: { minHeight: 74, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, padding: 11, color: Colors.textPrimary, backgroundColor: Theme.colors.surface.subtle, fontFamily: 'Inter-Regular', fontSize: 10, textAlignVertical: 'top' }, reviewSave: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 13, backgroundColor: Colors.orange, marginTop: 8 }, reviewSaveText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 9 },
   detailPagination: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 10, marginBottom: 4 }, detailPageDirection: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 11, backgroundColor: Theme.colors.surface.cyanSoft }, detailPageDisabled: { opacity: 0.28 }, detailPageButton: { minWidth: 34, height: 34, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'transparent', borderRadius: 11, backgroundColor: Theme.colors.surface.muted }, detailPageButtonActive: { borderColor: '#09BFD950', backgroundColor: Theme.colors.brand.primaryAction }, detailPageText: { color: Theme.colors.text.muted, fontFamily: 'Inter-Bold', fontSize: 10 }, detailPageTextActive: { color: Theme.colors.text.onBrand }, detailPageEllipsis: { width: 20, color: Theme.colors.text.muted, textAlign: 'center', fontFamily: 'Inter-Bold', fontSize: 14 }, detailPageTotal: { position: 'absolute', right: 2, color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 8 },
-  sectionTitle: { flexDirection: 'row', alignItems: 'center', gap: 11, borderTopWidth: 1, borderTopColor: '#D8E5EF', paddingTop: 22, marginTop: 14, marginBottom: 18 }, sectionNumber: { width: 42, height: 42, textAlign: 'center', textAlignVertical: 'center', borderRadius: 12, color: Colors.orange, backgroundColor: Colors.orangeDim, fontFamily: 'Inter-Bold', fontSize: 13 }, sectionName: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 18 }, sectionText: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 13, lineHeight: 18, marginTop: 3, maxWidth: 650 },
-  inlineAdd: { minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 1, borderColor: 'rgba(255,107,0,0.28)', borderRadius: 14, backgroundColor: Colors.orangeDim, marginBottom: 10 }, inlineAddText: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 13 }, subEditorCard: { borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 17, padding: 13, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, subEditorHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }, subEditorTitle: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 12, letterSpacing: 0.8 },
-  label: { color: Colors.textSecondary, fontFamily: 'Inter-Bold', fontSize: 12, letterSpacing: 0.6, marginBottom: 8 }, sourceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15 }, choices: { gap: 8, paddingBottom: 15 }, choiceWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 15 }, choice: { minHeight: 46, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 999, paddingHorizontal: 15, backgroundColor: Theme.colors.surface.base }, choiceActive: { borderColor: Colors.orange, backgroundColor: Colors.orangeDim }, choiceText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 13 }, choiceTextActive: { color: Colors.orange },
-  field: { marginBottom: 17 }, input: { minHeight: 56, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 14, color: Colors.textPrimary, backgroundColor: Theme.colors.surface.subtle, fontFamily: 'Inter-Regular', fontSize: 16 }, inputInactive: { borderColor: Theme.colors.border.default, color: Colors.textMuted, backgroundColor: Theme.colors.surface.muted, opacity: 0.78 }, inputError: { borderColor: Theme.colors.state.error, backgroundColor: 'rgba(239,68,68,0.055)' }, fieldHint: { marginTop: 7, color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 12, lineHeight: 17 }, fieldError: { marginTop: 7, color: '#FF6B72', fontFamily: 'Inter-SemiBold', fontSize: 12, lineHeight: 17 }, textarea: { minHeight: 104, paddingTop: 14, textAlignVertical: 'top' }, prefix: { alignSelf: 'flex-start', marginBottom: 7, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5, color: Theme.colors.state.info, backgroundColor: Theme.colors.surface.brandSoft, fontFamily: 'Inter-SemiBold', fontSize: 10 },
+  sectionTitle: { minHeight: 68, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16, marginBottom: 14, padding: 11, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 18, backgroundColor: Theme.colors.surface.brandSoft }, sectionNumber: { width: 36, height: 36, flexShrink: 0, textAlign: 'center', textAlignVertical: 'center', borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: 12, color: Theme.colors.brand.primaryText, backgroundColor: Theme.colors.surface.base, fontFamily: 'Inter-Bold', fontSize: 10 }, sectionCopy: { flex: 1, minWidth: 0 }, sectionName: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 18 }, sectionText: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 9.5, lineHeight: 14, marginTop: 2 },
+  inlineAdd: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: 15, backgroundColor: Theme.colors.surface.brandSoft, marginBottom: 10 }, inlineAddText: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 10.5 }, subEditorCard: { borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 18, padding: 12, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, subEditorHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }, subEditorTitle: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 9, letterSpacing: 0.7 },
+  label: { color: Colors.textSecondary, fontFamily: 'Inter-Bold', fontSize: 9.5, letterSpacing: 0.55, marginBottom: 7 }, sourceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 13 }, choices: { gap: 7, paddingBottom: 13 }, choiceWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 13 }, choice: { minHeight: 42, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 14, paddingHorizontal: 12, backgroundColor: Theme.colors.surface.base }, choiceActive: { borderColor: Theme.colors.border.focus, backgroundColor: Theme.colors.surface.brandSoft }, choiceText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 10.5 }, choiceTextActive: { color: Theme.colors.brand.primaryText },
+  field: { marginBottom: 14 }, input: { minHeight: 50, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 16, paddingHorizontal: 13, color: Colors.textPrimary, backgroundColor: Theme.colors.surface.base, fontFamily: 'Inter-Regular', fontSize: 13 }, inputInactive: { borderColor: Theme.colors.border.default, color: Colors.textMuted, backgroundColor: Theme.colors.surface.muted, opacity: 0.78 }, inputError: { borderColor: Theme.colors.state.error, backgroundColor: Theme.colors.state.errorSoft }, fieldHint: { marginTop: 6, color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 9.5, lineHeight: 14 }, fieldError: { marginTop: 6, color: Theme.colors.state.error, fontFamily: 'Inter-SemiBold', fontSize: 9.5, lineHeight: 14 }, textarea: { minHeight: 94, paddingTop: 13, textAlignVertical: 'top' }, prefix: { alignSelf: 'flex-start', marginBottom: 7, borderRadius: 10, paddingHorizontal: 9, paddingVertical: 5, color: Theme.colors.state.info, backgroundColor: Theme.colors.surface.brandSoft, fontFamily: 'Inter-SemiBold', fontSize: 9 },
   gallery: { gap: 12, paddingBottom: 10, paddingRight: 16 }, galleryCard: { width: 180, height: 214, padding: 7, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 20, backgroundColor: Theme.colors.surface.subtle }, galleryMain: { borderColor: Colors.orange }, galleryDragging: { zIndex: 20, elevation: 14, opacity: 0.88, shadowColor: Theme.colors.shadow.color, shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 } }, galleryPhoto: { width: 164, height: 148, overflow: 'hidden', borderRadius: 14, backgroundColor: '#F4F3F1' }, galleryRemove: { position: 'absolute', top: 7, right: 7, width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted }, mainBadge: { position: 'absolute', left: 7, bottom: 7, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 5, backgroundColor: Theme.colors.surface.muted }, mainBadgeText: { color: '#111', fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.5 }, galleryFooter: { height: 51, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 5, paddingHorizontal: 2 }, dragHint: { flexDirection: 'row', alignItems: 'center', gap: 2 }, dragHintText: { color: Colors.textMuted, fontFamily: 'Inter-SemiBold', fontSize: 7 }, makeMain: { height: 30, flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 9, paddingHorizontal: 7, backgroundColor: Theme.colors.surface.muted }, makeMainActive: { borderColor: 'rgba(255,107,0,0.3)', backgroundColor: Colors.orangeDim }, makeMainText: { color: Colors.textSecondary, fontFamily: 'Inter-Bold', fontSize: 7 }, makeMainTextActive: { color: Colors.orange }, imageAdd: { width: 180, height: 214, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderStyle: 'dashed', borderRadius: 20, backgroundColor: Theme.colors.surface.subtle }, imageAddIcon: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: Colors.orangeDim }, imageAddText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 10, marginTop: 11 }, imageCount: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 4 },
   twoColumns: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 }, column: { flexGrow: 1, flexBasis: 150 }, pricePreview: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 16, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, oldPrice: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 14, textDecorationLine: 'line-through' }, newPrice: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 20 }, discountBadge: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 12 },
   nirNote: { marginBottom: 12, borderWidth: 1, borderColor: 'rgba(56,189,248,0.18)', borderRadius: 15, padding: 14, backgroundColor: 'rgba(56,189,248,0.055)' }, nirNoteTitle: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 14, lineHeight: 19 }, nirNoteText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 13, lineHeight: 19, marginTop: 5 },
@@ -1257,9 +1329,10 @@ const styles = StyleSheet.create({
   multiSelect: { marginBottom: 16 }, multiSelectButton: { minHeight: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 14, backgroundColor: Theme.colors.surface.subtle }, multiSelectButtonOpen: { borderColor: Colors.orange }, multiSelectValue: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 14 }, multiSelectPlaceholder: { color: Colors.textMuted, fontFamily: 'Inter-Regular' }, multiSelectOptions: { marginTop: 6, overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 14, padding: 6, backgroundColor: Theme.colors.surface.subtle }, multiSelectOption: { minHeight: 50, flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 10, paddingHorizontal: 10 }, multiSelectCheck: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 7, backgroundColor: Theme.colors.surface.subtle }, multiSelectCheckActive: { borderColor: Colors.orange, backgroundColor: Colors.orange }, multiSelectOptionText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 14 }, multiSelectOptionTextActive: { color: Colors.orange },
   dropdownSearch: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 10, paddingHorizontal: 10, marginBottom: 4, backgroundColor: Theme.colors.surface.subtle }, dropdownSearchInput: { flex: 1, color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 14 },
   googlePreview: { flexDirection: 'row', gap: 12, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 19, padding: 14, backgroundColor: '#FFF', marginBottom: 18 }, googleImage: { width: 78, height: 78, borderRadius: 10, backgroundColor: '#EEE' }, googleCopy: { flex: 1, minWidth: 0 }, googleSite: { color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 9 }, googleTitle: { color: '#1A0DAB', fontFamily: 'Inter-Regular', fontSize: 15, lineHeight: 19, marginTop: 3 }, googleDescription: { color: '#4D5156', fontFamily: 'Inter-Regular', fontSize: 9, lineHeight: 14, marginTop: 3 }, googleUrl: { color: '#188038', fontFamily: 'Inter-Regular', fontSize: 8, marginTop: 4 },
-  toggleCard: { minHeight: 78, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderRadius: 17, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, accountingToggleCard: { borderWidth: 1, borderColor: 'rgba(52,211,153,0.22)', backgroundColor: Theme.colors.surface.base }, toggleCopy: { flex: 1, minWidth: 0 }, toggleTitle: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 15 }, toggleText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 12, lineHeight: 18, marginTop: 4 },
-  smartBillCard: { marginBottom: 18, gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 19, padding: 14, backgroundColor: Theme.colors.surface.brandSoft }, smartBillHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }, smartBillKicker: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1 }, smartBillTitle: { marginTop: 3, color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 15 }, smartBillStatus: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 6 }, smartBillStatusOk: { backgroundColor: Theme.colors.surface.cyanSoft }, smartBillStatusPending: { backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusError: { backgroundColor: '#854D0E' }, smartBillStatusIdle: { backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusText: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: .5 }, smartBillMatch: { borderRadius: 13, padding: 11, backgroundColor: Theme.colors.background.canvas }, smartBillMatchName: { color: Theme.colors.state.info, fontFamily: 'Inter-Bold', fontSize: 12 }, smartBillHelp: { color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 15 }, smartBillWarehouses: { gap: 7 }, smartBillWarehouse: { minHeight: 49, justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 12, backgroundColor: Theme.colors.background.canvas }, smartBillWarehouseActive: { borderColor: Theme.colors.border.focus, backgroundColor: Theme.colors.surface.cyanSoft }, smartBillWarehouseName: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 11 }, smartBillWarehouseId: { marginTop: 2, color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 8 }, smartBillStock: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 11 }, smartBillError: { color: Theme.colors.state.error, fontFamily: 'Inter-SemiBold', fontSize: 10, lineHeight: 15 },
-  saveBottom: { minHeight: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 17, backgroundColor: Colors.orange, marginTop: 16 }, saveBottomText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 15 },
+  toggleCard: { minHeight: 78, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderRadius: 17, padding: 14, backgroundColor: Theme.colors.surface.base, marginBottom: 10 }, toggleCopy: { flex: 1, minWidth: 0 }, toggleTitle: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 15 }, toggleText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 12, lineHeight: 18, marginTop: 4 },
+  skuFeedback: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: -3, marginBottom: 14, padding: 10, borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderRadius: 17, backgroundColor: Theme.colors.surface.brandSoft }, skuFeedbackSuccess: { borderColor: '#9EDCC2', backgroundColor: Theme.colors.state.successSoft }, skuFeedbackError: { borderColor: '#F1B7C1', backgroundColor: Theme.colors.state.errorSoft }, skuFeedbackIcon: { width: 38, height: 38, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: Theme.colors.surface.base }, skuFeedbackIconSuccess: { backgroundColor: '#DDF5E9' }, skuFeedbackIconError: { backgroundColor: '#FFE2E7' }, skuFeedbackCopy: { flex: 1, minWidth: 0 }, skuFeedbackTitle: { color: Theme.colors.state.info, fontFamily: 'Inter-Bold', fontSize: 10.5, lineHeight: 14 }, skuFeedbackTitleSuccess: { color: Theme.colors.state.success }, skuFeedbackTitleError: { color: Theme.colors.state.error }, skuFeedbackText: { marginTop: 3, color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 9, lineHeight: 13 },
+  smartBillCard: { marginBottom: 18, gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 21, padding: 12, backgroundColor: Theme.colors.surface.base }, smartBillHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 9 }, smartBillHeadCopy: { flex: 1, minWidth: 0 }, smartBillKicker: { color: Theme.colors.brand.cyanStrong, fontFamily: 'Inter-Bold', fontSize: 7.5, letterSpacing: .9 }, smartBillTitle: { marginTop: 3, color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 12.5, lineHeight: 16 }, smartBillStatus: { flexShrink: 0, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 6, backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusOk: { backgroundColor: Theme.colors.state.successSoft }, smartBillStatusPending: { backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusError: { backgroundColor: Theme.colors.state.errorSoft }, smartBillStatusIdle: { backgroundColor: Theme.colors.surface.brandSoft }, smartBillStatusText: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: .45 }, smartBillMatch: { borderRadius: 14, padding: 10, backgroundColor: Theme.colors.surface.brandSoft }, smartBillMatchName: { color: Theme.colors.state.info, fontFamily: 'Inter-Bold', fontSize: 10.5 }, smartBillHelp: { color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 9, lineHeight: 13 }, smartBillWarehouses: { gap: 7 }, smartBillWarehouse: { minHeight: 46, justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 14, paddingHorizontal: 11, backgroundColor: Theme.colors.surface.subtle }, smartBillWarehouseActive: { borderColor: Theme.colors.border.focus, backgroundColor: Theme.colors.surface.brandSoft }, smartBillWarehouseName: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 10 }, smartBillWarehouseId: { marginTop: 2, color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 7.5 }, smartBillStock: { color: Theme.colors.state.success, fontFamily: 'Inter-Bold', fontSize: 9.5 }, smartBillError: { color: Theme.colors.state.error, fontFamily: 'Inter-SemiBold', fontSize: 9, lineHeight: 13 },
+  saveBottom: { minHeight: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 17, backgroundColor: Theme.colors.brand.primaryAction, marginTop: 16 }, saveBottomText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 12 },
   saveProgressBackdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16, backgroundColor: Theme.colors.overlay.scrim },
   saveProgressCard: { width: '100%', maxWidth: 570, minHeight: 510, paddingHorizontal: 24, paddingVertical: 34, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 34, backgroundColor: Theme.colors.surface.base, shadowColor: Theme.colors.shadow.color, shadowOpacity: .55, shadowRadius: 35, shadowOffset: { width: 0, height: 20 }, elevation: 22 },
   saveGlowA: { width: 260, height: 260, position: 'absolute', top: -170, right: -80, borderRadius: 130, backgroundColor: Theme.colors.surface.brandSoft }, saveGlowB: { width: 210, height: 210, position: 'absolute', bottom: -150, left: -100, borderRadius: 105, backgroundColor: '#FFAA3312' },
