@@ -331,7 +331,7 @@ const moreAreaGroups = [
     key: 'settings', title: 'CONFIGURARE', color: Theme.colors.brand.secondary,
     areas: [
       { key: 'payments', title: 'Metode de plată', description: 'Activează plata cu cardul sau ramburs la curier.', Icon: CreditCard, color: Theme.colors.brand.primaryText },
-      { key: 'invoice-configurator', title: 'Configurator factură', description: 'Structura, aspectul și tema facturilor viitoare.', Icon: FileCog, color: Theme.colors.brand.secondary },
+      { key: 'invoice-configurator', title: 'Facturare SmartBill', description: 'Serii, emitere și sincronizare direct din SmartBill.', Icon: FileCog, color: Theme.colors.brand.secondary },
       { key: 'automations', title: 'Automatizări', description: 'Emitere și trimitere automată a facturilor.', Icon: Zap, color: Theme.colors.state.warningBright },
       { key: 'company', title: 'Datele firmei', description: 'Identitate juridică, adresă, contact și date bancare.', Icon: Building2, color: Theme.colors.brand.primaryText },
       { key: 'users', title: 'Utilizatori', description: 'Conturi și acces la aplicațiile Cubis Shop.', Icon: UserCog, color: Theme.colors.brand.primaryText },
@@ -1107,7 +1107,7 @@ export default function ShopModuleScreen() {
   if (view === 'invoice-configurator') {
     return (
       <View style={styles.container}>
-        <Header title="Configurator factură" showBack onBack={() => setView('more')} right={notificationButton} />
+        <Header title="Facturare SmartBill" showBack onBack={() => setView('more')} right={notificationButton} />
         <ShopInvoiceConfigurator bottomInset={insets.bottom} />
         <ShopBottomNavigation activeTab="more" onSelect={(tab) => setView(tab)} bottomInset={insets.bottom} />
       </View>
