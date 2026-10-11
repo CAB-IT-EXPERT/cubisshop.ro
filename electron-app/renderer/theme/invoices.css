@@ -1,0 +1,857 @@
+/* Material 3 invoice workspace. Kept isolated from fiscal behavior and SmartBill flows. */
+:root[data-theme="cubis-light"] #tab-shop-invoices {
+  --invoice-blue: #0b6bcf;
+  --invoice-blue-soft: #eaf3ff;
+  --invoice-cyan: #079dbd;
+  --invoice-green: #168457;
+  --invoice-green-soft: #eaf8f1;
+  --invoice-amber: #a65f00;
+  --invoice-amber-soft: #fff5e1;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-invoices .shop-commerce-page {
+  background:
+    radial-gradient(circle at 91% 16%, rgba(9, 201, 229, 0.1), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, var(--color-canvas-alt) 100%);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-invoices .shop-commerce-hero[data-commerce-kind="invoices"] {
+  min-height: 184px;
+  border-color: #d3e4f2;
+  background:
+    radial-gradient(circle at 86% 40%, rgba(9, 201, 229, 0.23), transparent 25%),
+    radial-gradient(circle at 68% 110%, rgba(8, 127, 245, 0.12), transparent 32%),
+    linear-gradient(135deg, #ffffff 0%, #f4f9ff 62%, #edfafd 100%);
+  box-shadow: 0 18px 48px rgba(31, 82, 126, 0.1);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-invoices .shop-commerce-hero[data-commerce-kind="invoices"] .shop-commerce-title > span {
+  color: var(--invoice-blue);
+  text-transform: none;
+  letter-spacing: 0.09em;
+}
+
+:root[data-theme="cubis-light"] #tab-shop-invoices .shop-commerce-hero[data-commerce-kind="invoices"] .shop-commerce-hero-symbol {
+  color: var(--invoice-blue);
+  background: linear-gradient(145deg, #ffffff, #edf6ff);
+  box-shadow: 0 18px 42px rgba(11, 107, 207, 0.13);
+  animation: invoiceHeroFloat 4.8s ease-in-out infinite;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics {
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article {
+  min-height: 116px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 20px;
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgba(31, 82, 126, 0.08);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -48px;
+  width: 112px;
+  height: 112px;
+  border: 18px solid rgba(11, 107, 207, 0.04);
+  border-radius: 50%;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-brand);
+  box-shadow: 0 18px 38px rgba(31, 82, 126, 0.12);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.paid {
+  border-color: #b8e4cd;
+  background: linear-gradient(135deg, var(--invoice-green-soft), #ffffff 72%);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.unpaid {
+  border-color: #ead3ad;
+  background: linear-gradient(135deg, var(--invoice-amber-soft), #ffffff 72%);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.documents {
+  background: linear-gradient(135deg, var(--invoice-blue-soft), #ffffff 72%);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article > span {
+  width: 50px;
+  height: 50px;
+  border-radius: 17px;
+  color: var(--invoice-blue);
+  background: var(--invoice-blue-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.paid > span {
+  color: var(--invoice-green);
+  background: #dff4e9;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article.unpaid > span {
+  color: var(--invoice-amber);
+  background: #ffebc5;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics article > span svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics small {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 780;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics strong {
+  margin-top: 7px;
+  color: var(--color-text-primary);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-metrics em {
+  margin-top: 5px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar {
+  gap: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 12px;
+  margin-bottom: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 30px rgba(31, 82, 126, 0.075);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar > label {
+  height: 52px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 17px;
+  padding: 0 17px;
+  background: var(--color-surface-subtle);
+  transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar > label:focus-within {
+  border-color: rgba(8, 127, 245, 0.58);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-focus);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar > label svg {
+  color: var(--color-brand-text);
+  stroke: currentColor;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar input {
+  font-size: 12px;
+  font-weight: 560;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar > div {
+  gap: 4px;
+  border-radius: 17px;
+  padding: 4px;
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar button {
+  min-width: 82px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px;
+  padding: 0 15px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  font-size: 10px;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar button:hover:not(.active) {
+  color: var(--color-brand-text);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-toolbar button.active {
+  border: 0;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action);
+  box-shadow: 0 7px 16px rgba(6, 103, 200, 0.16);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-list {
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice {
+  min-height: 150px;
+  gap: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 26px;
+  padding: 20px 22px;
+  background:
+    radial-gradient(circle at 96% 50%, color-mix(in srgb, var(--invoice-accent) 9%, transparent), transparent 28%),
+    var(--color-surface);
+  box-shadow: 0 12px 34px rgba(31, 82, 126, 0.08);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice::before {
+  top: 22px;
+  bottom: 22px;
+  width: 5px;
+  border-radius: 0 99px 99px 0;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice[data-invoice-open]:hover,
+:root[data-theme="cubis-light"] .shop-issued-invoice[data-invoice-open]:focus-visible {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--invoice-accent) 40%, var(--color-border));
+  box-shadow: 0 20px 44px rgba(31, 82, 126, 0.13);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-icon {
+  width: 60px;
+  height: 60px;
+  border: 1px solid color-mix(in srgb, var(--invoice-accent) 28%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--invoice-accent) 10%, #ffffff);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy header strong {
+  color: var(--color-text-primary);
+  font-size: 17px;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy header b {
+  border: 1px solid #eed6a7;
+  color: #8b5b00;
+  background: #fff6df;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy header b.paid {
+  border-color: #b4e1c7;
+  color: var(--invoice-green);
+  background: var(--invoice-green-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy header b.provider {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy h3 {
+  margin-top: 10px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy p,
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy > span {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice-copy > span.sent {
+  color: var(--invoice-green);
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice > aside {
+  min-width: 210px;
+  border-left: 1px solid var(--color-border-subtle);
+  padding-left: 26px;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice > aside > small {
+  color: var(--color-text-muted);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice > aside > strong {
+  color: color-mix(in srgb, var(--invoice-accent) 72%, #5a3d00);
+  font-size: 21px;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice button.shop-issued-invoice-open {
+  height: 44px;
+  border: 0;
+  border-radius: 15px;
+  color: #ffffff;
+  background: var(--color-brand-action);
+  box-shadow: none;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-issued-invoice button.shop-issued-invoice-open:hover {
+  filter: none;
+  transform: translateX(2px);
+  background: #075ead;
+}
+
+/* Invoice detail dialog */
+:root[data-theme="cubis-light"] .shop-invoice-detail-overlay,
+:root[data-theme="cubis-light"] .shop-invoice-issue-overlay {
+  background: rgba(15, 39, 63, 0.48);
+  backdrop-filter: blur(14px);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal {
+  width: min(1120px, calc(100vw - 42px));
+  max-height: calc(100vh - 32px);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 30px;
+  background: #f6f9fc;
+  box-shadow: 0 32px 90px rgba(12, 45, 73, 0.25);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > header {
+  min-height: 76px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 15px 22px;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > header small {
+  color: var(--color-brand-text);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > header h2 {
+  margin-top: 5px;
+  color: var(--color-text-primary);
+  font-size: 21px;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > header > button,
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal > header > button {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > header > button:hover,
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal > header > button:hover {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  transform: rotate(4deg);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > .shop-commerce-modal-scroll {
+  gap: 14px;
+  padding: 18px 20px 24px;
+  background: #f6f9fc;
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero {
+  min-height: 142px;
+  border: 1px solid color-mix(in srgb, var(--invoice-accent) 30%, var(--color-border));
+  border-radius: 26px;
+  padding: 22px 24px;
+  background:
+    radial-gradient(circle at 89% 24%, color-mix(in srgb, var(--invoice-accent) 16%, transparent), transparent 25%),
+    linear-gradient(135deg, #ffffff, color-mix(in srgb, var(--invoice-accent) 6%, #f5f9fd));
+  box-shadow: 0 12px 30px rgba(31, 82, 126, 0.07);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero::after {
+  border-color: color-mix(in srgb, var(--invoice-accent) 8%, transparent);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-document {
+  width: 64px;
+  height: 64px;
+  border: 1px solid color-mix(in srgb, var(--invoice-accent) 24%, transparent);
+  border-radius: 21px;
+  background: color-mix(in srgb, var(--invoice-accent) 10%, #ffffff);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero small {
+  color: color-mix(in srgb, var(--invoice-accent) 68%, #3c5368);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero h3 {
+  color: var(--color-text-primary);
+  font-size: 29px;
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero p {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-state-stack > b {
+  border: 1px solid #ecd5a8;
+  color: #875800;
+  background: #fff6df;
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-state-stack > b.paid {
+  border-color: #b4e1c7;
+  color: var(--invoice-green);
+  background: var(--invoice-green-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-state-stack > b.provider {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party {
+  min-height: 174px;
+  border: 1px solid var(--color-border);
+  border-radius: 23px;
+  padding: 20px 22px;
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgba(31, 82, 126, 0.055);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party > span {
+  color: #ad6500;
+  background: #fff4e4;
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party.buyer > span {
+  color: var(--invoice-cyan);
+  background: #e8f9fc;
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party > small {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party > strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party > em,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-party > p {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-products {
+  border: 1px solid var(--color-border);
+  border-radius: 23px;
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgba(31, 82, 126, 0.055);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-products > header {
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-products header small {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-products header strong,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product-copy strong,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product > b {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-products header > span,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product-icon {
+  color: var(--invoice-blue);
+  background: var(--invoice-blue-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product {
+  border-top-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product:is(button):hover {
+  background: var(--color-surface-brand);
+  box-shadow: inset 4px 0 0 var(--color-brand-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product-copy small,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product-copy > em:not(.shop-invoice-line-discount) {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-product-arrow {
+  color: var(--invoice-blue);
+  background: var(--invoice-blue-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-payment,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals {
+  min-height: 186px;
+  border: 1px solid var(--color-border);
+  border-radius: 23px;
+  padding: 22px;
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgba(31, 82, 126, 0.055);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-payment > small {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-payment > strong,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals > span strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-payment > p,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-payment > .shop-invoice-payment-note,
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals > span small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-payment > .shop-invoice-payment-note {
+  border-left-color: var(--color-brand-primary);
+  border-radius: 0 10px 10px 0;
+  padding: 8px 10px;
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals {
+  border-color: #d6e4ef;
+  background: linear-gradient(145deg, #ffffff, #f2f8ff);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals .grand {
+  border-top-color: var(--color-border-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals .grand small {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-totals .grand strong {
+  color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-modal > footer {
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--color-border-subtle);
+  padding: 13px 18px;
+  background: rgba(255, 255, 255, 0.97);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-footer-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--invoice-green);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-footer-note > svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-footer-note > span {
+  display: grid;
+  gap: 2px;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-footer-note small {
+  color: var(--invoice-green);
+  font-size: 8px;
+  font-weight: 850;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-footer-note strong {
+  color: var(--color-text-secondary);
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-action {
+  min-height: 44px !important;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 14px !important;
+  color: var(--color-brand-text);
+  background: var(--color-surface-muted);
+  box-shadow: none;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-action.email {
+  border-color: #bde7ed;
+  color: #08768e;
+  background: #edfafd;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-action.pdf {
+  border-color: transparent;
+  color: #ffffff;
+  background: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-action.pdf:hover:not(:disabled) {
+  border-color: transparent;
+  background: #075ead;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-detail-action.delete {
+  border-color: var(--color-error-border);
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+/* SmartBill issue dialog */
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal {
+  width: min(600px, calc(100vw - 38px));
+  border: 1px solid var(--color-border-strong);
+  border-radius: 30px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-modal);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal .shop-invoice-issue-glow {
+  border-color: rgba(8, 127, 245, 0.1);
+  box-shadow: 0 0 80px rgba(8, 127, 245, 0.08);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal > header,
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal > footer {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-modal > header small {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-body {
+  padding: 22px 24px 10px;
+  background: #f8fbff;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-lead > span {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-lead small,
+:root[data-theme="cubis-light"] .shop-invoice-issue-summary small {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-lead strong,
+:root[data-theme="cubis-light"] .shop-invoice-issue-summary strong,
+:root[data-theme="cubis-light"] .shop-invoice-email-switch > span strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-lead p,
+:root[data-theme="cubis-light"] .shop-invoice-email-switch > span small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-summary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: 0 8px 22px rgba(31, 82, 126, 0.055);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-summary > span:last-child strong {
+  color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch[hidden] {
+  display: none !important;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch.active {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+  box-shadow: var(--shadow-focus);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch.return.active {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-icon {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch > i {
+  background: #d7e2eb;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch > i b {
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(31, 82, 126, 0.18);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch input:checked + i {
+  background: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch input:checked + i b,
+:root[data-theme="cubis-light"] .shop-invoice-email-switch.return input:checked + i b {
+  background: #ffffff;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-email-switch.return input:checked + i {
+  background: var(--invoice-green);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-note {
+  border: 1px solid var(--color-success-border);
+  color: var(--invoice-green);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-issue-confirm {
+  border: 0;
+  background: var(--color-brand-action);
+  box-shadow: none;
+}
+
+@keyframes invoiceHeroFloat {
+  0%, 100% { transform: translateY(-50%) rotate(-8deg); }
+  50% { transform: translateY(calc(-50% - 5px)) rotate(-5deg); }
+}
+
+@media (max-width: 900px) {
+  :root[data-theme="cubis-light"] .shop-invoice-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-metrics article {
+    min-height: 110px;
+    padding: 16px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-metrics article > span {
+    width: 43px;
+    height: 43px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-metrics strong {
+    font-size: 18px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-issued-invoice > aside {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    border-top: 1px solid var(--color-border-subtle);
+    border-left: 0;
+    padding: 14px 0 0 78px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-issued-invoice > aside > strong {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  :root[data-theme="cubis-light"] .shop-invoice-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-toolbar > div {
+    overflow-x: auto;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-detail-overlay {
+    padding: 8px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-detail-modal {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    border-radius: 24px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-detail-modal > footer {
+    display: block;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-detail-footer-note {
+    display: none;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-detail-footer-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero {
+    padding: 18px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-invoice-detail-content .shop-invoice-detail-hero h3 {
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="cubis-light"] #tab-shop-invoices .shop-commerce-hero[data-commerce-kind="invoices"] .shop-commerce-hero-symbol {
+    animation: none;
+  }
+}
