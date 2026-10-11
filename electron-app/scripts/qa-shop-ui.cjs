@@ -59,8 +59,21 @@ app.whenReady().then(async () => {
   const modalPath = path.join(outputDir, 'shop-category-popup.png');
   fs.writeFileSync(modalPath, (await win.webContents.capturePage()).toPNG());
   await win.webContents.executeJavaScript(`document.querySelector('[data-shop-modal-close="shop-category-modal"]').click()`);
+
+  await win.webContents.executeJavaScript(`window.switchTab('shop-brands'); document.getElementById('shop-brand-add').click()`);
+  await sleep(180);
+  const brandModalPath = path.join(outputDir, 'shop-brand-popup.png');
+  fs.writeFileSync(brandModalPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.querySelector('[data-shop-modal-close="shop-brand-modal"]').click()`);
+
   await win.webContents.executeJavaScript(`window.switchTab('shop-manufacturers')`);
   await sleep(180);
+  await win.webContents.executeJavaScript(`document.getElementById('shop-manufacturer-add').click()`);
+  await sleep(180);
+  const manufacturerModalPath = path.join(outputDir, 'shop-manufacturer-popup.png');
+  fs.writeFileSync(manufacturerModalPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.querySelector('[data-shop-modal-close="shop-manufacturer-modal"]').click()`);
+
   win.setSize(720, 760);
   await sleep(250);
   const compactPath = path.join(outputDir, 'shop-manufacturers-compact.png');
@@ -73,10 +86,21 @@ app.whenReady().then(async () => {
     activePanel: document.querySelector('.tab-panel.active')?.id || '',
     tabs: document.querySelectorAll('#tab-shop-manufacturers .shop-catalog-tabs button').length,
     bodyHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    popupHidden: document.getElementById('shop-category-modal').hidden,
+    actionIconOffsets: Array.from(document.querySelectorAll('#shop-manufacturer-table-body .shop-table-action')).map((button) => {
+      const buttonRect = button.getBoundingClientRect();
+      const iconRect = button.querySelector('svg').getBoundingClientRect();
+      return {
+        x: Number(((iconRect.left + iconRect.width / 2) - (buttonRect.left + buttonRect.width / 2)).toFixed(2)),
+        y: Number(((iconRect.top + iconRect.height / 2) - (buttonRect.top + buttonRect.height / 2)).toFixed(2)),
+      };
+    }),
+    popupHidden: ['shop-category-modal', 'shop-brand-modal', 'shop-manufacturer-modal']
+      .every((id) => document.getElementById(id).hidden),
   }))()`);
 
-  console.log(JSON.stringify({ ...metrics, errors, screenshots: { desktopPath, modalPath, compactPath } }, null, 2));
+  console.log(JSON.stringify({ ...metrics, errors, screenshots: {
+    desktopPath, modalPath, brandModalPath, manufacturerModalPath, compactPath,
+  } }, null, 2));
   await win.destroy();
   app.quit();
 }).catch((error) => {

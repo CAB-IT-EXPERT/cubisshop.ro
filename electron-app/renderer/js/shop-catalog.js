@@ -123,6 +123,13 @@
     return button;
   }
 
+  function actionGroup(...actions) {
+    const group = document.createElement('div');
+    group.className = 'shop-table-actions-inner';
+    group.append(...actions);
+    return group;
+  }
+
   function protectedCategoryIndicator() {
     const indicator = document.createElement('span');
     indicator.className = 'shop-table-action locked';
@@ -182,8 +189,10 @@
 
       const actionsCell = document.createElement('td');
       actionsCell.className = 'shop-table-actions';
-      actionsCell.append(actionButton('Editeaza categoria', 'edit', () => openCategory(category)));
-      actionsCell.append(category.is_protected ? protectedCategoryIndicator() : actionButton('Sterge categoria', 'delete', () => requestDelete('category', category)));
+      actionsCell.append(actionGroup(
+        actionButton('Editeaza categoria', 'edit', () => openCategory(category)),
+        category.is_protected ? protectedCategoryIndicator() : actionButton('Sterge categoria', 'delete', () => requestDelete('category', category)),
+      ));
       row.appendChild(actionsCell);
       categoryBody.appendChild(row);
     });
@@ -216,7 +225,10 @@
       row.appendChild(statusCell);
       const actionsCell = document.createElement('td');
       actionsCell.className = 'shop-table-actions';
-      actionsCell.append(actionButton('Editeaza compatibilitatea', 'edit', () => openBrand(brand)), actionButton('Sterge compatibilitatea', 'delete', () => requestDelete('brand', brand)));
+      actionsCell.append(actionGroup(
+        actionButton('Editeaza compatibilitatea', 'edit', () => openBrand(brand)),
+        actionButton('Sterge compatibilitatea', 'delete', () => requestDelete('brand', brand)),
+      ));
       row.appendChild(actionsCell);
       brandBody.appendChild(row);
     });
@@ -249,7 +261,10 @@
       row.appendChild(statusCell);
       const actionsCell = document.createElement('td');
       actionsCell.className = 'shop-table-actions';
-      actionsCell.append(actionButton('Editeaza producatorul', 'edit', () => openManufacturer(manufacturer)), actionButton('Sterge producatorul', 'delete', () => requestDelete('manufacturer', manufacturer)));
+      actionsCell.append(actionGroup(
+        actionButton('Editeaza producatorul', 'edit', () => openManufacturer(manufacturer)),
+        actionButton('Sterge producatorul', 'delete', () => requestDelete('manufacturer', manufacturer)),
+      ));
       row.appendChild(actionsCell);
       manufacturerBody.appendChild(row);
     });
@@ -316,7 +331,7 @@
     state.editingCategory = category;
     state.imageBase64 = null;
     state.imageRemoved = false;
-    byId('shop-category-modal-title').textContent = category ? 'Editeaza categoria' : 'Categorie noua';
+    byId('shop-category-modal-title').textContent = category ? 'Editează categoria' : 'Categorie nouă';
     byId('shop-category-name').value = category?.name || '';
     byId('shop-category-description').value = category?.description || '';
     byId('shop-category-active').checked = category?.is_active ?? true;
@@ -333,7 +348,7 @@
 
   function openBrand(brand = null) {
     state.editingBrand = brand;
-    byId('shop-brand-modal-title').textContent = brand ? 'Editeaza compatibilitatea' : 'Compatibilitate noua';
+    byId('shop-brand-modal-title').textContent = brand ? 'Editează compatibilitatea' : 'Compatibilitate nouă';
     byId('shop-brand-name').value = brand?.name || '';
     byId('shop-brand-website').value = brand?.website_url || '';
     byId('shop-brand-active').checked = brand?.is_active ?? true;
