@@ -234,7 +234,7 @@
     const kind = contentId.replace('shop-', '').replace('-content', '');
     const productIcon = '<svg viewBox="0 0 24 24"><path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M4 12l8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"/></svg>';
     const symbols = { products: productIcon, orders: '✓', invoices: '<svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>', inventory: '▦', sources: '◎', suppliers: '⌁', nirs: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h5M9 12h7m-7 4h7"/><path d="m9 8 1.2 1.2L12.7 7"/></svg>', payments: '▣', automations: '<svg viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-7Z"/></svg>', shipping: '⇢', customers: '◉', newsletter: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m5 8 7 5 7-5"/><path d="m16 17 2 2 4-4"/></svg>', discounts: '%', company: '<svg viewBox="0 0 24 24"><path d="M5 21V5.8c0-.7.4-1.3 1.1-1.6l8-3.1A1.4 1.4 0 0 1 16 2.4V21M3 21h18M9 8h3m-3 4h3m-3 4h3m4-8h2v3h-2m0 3h2v3h-2"/></svg>' };
-    const titleIcon = kind === 'products' ? `<i class="shop-commerce-title-icon" aria-hidden="true">${productIcon}</i>` : '';
+    const titleIcon = ['products', 'newsletter'].includes(kind) ? `<i class="shop-commerce-title-icon" aria-hidden="true">${symbols[kind]}</i>` : '';
     const leadingSymbol = kind === 'discounts' ? '<span class="shop-discount-hero-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5V4h3.5L20 16.5 16.5 20 4 7.5Z"/><circle cx="8.1" cy="8.1" r="1.15"/><path d="m9.5 15 5-5M10.2 10.5h.01M14.7 14.5h.01"/></svg><i></i></span>' : '';
     const addLabel = contentId === 'shop-products-content'
       ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Adaugă produs</span>'
@@ -3698,7 +3698,8 @@
     const host = $('shop-newsletter-results');
     if (!host) return;
     const filtered = filteredNewsletterSubscribers();
-    const pageSize = state.pageSizes.newsletter;
+    const isMobile = window.matchMedia('(max-width: 780px)').matches;
+    const pageSize = isMobile ? 4 : state.pageSizes.newsletter;
     const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     state.pages.newsletter = Math.max(1, Math.min(Number(state.pages.newsletter || 1), totalPages));
     const start = (state.pages.newsletter - 1) * pageSize;
@@ -3706,6 +3707,9 @@
     const rows = visible.map((subscriber, index) => {
       const subscribed = subscriber.status === 'subscribed';
       const initial = String(subscriber.full_name || subscriber.email || '?').trim().charAt(0).toUpperCase();
+      const statusIcon = subscribed
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 12 3 3 7-7"/><circle cx="12" cy="12" r="9"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 9 6 6M15 9l-6 6"/><circle cx="12" cy="12" r="9"/></svg>';
       const activityLabel = subscriber.last_error
         ? `Eroare la ultima trimitere: ${subscriber.last_error}`
         : subscribed && subscriber.last_notified_at
@@ -3714,15 +3718,17 @@
             ? `Abonat din ${dateTime(subscriber.consent_at || subscriber.created_at)}`
             : `Dezabonat la ${dateTime(subscriber.unsubscribed_at)}`;
       return `<article class="shop-newsletter-card ${subscribed ? 'subscribed' : 'unsubscribed'}" style="--newsletter-index:${index}">
-        <span class="shop-newsletter-avatar">${esc(initial)}<i></i></span>
-        <div class="shop-newsletter-copy"><strong>${esc(subscriber.full_name || 'Client fără nume')}</strong><a href="mailto:${esc(subscriber.email)}" data-newsletter-link>${esc(subscriber.email)}</a><span>${subscriber.phone ? esc(subscriber.phone) : 'Telefon necompletat'}</span><em class="${subscriber.last_error ? 'error' : ''}">${esc(activityLabel)}</em></div>
-        <div class="shop-newsletter-consent"><small>SURSĂ CONSIMȚĂMÂNT</small><strong>${esc(subscriber.consent_source === 'checkout_historical' ? 'Checkout · istoric' : 'Checkout')}</strong><span>${esc(dateTime(subscriber.consent_at || subscriber.created_at))}</span></div>
-        <b class="shop-newsletter-status ${subscribed ? 'subscribed' : 'unsubscribed'}"><i></i>${subscribed ? 'ABONAT' : 'DEZABONAT'}</b>
+        <div class="shop-newsletter-person"><span class="shop-newsletter-avatar">${esc(initial)}<i></i></span><div class="shop-newsletter-copy"><strong>${esc(subscriber.full_name || 'Client fără nume')}</strong><a href="mailto:${esc(subscriber.email)}" data-newsletter-link>${esc(subscriber.email)}</a><span>${subscriber.phone ? esc(subscriber.phone) : 'Telefon necompletat'}</span><em class="${subscriber.last_error ? 'error' : ''}">${esc(activityLabel)}</em></div></div>
+        <div class="shop-newsletter-consent"><small>Sursă consimțământ</small><strong>${esc(subscriber.consent_source === 'checkout_historical' ? 'Checkout · istoric' : 'Checkout')}</strong><span>${esc(dateTime(subscriber.consent_at || subscriber.created_at))}</span></div>
+        <b class="shop-newsletter-status ${subscribed ? 'subscribed' : 'unsubscribed'}">${statusIcon}<span>${subscribed ? 'Abonat' : 'Dezabonat'}</span></b>
       </article>`;
     }).join('');
     const pageItems = customerPaginationItems(totalPages, state.pages.newsletter);
-    const pager = filtered.length ? `<nav class="shop-customer-pagination shop-newsletter-pagination" aria-label="Paginile abonaților"><button type="button" class="direction" data-newsletter-page="${state.pages.newsletter - 1}" ${state.pages.newsletter === 1 ? 'disabled' : ''}>‹</button>${pageItems.map(item => item === '…' ? '<span>…</span>' : `<button type="button" data-newsletter-page="${item}" class="${item === state.pages.newsletter ? 'active' : ''}" ${item === state.pages.newsletter ? 'aria-current="page"' : ''}>${item}</button>`).join('')}<button type="button" class="direction" data-newsletter-page="${state.pages.newsletter + 1}" ${state.pages.newsletter === totalPages ? 'disabled' : ''}>›</button></nav>` : '';
-    host.innerHTML = `<div class="shop-newsletter-list">${rows || empty('Niciun abonat găsit', 'Schimbă filtrul sau caută după alt nume, e-mail ori telefon.')}</div>${pager}`;
+    const pageButtons = pageItems.map(item => item === '…' ? '<i class="shop-newsletter-page-ellipsis">…</i>' : `<button type="button" data-newsletter-page="${item}" class="${item === state.pages.newsletter ? 'active' : ''}" ${item === state.pages.newsletter ? 'aria-current="page"' : ''}>${item}</button>`).join('');
+    const pager = filtered.length && totalPages > 1 ? `<nav class="shop-customer-pagination shop-newsletter-pagination" aria-label="Paginile abonaților"><div class="shop-newsletter-page-copy"><small>Pagina</small><strong>${state.pages.newsletter} din ${totalPages}</strong><em>${start + 1}–${Math.min(start + pageSize, filtered.length)} din ${filtered.length}</em></div><div class="shop-newsletter-page-actions"><button type="button" class="direction previous" data-newsletter-page="${state.pages.newsletter - 1}" ${state.pages.newsletter === 1 ? 'disabled' : ''} aria-label="Pagina anterioară"><i aria-hidden="true">‹</i><em>Înapoi</em></button><div class="shop-newsletter-page-numbers">${pageButtons}</div><button type="button" class="direction next" data-newsletter-page="${state.pages.newsletter + 1}" ${state.pages.newsletter === totalPages ? 'disabled' : ''} aria-label="Pagina următoare"><em>Înainte</em><i aria-hidden="true">›</i></button></div></nav>` : '';
+    const listHeader = rows ? '<div class="shop-newsletter-list-head"><span>Persoană și contact</span><span>Consimțământ</span><span>Status</span></div>' : '';
+    const emptyState = '<section class="shop-newsletter-empty"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m5 8 7 5 7-5"/></svg></span><div><small>LISTĂ NEWSLETTER</small><strong>Niciun abonat găsit</strong><p>Schimbă filtrul sau caută după alt nume, adresă de e-mail ori telefon.</p></div></section>';
+    host.innerHTML = `${listHeader}<div class="shop-newsletter-list">${rows || emptyState}</div>${pager}`;
     const counter = $('shop-newsletter-result-count');
     if (counter) counter.textContent = `${filtered.length} ${filtered.length === 1 ? 'persoană' : 'persoane'}${filtered.length ? ` · pagina ${state.pages.newsletter} din ${totalPages}` : ''}`;
     const clear = $('shop-newsletter-search-clear');
@@ -3732,7 +3738,7 @@
       if (button.disabled || page === state.pages.newsletter) return;
       state.pages.newsletter = page;
       renderNewsletterResults();
-      $('shop-newsletter-search')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.querySelector('#tab-shop-newsletter .shop-newsletter-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }));
     host.querySelectorAll('[data-newsletter-link]').forEach(link => link.addEventListener('click', event => {
       event.preventDefault();
@@ -3745,8 +3751,11 @@
     const unsubscribed = state.newsletterSubscribers.length - subscribed;
     const notified = state.newsletterSubscribers.filter(item => item.last_notified_at).length;
     const searchIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>';
-    $('shop-newsletter-content').innerHTML = `<section class="shop-newsletter-metrics"><article><span class="green">${subscribed}</span><div><strong>Abonați activi</strong><small>Primesc produsele noi</small></div></article><article><span class="muted">${unsubscribed}</span><div><strong>Dezabonați</strong><small>Nu mai primesc mesaje</small></div></article><article><span class="orange">${notified}</span><div><strong>Notificați</strong><small>Au primit cel puțin un produs</small></div></article></section>
-      <section class="shop-newsletter-toolbar"><div class="shop-newsletter-search"><span>${searchIcon}</span><label for="shop-newsletter-search"><small>CAUTĂ ÎN LISTĂ</small><input id="shop-newsletter-search" type="search" value="${esc(state.newsletterQuery)}" placeholder="Nume, e-mail sau telefon" autocomplete="off" /></label><b id="shop-newsletter-result-count"></b><button type="button" id="shop-newsletter-search-clear" aria-label="Șterge căutarea">×</button></div><div class="shop-newsletter-filters"><button type="button" data-newsletter-status="all" class="${state.newsletterStatus === 'all' ? 'active' : ''}">Toți</button><button type="button" data-newsletter-status="subscribed" class="${state.newsletterStatus === 'subscribed' ? 'active' : ''}">Abonați</button><button type="button" data-newsletter-status="unsubscribed" class="${state.newsletterStatus === 'unsubscribed' ? 'active' : ''}">Dezabonați</button></div></section><div id="shop-newsletter-results"></div>`;
+    const activeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m5 8 7 5 7-5"/><path d="m15.5 17 1.7 1.7L21 15"/></svg>';
+    const inactiveIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 18H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v5"/><path d="m4 7 8 5 8-5M17 16l5 5M22 16l-5 5"/></svg>';
+    const notifiedIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-8-7 18-3-7-8-3Z"/><path d="m11 14 4-4"/></svg>';
+    $('shop-newsletter-content').innerHTML = `<section class="shop-newsletter-metrics" aria-label="Rezumat abonați"><article data-tone="active"><span class="shop-newsletter-metric-icon">${activeIcon}</span><div><small>Abonați activi</small><strong>${subscribed}</strong><em>Primesc produsele noi</em></div></article><article data-tone="inactive"><span class="shop-newsletter-metric-icon">${inactiveIcon}</span><div><small>Dezabonați</small><strong>${unsubscribed}</strong><em>Nu mai primesc mesaje</em></div></article><article data-tone="notified"><span class="shop-newsletter-metric-icon">${notifiedIcon}</span><div><small>Notificați</small><strong>${notified}</strong><em>Au primit cel puțin un produs</em></div></article></section>
+      <section class="shop-newsletter-toolbar"><div class="shop-newsletter-search"><span>${searchIcon}</span><label for="shop-newsletter-search"><small>Caută în listă</small><input id="shop-newsletter-search" type="search" value="${esc(state.newsletterQuery)}" placeholder="Nume, e-mail sau telefon" autocomplete="off" /></label><b id="shop-newsletter-result-count"></b><button type="button" id="shop-newsletter-search-clear" aria-label="Șterge căutarea">×</button></div><div class="shop-newsletter-filters" aria-label="Filtrează abonații"><button type="button" data-newsletter-status="all" class="${state.newsletterStatus === 'all' ? 'active' : ''}"><span>Toți</span><b>${state.newsletterSubscribers.length}</b></button><button type="button" data-newsletter-status="subscribed" class="${state.newsletterStatus === 'subscribed' ? 'active' : ''}"><span>Abonați</span><b>${subscribed}</b></button><button type="button" data-newsletter-status="unsubscribed" class="${state.newsletterStatus === 'unsubscribed' ? 'active' : ''}"><span>Dezabonați</span><b>${unsubscribed}</b></button></div></section><div id="shop-newsletter-results"></div>`;
     const search = $('shop-newsletter-search');
     search.addEventListener('input', () => { state.newsletterQuery = search.value; state.pages.newsletter = 1; renderNewsletterResults(); });
     $('shop-newsletter-search-clear').addEventListener('click', () => { state.newsletterQuery = ''; state.pages.newsletter = 1; search.value = ''; search.focus(); renderNewsletterResults(); });
@@ -5869,5 +5878,18 @@
     button.setAttribute('aria-label', 'Exportă în XLSX'); button.innerHTML = `${productExportIcon()}<span>Exportă XLSX</span>`;
     button.onclick = () => openRegistryExport(kind, button); group.appendChild(button);
   }
+  let newsletterMobileViewport = window.matchMedia('(max-width: 780px)').matches;
+  let newsletterResizeFrame = 0;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(newsletterResizeFrame);
+    newsletterResizeFrame = requestAnimationFrame(() => {
+      const mobileViewport = window.matchMedia('(max-width: 780px)').matches;
+      if (mobileViewport === newsletterMobileViewport) return;
+      newsletterMobileViewport = mobileViewport;
+      if (!$('shop-newsletter-results') || !state.newsletterSubscribers.length) return;
+      state.pages.newsletter = 1;
+      renderNewsletterResults();
+    });
+  });
   mount();
 })();
