@@ -277,6 +277,8 @@ app.whenReady().then(async () => {
     orderNotifyScrollDelta: Number(window.__qaOrderNotifyScrollDelta || 0),
     orderContactActions: document.querySelectorAll('#shop-order-details .shop-order-contact-actions button').length,
     orderDeliveryRows: document.querySelectorAll('#shop-order-details .shop-order-summary-card:nth-child(2) .shop-order-detail-row').length,
+    orderShippingNoteActions: document.querySelectorAll('#shop-order-details [data-shipping-note-issue], #shop-order-details [data-shipping-note-share], #shop-order-details [data-shipping-note-email], #shop-order-details [data-shipping-note-download], #shop-order-details [data-shipping-note-delete]').length,
+    shippingNoteModalMounted: Boolean(document.getElementById('shop-shipping-note-modal')),
     invoicedOrderCustomerEditHidden: !document.querySelector('#shop-order-details [data-order-customer-edit]'),
     invoicedOrderDeliveryEditHidden: !document.querySelector('#shop-order-details [data-order-delivery-edit]'),
     invoicedOrderIdentityLocks: [...document.querySelectorAll('#shop-order-details .shop-order-customer-locked')].map(node => node.textContent.trim()),

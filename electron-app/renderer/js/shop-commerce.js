@@ -8,7 +8,7 @@
   const dashboardPreferences = readDashboardPreferences();
   const state = {
     products: [], orders: [], invoices: [], inventory: [], inventoryMovements: [], sources: [], suppliers: [], categories: [], brands: [], manufacturers: [], shipping: [], customers: [], newsletterSubscribers: [], promotions: [], companies: [], nirs: [], nirPermissions: [], nirWarehouses: [], smartBillSettings: null, smartBillDraft: null, smartBillBusy: '', smartBillSkuLookup: null, smartBillSkuTimer: null, smartBillSkuRequestId: 0, invoiceThemeSettings: null, invoiceAutomationSettings: null, invoiceAutomationSaving: false, selectedInvoiceTheme: 'orange', invoiceSettingsDraft: { invoice_series: '', default_warehouse_id: '', default_warehouse_name: '', due_days: 7, default_notes: '' }, invoiceThemeSaving: false, invoiceQuery: '', invoiceStatusFilter: 'all', invoiceBusy: '',
-    editingProduct: null, editingOrder: null, orderItemDrafts: [], orderProductPickerTimer: null, orderReplacementTransportConfirmed: false, orderReplacementShippingCost: 0, orderReplacementReturnPayer: '', orderReplacementReturnCost: 0, invoiceIssueOrder: null, invoiceDetail: null, shippingNoteOrder: null, shippingNoteBusy: '', editingStock: null, editingSource: null, editingSupplier: null, editingShipping: null, editingPromotion: null, editingCompany: null, customerDetail: null, companyStampBase64: null, companyStampRemove: false, promotionSelectedProductIds: new Set(), promotionAllProductIds: null, promotionSelectingAll: false, promotionProductQuery: '', promotionProductsLoading: false, promotionProductSearchTimer: null, promotionSelectedCustomerIds: new Set(), promotionCustomerQuery: '', promotionCustomersLoading: false,
+    editingProduct: null, editingOrder: null, orderItemDrafts: [], orderProductPickerTimer: null, orderReplacementTransportConfirmed: false, orderReplacementShippingCost: 0, orderReplacementReturnPayer: '', orderReplacementReturnCost: 0, invoiceIssueOrder: null, invoiceDetail: null, editingStock: null, editingSource: null, editingSupplier: null, editingShipping: null, editingPromotion: null, editingCompany: null, customerDetail: null, companyStampBase64: null, companyStampRemove: false, promotionSelectedProductIds: new Set(), promotionAllProductIds: null, promotionSelectingAll: false, promotionProductQuery: '', promotionProductsLoading: false, promotionProductSearchTimer: null, promotionSelectedCustomerIds: new Set(), promotionCustomerQuery: '', promotionCustomersLoading: false,
     productImages: [], productSpecifications: [], productQuestions: [], productDetail: null, productTotal: 0, productSearchTimer: null, productLoadRequestId: 0, slugTouched: false, productQuery: '', orderQuery: '', orderSearchTimer: null, orderStatusFilter: 'all', orderPaymentMethodFilter: 'all', orderPaymentStatusFilter: 'all', richRange: null, richImage: null, richDragging: null, richResize: null,
     customerQuery: '', newsletterQuery: '', newsletterStatus: 'all', productSaveProgressTimer: null, inventoryQuery: '', inventoryMovementsLoading: false, supplierProductsBySupplier: {}, supplierProductPages: {}, nirEditor: null, nirCorrectionOriginal: null, nirStornoDocument: null, nirSupplierReturnContext: null, nirSearch: '', nirStatus: '', nirSupplierQuery: '', nirProductQuery: '', nirProductLineIndex: -1, nirSavePromise: null, nirEditRevision: 0, nirRegistryRequestId: 0, nirBootstrapped: false, nirCreateInFlight: false, nirResolveTimers: new Map(), nirResolveRequestIds: new Map(), nirPendingFiles: [], nirStornoPendingFiles: [], nirRateLoading: '', nirReversing: false, nirBundleDownloading: '', nirRegistryDownloadPeriod: 'current_month', nirRegistryDownloadContent: 'complete', nirRegistryDownloading: false, nirExportProgressTimer: null,
     pages: { products: 1, orders: 1, invoices: 1, inventory: 1, stockFlow: 1, stockMovements: 1, productSales: 1, productReviews: 1, productPurchases: 1, customers: 1, newsletter: 1, customerOrders: 1, nirs: 1 },
@@ -224,7 +224,7 @@
       ${dashboardCard('shop-invoice-configurator', 'amber', 'DOCUMENTE', 'Facturare SmartBill', 'Serii, reguli fiscale și sincronizare automată.')}
       ${dashboardCard('shop-automations', 'amber', 'FLUXURI', 'Automatizări', 'Emitere și trimitere automată a facturilor.')}
     `);
-    document.body.insertAdjacentHTML('beforeend', productModal() + productDetailModal() + productSaveProgressOverlay() + orderModal() + invoiceIssueModal() + shippingNoteModal() + invoiceDetailModal() + stockModal() + sourceModal() + supplierModal() + nirModal() + nirRegistryDownloadModal() + shippingModal() + customerModal() + promotionModal() + promotionStatsModal() + companyModal());
+    document.body.insertAdjacentHTML('beforeend', productModal() + productDetailModal() + productSaveProgressOverlay() + orderModal() + invoiceIssueModal() + invoiceDetailModal() + stockModal() + sourceModal() + supplierModal() + nirModal() + nirRegistryDownloadModal() + shippingModal() + customerModal() + promotionModal() + promotionStatsModal() + companyModal());
     wire();
     startSmartBillAutoSync();
     if ($('tab-shop-dashboard')?.classList.contains('active')) void loadShopView('shop-dashboard', { force: true });
@@ -262,7 +262,7 @@
       ${section('05', 'Întrebări și răspunsuri', 'Conținutul este afișat numai pe pagina acestui produs.')}<div class="shop-subeditor-head"><strong>Întrebări produs</strong><button type="button" id="shop-product-add-question">+ Adaugă întrebare</button></div><div id="shop-product-questions" class="shop-product-subeditor"></div>
       ${section('06', 'Preț și reducere', 'Controlează prețul public și configurează reducerea aplicată produsului.')}
       <div class="shop-supplier-pricing" id="shop-product-boomag-pricing" hidden><div class="shop-supplier-pricing-head"><span><small>SINCRONIZARE BOOMAG</small><strong>Pretul public se pastreaza automat</strong></span><em><i></i>FEED ACTIV</em></div><div class="shop-commerce-columns"><label>Pret feed Boomag<input id="shop-product-supplier-base-price" type="number" step="0.01" disabled placeholder="Nesincronizat" /><small>Valoare preluata automat din feed.</small></label><label>Diferenta comerciala<input id="shop-product-price-difference" type="number" step="0.01" disabled placeholder="Nedisponibila" /><small>Calculata automat fata de pretul Cubis Shop.</small></label></div></div>
-      <div class="shop-commerce-columns three"><label>Preț Cubis Shop *<input id="shop-product-price" type="number" min="0" step="0.01" required /><small id="shop-product-price-hint" hidden>Editezi prețul public dorit; diferența se recalculează automat.</small></label><label>Tip reducere<select id="shop-product-discount-type"><option value="percent">Procent (%)</option><option value="fixed">Sumă fixă (lei)</option></select></label><label id="shop-product-discount-label">Reducere %<input id="shop-product-discount-value" type="number" min="0" step="0.01" /></label></div><div class="shop-commerce-columns"><label>Unitate de măsură (U.M.)<input id="shop-product-unit" type="text" maxlength="20" value="buc" placeholder="buc" /><small>Se preia automat pe aviz.</small></label></div><div class="shop-nir-note"><b>Gestiunea contabilă nu se editează în Cubis.</b><span>Stocul, NIR-ul, FIFO și costurile contabile sunt administrate exclusiv în SmartBill.</span></div><div class="shop-price-preview"><small>Preț pe site</small><strong id="shop-product-final-price">0,00 lei</strong></div>
+      <div class="shop-commerce-columns three"><label>Preț Cubis Shop *<input id="shop-product-price" type="number" min="0" step="0.01" required /><small id="shop-product-price-hint" hidden>Editezi prețul public dorit; diferența se recalculează automat.</small></label><label>Tip reducere<select id="shop-product-discount-type"><option value="percent">Procent (%)</option><option value="fixed">Sumă fixă (lei)</option></select></label><label id="shop-product-discount-label">Reducere %<input id="shop-product-discount-value" type="number" min="0" step="0.01" /></label></div><div class="shop-commerce-columns"><label>Unitate de măsură (U.M.)<input id="shop-product-unit" type="text" maxlength="20" value="buc" placeholder="buc" /><small>Unitatea folosită pentru produs.</small></label></div><div class="shop-nir-note"><b>Gestiunea contabilă nu se editează în Cubis.</b><span>Stocul, NIR-ul, FIFO și costurile contabile sunt administrate exclusiv în SmartBill.</span></div><div class="shop-price-preview"><small>Preț pe site</small><strong id="shop-product-final-price">0,00 lei</strong></div>
       ${section('07', 'Catalog și compatibilitate', 'Leagă produsul de categorie, producător și mărcile compatibile.')}
       <div class="shop-commerce-columns"><div class="shop-field-group"><span>Categorii și subcategorii</span><div class="shop-multi-select" id="shop-product-category-select"><button type="button" id="shop-product-categories-toggle" aria-expanded="false"><span id="shop-product-categories-summary">Alege categoriile</span><b>⌄</b></button><div class="shop-brand-options shop-tree-options" id="shop-product-categories" hidden></div></div></div><div class="shop-field-group"><span>Producător</span><div class="shop-multi-select" id="shop-product-manufacturer-select"><button type="button" id="shop-product-manufacturer-toggle" aria-expanded="false"><span id="shop-product-manufacturer-summary">Alege producătorul</span><b>⌄</b></button><div class="shop-brand-options" id="shop-product-manufacturers" hidden></div></div></div></div><div class="shop-field-group"><span>Compatibilități</span><div class="shop-multi-select" id="shop-product-brand-select"><button type="button" id="shop-product-brands-toggle" aria-expanded="false"><span id="shop-product-brands-summary">Alege mărcile compatibile</span><b>⌄</b></button><div class="shop-brand-options" id="shop-product-brands" hidden></div></div></div>
       ${section('08', 'Garanția produsului', 'Se afișează public atunci când valoarea este mai mare de zero.')}
@@ -315,22 +315,6 @@
           <div class="shop-invoice-issue-note"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg><span>Numărul este atribuit exclusiv de SmartBill. Factura emisă nu este regenerată local.</span></div>
         </div>
         <footer><button type="button" class="btn-ghost" data-commerce-close="shop-invoice-issue-modal">Renunță</button><button type="submit" class="btn-primary shop-invoice-issue-confirm" id="shop-invoice-issue-confirm"><svg viewBox="0 0 24 24"><path d="M6 2h9l4 4v16l-3-2-3 2-3-2-4 2V2Z"/><path d="M14 2v5h5M9 11h6m-6 4h4"/></svg><span>Emite factura</span></button></footer>
-      </form>
-    </div>`;
-  }
-  function shippingNoteModal() {
-    return `<div class="shop-commerce-overlay shop-shipping-note-overlay" id="shop-shipping-note-modal" hidden>
-      <form class="shop-commerce-modal compact shop-shipping-note-modal" id="shop-shipping-note-form">
-        <header><div><small>AVIZ DE ÎNSOȚIRE A MĂRFII</small><h2>Generează avizul</h2></div><button type="button" data-commerce-close="shop-shipping-note-modal">×</button></header>
-        <div class="shop-commerce-modal-scroll">
-          <div class="shop-shipping-note-summary"><span><small>COMANDĂ</small><strong id="shop-shipping-note-order">—</strong></span><span><small>CLIENT</small><strong id="shop-shipping-note-client">—</strong></span><span><small>PRODUSE</small><strong id="shop-shipping-note-products">0</strong></span></div>
-          <div class="shop-commerce-columns"><label>Numele delegatului<input id="shop-shipping-note-delegate" maxlength="500" value="-" /></label><label>CI - serie și număr<input id="shop-shipping-note-identity" maxlength="500" value="-" /></label></div>
-          <div class="shop-commerce-columns"><label>Mijloc transport / nr.<input id="shop-shipping-note-vehicle" maxlength="500" value="-" /></label><label>Ora livrării<input id="shop-shipping-note-time" maxlength="500" value="-" /></label></div>
-          <label>Loc încărcare<input id="shop-shipping-note-loading" maxlength="500" value="-" /></label>
-          <label>Expeditor · nume și semnătură<input id="shop-shipping-note-sender" maxlength="500" value="Cubis Shop Romania" /></label>
-          <label class="shop-shipping-note-stamp"><span><strong>Variantă cu ștampilă</strong><small>În PDF apare ștampila salvată în Datele firmei, fără chenar.</small></span><input id="shop-shipping-note-stamp" type="checkbox"><i></i></label>
-        </div>
-        <footer><button type="button" class="btn-ghost" data-commerce-close="shop-shipping-note-modal">Renunță</button><button type="submit" class="btn-primary" id="shop-shipping-note-confirm">Generează avizul</button></footer>
       </form>
     </div>`;
   }
@@ -632,7 +616,6 @@
     $('shop-smartbill-product-warehouse-toggle')?.addEventListener('click', toggleSmartBillWarehousePicker);
     $('shop-order-form').addEventListener('submit', saveOrder);
     $('shop-invoice-issue-form').addEventListener('submit', submitInvoiceIssue);
-    $('shop-shipping-note-form').addEventListener('submit', submitShippingNote);
     $('shop-invoice-issue-send-email').addEventListener('change', syncInvoiceIssuePanel);
     $('shop-invoice-issue-send-return-email').addEventListener('change', syncInvoiceIssuePanel);
     $('shop-invoice-detail-link').addEventListener('click', () => void copyInvoicePublicLink(state.invoiceDetail?.id));
@@ -2283,113 +2266,6 @@
     finally { state.invoiceBusy = ''; button.disabled = false; }
   }
 
-  async function openShippingNoteIssue(orderId) {
-    const order = state.editingOrder?.id === orderId ? state.editingOrder : state.orders.find(item => item.id === orderId);
-    if (!order || state.shippingNoteBusy) return;
-    if (order.shipping_note) return;
-    state.shippingNoteBusy = order.id;
-    try {
-      const prepared = await window.SHOP_API.prepareShippingNote(order.id);
-      if (prepared.existing) {
-        const refreshed = await window.SHOP_API.getOrder(order.id);
-        state.orders = state.orders.map(item => item.id === refreshed.id ? refreshed : item);
-        renderOrderDetails(refreshed); renderOrders();
-        return;
-      }
-      state.shippingNoteOrder = order;
-      const expedition = prepared.draft?.expedition || {};
-      $('shop-shipping-note-order').textContent = order.order_number;
-      $('shop-shipping-note-client').textContent = orderCustomerDisplayName(order) || 'Client';
-      $('shop-shipping-note-products').textContent = String(order.items?.length || 0);
-      $('shop-shipping-note-delegate').value = expedition.delegate_name || '-';
-      $('shop-shipping-note-identity').value = expedition.identity_document || '-';
-      $('shop-shipping-note-vehicle').value = expedition.transport_vehicle || '-';
-      $('shop-shipping-note-time').value = expedition.delivery_time || '-';
-      $('shop-shipping-note-loading').value = expedition.loading_place || '-';
-      $('shop-shipping-note-sender').value = prepared.draft?.sender_name || 'Cubis Shop Romania';
-      $('shop-shipping-note-stamp').checked = false;
-      openModal('shop-shipping-note-modal');
-    } catch (error) { toast(error.message || 'Formularul avizului nu a putut fi pregătit.', 'error'); }
-    finally { state.shippingNoteBusy = ''; }
-  }
-
-  async function submitShippingNote(event) {
-    event.preventDefault();
-    const order = state.shippingNoteOrder;
-    if (!order || state.shippingNoteBusy) return;
-    const button = $('shop-shipping-note-confirm');
-    button.disabled = true;
-    state.shippingNoteBusy = order.id;
-    try {
-      const note = await window.SHOP_API.issueShippingNote(order.id, {
-        delegate_name: $('shop-shipping-note-delegate').value.trim() || '-',
-        identity_document: $('shop-shipping-note-identity').value.trim() || '-',
-        transport_vehicle: $('shop-shipping-note-vehicle').value.trim() || '-',
-        delivery_time: $('shop-shipping-note-time').value.trim() || '-',
-        loading_place: $('shop-shipping-note-loading').value.trim() || '-',
-        sender_name: $('shop-shipping-note-sender').value.trim() || 'Cubis Shop Romania',
-        with_stamp: $('shop-shipping-note-stamp').checked,
-      });
-      closeModal('shop-shipping-note-modal');
-      state.shippingNoteOrder = null;
-      toast(`${note.display_number} a fost generat.`);
-      const refreshed = await window.SHOP_API.getOrder(order.id);
-      state.orders = state.orders.map(item => item.id === refreshed.id ? refreshed : item);
-      if (state.editingOrder?.id === refreshed.id) renderOrderDetails(refreshed);
-      renderOrders();
-    } catch (error) { toast(error.message || 'Avizul nu a putut fi generat.', 'error'); }
-    finally { state.shippingNoteBusy = ''; button.disabled = false; }
-  }
-
-  async function shareShippingNote(note) {
-    if (!note?.id || state.shippingNoteBusy) return;
-    state.shippingNoteBusy = note.id;
-    try {
-      const file = await window.SHOP_API.getShippingNotePublicLink(note.id);
-      if (navigator.share) await navigator.share({ title: note.display_number, text: `Aviz ${note.display_number}`, url: file.url });
-      else await shell.openExternal(file.url);
-    } catch (error) {
-      if (error?.name !== 'AbortError') toast(error.message || 'Trimiterea PDF nu a putut fi deschisă.', 'error');
-    } finally { state.shippingNoteBusy = ''; }
-  }
-
-  async function downloadShippingNote(note) {
-    if (!note?.id || state.shippingNoteBusy) return;
-    state.shippingNoteBusy = note.id;
-    try { saveNirDownload(await window.SHOP_API.downloadShippingNote(note.id)); }
-    catch (error) { toast(error.message || 'Avizul nu a putut fi descărcat.', 'error'); }
-    finally { state.shippingNoteBusy = ''; }
-  }
-
-  async function emailShippingNote(note, order) {
-    if (!note?.id || state.shippingNoteBusy) return;
-    if (!order.customer_email) return toast('Comanda nu are o adresă de e-mail validă.', 'error');
-    state.shippingNoteBusy = note.id;
-    try {
-      const result = await window.SHOP_API.sendShippingNoteEmail(note.id);
-      if (!result.sent) throw new Error(result.error || 'E-mailul nu a fost trimis.');
-      toast(`Avizul a fost trimis la ${result.recipient}.`);
-      const refreshed = await window.SHOP_API.getOrder(order.id);
-      state.orders = state.orders.map(item => item.id === refreshed.id ? refreshed : item);
-      renderOrderDetails(refreshed); renderOrders();
-    } catch (error) { toast(error.message || 'Avizul nu a putut fi trimis.', 'error'); }
-    finally { state.shippingNoteBusy = ''; }
-  }
-
-  async function deleteShippingNote(note, order) {
-    if (!note?.id || !note.can_delete || state.shippingNoteBusy) return;
-    if (!confirm(`Ștergi ${note.display_number}? Numărul va fi refolosit de următorul aviz.`)) return;
-    state.shippingNoteBusy = note.id;
-    try {
-      await window.SHOP_API.deleteShippingNote(note.id);
-      toast(`${note.display_number} a fost șters; numărul a fost eliberat.`);
-      const refreshed = await window.SHOP_API.getOrder(order.id);
-      state.orders = state.orders.map(item => item.id === refreshed.id ? refreshed : item);
-      renderOrderDetails(refreshed); renderOrders();
-    } catch (error) { toast(error.message || 'Avizul nu a putut fi șters.', 'error'); }
-    finally { state.shippingNoteBusy = ''; }
-  }
-
   async function loadOrders() { loading('shop-orders-content', 'Se incarca comenzile...'); try { const orders = await window.SHOP_API.listOrders(); state.orders = Array.isArray(orders) ? orders : []; renderOrders(); } catch (error) { failure('shop-orders-content', error); } }
   function orderCustomerKind(order) {
     const company = String(order?.customer_type || '').toLowerCase() === 'company'
@@ -2761,9 +2637,6 @@
     const invoiceCard = order.invoice
       ? `<section class="shop-order-invoice-card issued"><span class="shop-order-invoice-icon">✓</span><div><small>FACTURĂ ${order.invoice.provider === 'smartbill' ? 'SMARTBILL' : 'ISTORICĂ'}</small><strong>${esc(order.invoice.display_number)}</strong><p>${order.invoice.status === 'paid' ? 'Plătită' : 'Neplătită'} · ${invoiceMoney(order.invoice.total, order.invoice.currency)} · ${order.invoice.provider === 'smartbill' ? 'stoc descărcat prin SmartBill' : 'document local istoric'}</p></div><aside><button type="button" class="primary issue" data-order-invoice-open="${esc(order.invoice.id)}"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>Vezi factura</button></aside></section>`
       : `<section class="shop-order-invoice-card"><span class="shop-order-invoice-icon"><svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></span><div><small>FACTURĂ SMARTBILL</small><strong>Factura nu este emisă</strong><p>SmartBill alocă seria și numărul, apoi descarcă fiecare produs din gestiunea asociată SKU-ului.</p></div><aside><button type="button" class="primary issue" data-order-invoice-issue="${esc(order.id)}">Emite factura</button></aside></section>`;
-    const shippingNoteCard = order.shipping_note
-      ? `<section class="shop-order-invoice-card shop-order-shipping-note issued"><span class="shop-order-invoice-icon">AVZ</span><div><small>AVIZ DE ÎNSOȚIRE</small><strong>${esc(order.shipping_note.display_number)}</strong><p>${order.shipping_note.with_stamp ? 'Cu ștampilă' : 'Fără ștampilă'} · comanda ${esc(order.order_number)}${order.shipping_note.email_sent_at ? ' · trimis pe e-mail' : ''}</p></div><aside class="shop-shipping-note-actions"><button type="button" data-shipping-note-share="${esc(order.shipping_note.id)}">Trimite PDF</button><button type="button" data-shipping-note-email="${esc(order.shipping_note.id)}" ${order.customer_email ? '' : 'disabled'}>E-mail</button><button type="button" data-shipping-note-download="${esc(order.shipping_note.id)}">Download</button>${order.shipping_note.can_delete ? `<button type="button" class="danger" data-shipping-note-delete="${esc(order.shipping_note.id)}">Șterge</button>` : ''}</aside></section>`
-      : `<section class="shop-order-invoice-card shop-order-shipping-note"><span class="shop-order-invoice-icon">AVZ</span><div><small>AVIZ DE ÎNSOȚIRE</small><strong>Aviz neemis</strong><p>Datele firmei, clientul și produsele se preiau automat din comandă.</p></div><aside><button type="button" class="primary issue" data-shipping-note-issue="${esc(order.id)}">Generează avizul</button></aside></section>`;
     const returnInvoiceCard = order.return_invoice
       ? `<section class="shop-order-invoice-card issued return"><span class="shop-order-invoice-icon">↩</span><div><small>${order.return_invoice.invoice_type === 'correction_return' ? 'FACTURĂ NEGATIVĂ DE CORECȚIE' : 'FACTURĂ DE RETUR'}</small><strong>${esc(order.return_invoice.display_number)}</strong><p>Referință fiscală și comanda ${esc(order.order_number)}</p></div><aside><button type="button" class="primary issue" data-order-invoice-open="${esc(order.return_invoice.id)}">Vezi returul</button></aside></section>`
       : '';
@@ -2805,7 +2678,7 @@
       <div class="shop-order-items">${orderItemsHtml}</div>
       ${order.invoice ? '<p class="shop-order-correction-hint">Factura emisă este un snapshot fiscal: redenumirea produsului în catalog nu o regenerează, iar pozițiile comenzii sunt blocate.</p>' : ''}
       <div class="shop-order-total"><span>Produse${hasVat ? ' (TVA inclus)' : ''} <b data-order-products-total>${money(productsTotal)}</b> · Transport <b data-order-shipping-total>${money(displayedShippingCost)}</b>${globalDiscount}</span><strong>Total de plată${hasVat ? ' (TVA inclus)' : ''} <b data-order-grand-total>${money(productsTotal + displayedShippingCost)}</b></strong></div>
-      ${invoiceCard}${shippingNoteCard}${returnInvoiceCard}${returnSummary}${returnPolicyLine}${orderTimeline(order)}${orderStatusPicker(order)}${returnRequestCard}
+      ${invoiceCard}${returnInvoiceCard}${returnSummary}${returnPolicyLine}${orderTimeline(order)}${orderStatusPicker(order)}${returnRequestCard}
       <label id="shop-order-cancellation-field" class="shop-order-cancellation-field" ${order.status === 'cancelled' ? '' : 'hidden'}><span><b>ANULARE COMANDĂ · MOTIV OBLIGATORIU</b><strong>${order.status === 'cancelled' ? 'Motivul înregistrat' : 'De ce anulăm comanda?'}</strong><small>Clientul va fi notificat automat, iar factura și stocul vor fi corectate după regulile fiscale.</small></span><textarea id="shop-order-cancellation-reason" rows="4" maxlength="1000" placeholder="Scrie motivul transmis clientului...">${esc(order.customer_cancellation_reason || '')}</textarea></label>
       <label class="shop-order-notify" data-notify-state="waiting"><input id="shop-order-notify" type="checkbox"><span class="shop-order-notify-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m5 8 7 5 7-5"/></svg><i></i></span><span class="shop-order-notify-copy"><span class="shop-order-notify-eyebrow">NOTIFICARE CLIENT <b id="shop-order-notify-state">ALEGE STATUS</b></span><strong>Trimite actualizarea pe e-mail</strong><small id="shop-order-notify-helper"></small></span><span class="shop-order-notify-switch" aria-hidden="true"><i></i></span></label>
       <button type="button" id="shop-order-send-current-status" class="shop-order-current-status-send" ${order.customer_email ? '' : 'disabled'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m5 7 7 6 7-6"/></svg><span><strong>Trimite statusul curent</strong><small>${order.customer_email ? `Retrimite acum statusul „${esc(statusShortLabels[order.status] || order.status)}” la ${esc(order.customer_email)}` : 'Comanda nu are o adresă de e-mail.'}</small></span><i>TRIMITE</i></button>
@@ -2832,11 +2705,6 @@
       if (start !== null) event.currentTarget.setSelectionRange(start, start);
     });
     $('shop-order-details').querySelector('[data-order-invoice-issue]')?.addEventListener('click', () => openInvoiceIssue(order.id));
-    $('shop-order-details').querySelector('[data-shipping-note-issue]')?.addEventListener('click', () => void openShippingNoteIssue(order.id));
-    $('shop-order-details').querySelector('[data-shipping-note-share]')?.addEventListener('click', () => void shareShippingNote(order.shipping_note));
-    $('shop-order-details').querySelector('[data-shipping-note-email]')?.addEventListener('click', () => void emailShippingNote(order.shipping_note, order));
-    $('shop-order-details').querySelector('[data-shipping-note-download]')?.addEventListener('click', () => void downloadShippingNote(order.shipping_note));
-    $('shop-order-details').querySelector('[data-shipping-note-delete]')?.addEventListener('click', () => void deleteShippingNote(order.shipping_note, order));
     $('shop-order-details').querySelectorAll('[data-order-invoice-open]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); navigateToIssuedInvoice(event.currentTarget.dataset.orderInvoiceOpen); }));
     $('shop-order-details').querySelectorAll('[data-return-shipping-choice]').forEach(choice => {
       const refresh = () => {
