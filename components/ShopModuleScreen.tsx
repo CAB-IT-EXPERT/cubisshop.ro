@@ -1147,9 +1147,11 @@ export default function ShopModuleScreen() {
 
   const isCategories = view === 'categories';
   const isBrands = view === 'brands';
-  const viewTitle = isCategories ? 'Categorii si subcategorii' : isBrands ? 'Compatibilitati branduri' : 'Producatori';
-  const viewSubtitle = isCategories ? 'Organizeaza produsele pe niveluri si adauga o miniatura.' : isBrands ? 'Administreaza marcile cu care sunt compatibile produsele.' : 'Administreaza companiile care fabrica produsele.';
+  const compactCatalog = viewportWidth < 720;
+  const viewTitle = isCategories ? 'Categorii și subcategorii' : isBrands ? 'Compatibilități branduri' : 'Producători';
+  const viewSubtitle = isCategories ? 'Construiește o structură clară pentru fiecare produs.' : isBrands ? 'Grupează produsele după mărcile cu care sunt compatibile.' : 'Păstrează la îndemână companiile care fabrică produsele.';
   const viewCount = isCategories ? categories.length : isBrands ? brands.length : manufacturers.length;
+  const catalogAccent = isCategories ? '#F45B7A' : isBrands ? '#009F8B' : '#087FF5';
   return (
     <View style={styles.container}>
       <Header
@@ -1164,19 +1166,20 @@ export default function ShopModuleScreen() {
       />
       <ScrollView contentContainerStyle={[styles.catalogContent, { paddingBottom: 178 + insets.bottom }]} showsVerticalScrollIndicator={false}>
         <View style={styles.catalogHero}>
-          <View style={styles.catalogHeroIcon}>{isCategories ? <FolderTree size={24} color="#FB7185" /> : isBrands ? <Tags size={24} color="#078F88" /> : <Factory size={24} color="#09BFD9" />}</View>
+          <View style={[styles.catalogHeroAura, { backgroundColor: `${catalogAccent}10` }]} />
+          <View style={[styles.catalogHeroIcon, { backgroundColor: `${catalogAccent}12` }]}>{isCategories ? <FolderTree size={27} color={catalogAccent} /> : isBrands ? <Tags size={27} color={catalogAccent} /> : <Factory size={27} color={catalogAccent} />}</View>
           <View style={styles.catalogHeroText}>
-            <Text style={styles.catalogKicker}>CATALOG PRODUSE</Text>
+            <Text style={[styles.catalogKicker, { color: catalogAccent }]}>ORGANIZARE CATALOG</Text>
             <Text style={styles.catalogTitle}>{viewTitle}</Text>
             <Text style={styles.catalogSubtitle}>{viewSubtitle}</Text>
           </View>
-          <View style={styles.counter}><Text style={styles.counterValue}>{viewCount}</Text><Text style={styles.counterLabel}>TOTAL</Text></View>
+          <View style={[styles.counter, { borderColor: `${catalogAccent}25` }]}><Text style={[styles.counterValue, { color: catalogAccent }]}>{viewCount}</Text><Text style={styles.counterLabel}>TOTAL</Text></View>
         </View>
 
         <View style={styles.tabs}>
-          <TouchableOpacity style={[styles.tab, isCategories && styles.tabActive]} onPress={() => setView('categories')}><FolderTree size={16} color={isCategories ? Colors.white : Colors.textSecondary} /><Text style={[styles.tabText, isCategories && styles.tabTextActive]}>Categorii</Text></TouchableOpacity>
-          <TouchableOpacity style={[styles.tab, isBrands && styles.tabActive]} onPress={() => setView('brands')}><Tags size={16} color={isBrands ? Colors.white : Colors.textSecondary} /><Text style={[styles.tabText, isBrands && styles.tabTextActive]}>Compatibilitati</Text></TouchableOpacity>
-          <TouchableOpacity style={[styles.tab, view === 'manufacturers' && styles.tabActive]} onPress={() => setView('manufacturers')}><Factory size={16} color={view === 'manufacturers' ? Colors.white : Colors.textSecondary} /><Text style={[styles.tabText, view === 'manufacturers' && styles.tabTextActive]}>Producatori</Text></TouchableOpacity>
+          <TouchableOpacity accessibilityRole="tab" accessibilityState={{ selected: isCategories }} style={[styles.tab, isCategories && styles.tabActive]} onPress={() => setView('categories')}><View style={[styles.tabIcon, isCategories && styles.tabIconActive]}><FolderTree size={16} color={isCategories ? '#FFFFFF' : '#F45B7A'} /></View><Text numberOfLines={1} style={[styles.tabText, isCategories && styles.tabTextActive]}>Categorii</Text></TouchableOpacity>
+          <TouchableOpacity accessibilityRole="tab" accessibilityState={{ selected: isBrands }} style={[styles.tab, isBrands && styles.tabActive]} onPress={() => setView('brands')}><View style={[styles.tabIcon, isBrands && styles.tabIconActive]}><Tags size={16} color={isBrands ? '#FFFFFF' : '#009F8B'} /></View><Text numberOfLines={1} style={[styles.tabText, isBrands && styles.tabTextActive]}>Branduri</Text></TouchableOpacity>
+          <TouchableOpacity accessibilityRole="tab" accessibilityState={{ selected: view === 'manufacturers' }} style={[styles.tab, view === 'manufacturers' && styles.tabActive]} onPress={() => setView('manufacturers')}><View style={[styles.tabIcon, view === 'manufacturers' && styles.tabIconActive]}><Factory size={16} color={view === 'manufacturers' ? '#FFFFFF' : '#087FF5'} /></View><Text numberOfLines={1} style={[styles.tabText, view === 'manufacturers' && styles.tabTextActive]}>Producători</Text></TouchableOpacity>
         </View>
 
         {loading ? (
@@ -1184,19 +1187,19 @@ export default function ShopModuleScreen() {
         ) : error ? (
           <View style={styles.stateBox}><Text style={styles.errorText}>{error}</Text><TouchableOpacity style={styles.retryButton} onPress={() => void loadCatalog()}><Text style={styles.retryText}>Incearca din nou</Text></TouchableOpacity></View>
         ) : isCategories ? (
-          <CategoryTable categories={categories} onEdit={openCategoryForm} onDelete={(item) => setDeleteTarget({ type: 'category', item })} />
+          <CategoryTable compact={compactCatalog} categories={categories} onEdit={openCategoryForm} onDelete={(item) => setDeleteTarget({ type: 'category', item })} />
         ) : isBrands ? (
-          <BrandTable brands={brands} onEdit={openBrandForm} onDelete={(item) => setDeleteTarget({ type: 'brand', item })} />
+          <BrandTable compact={compactCatalog} brands={brands} onEdit={openBrandForm} onDelete={(item) => setDeleteTarget({ type: 'brand', item })} />
         ) : (
-          <ManufacturerTable manufacturers={manufacturers} onEdit={openManufacturerForm} onDelete={(item) => setDeleteTarget({ type: 'manufacturer', item })} />
+          <ManufacturerTable compact={compactCatalog} manufacturers={manufacturers} onEdit={openManufacturerForm} onDelete={(item) => setDeleteTarget({ type: 'manufacturer', item })} />
         )}
       </ScrollView>
 
-      <View style={{ position: 'absolute', right: 22, bottom: 86 + insets.bottom, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View style={[styles.catalogFloatingActions, { bottom: 86 + insets.bottom }]}>
       <TouchableOpacity
-        style={[styles.fab, { position: 'relative', right: 0 }]}
+        style={[styles.fab, { position: 'relative', right: 0, backgroundColor: catalogAccent }]}
         activeOpacity={0.82}
-        accessibilityLabel={isCategories ? 'Adauga categorie' : isBrands ? 'Adauga compatibilitate brand' : 'Adauga producator'}
+        accessibilityLabel={isCategories ? 'Adaugă categorie' : isBrands ? 'Adaugă compatibilitate brand' : 'Adaugă producător'}
         onPress={() => isCategories ? openCategoryForm() : isBrands ? openBrandForm() : openManufacturerForm()}>
         <Plus size={28} color={Colors.white} strokeWidth={2.6} />
       </TouchableOpacity>
@@ -1209,38 +1212,44 @@ export default function ShopModuleScreen() {
         <Pressable style={styles.modalBackdrop} onPress={() => !saving && closeCategoryForm()}>
           <Pressable style={[styles.modalCard, { paddingBottom: Math.max(20, insets.bottom) }]} onPress={(event) => event.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <View><Text style={styles.modalKicker}>CATEGORIE SHOP</Text><Text style={styles.modalTitle}>{editingCategory ? 'Editeaza categoria' : 'Categorie noua'}</Text></View>
+              <View style={[styles.modalHeaderIcon, { backgroundColor: '#F45B7A12' }]}><FolderTree size={24} color="#F45B7A" /></View>
+              <View style={styles.modalHeaderCopy}><Text style={[styles.modalKicker, { color: '#F45B7A' }]}>STRUCTURĂ CATALOG</Text><Text style={styles.modalTitle}>{editingCategory ? 'Editează categoria' : 'Categorie nouă'}</Text><Text style={styles.modalSubtitle}>Imagine, identitate și poziție în catalog.</Text></View>
               <TouchableOpacity style={styles.closeButton} onPress={closeCategoryForm} disabled={saving}><X size={20} color={Colors.textSecondary} /></TouchableOpacity>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.modalBody}>
               {editingCategory?.is_protected ? <View style={styles.systemCategoryNote}>
                 <View style={styles.systemCategoryNoteIcon}><LockKeyhole size={18} color={Colors.orange} /></View>
-                <View style={styles.systemCategoryNoteCopy}><Text style={styles.systemCategoryNoteTitle}>Categorie permanenta a magazinului</Text><Text style={styles.systemCategoryNoteText}>O poti redenumi si activa sau dezactiva. ID-ul intern ramane stabil, iar categoria nu poate fi stearsa.</Text><Text selectable style={styles.systemCategoryKey}>ID: {editingCategory.system_key || editingCategory.id}</Text></View>
+                <View style={styles.systemCategoryNoteCopy}><Text style={styles.systemCategoryNoteTitle}>Categorie permanentă a magazinului</Text><Text style={styles.systemCategoryNoteText}>O poți redenumi și activa sau dezactiva. ID-ul intern rămâne stabil, iar categoria nu poate fi ștearsă.</Text><Text selectable style={styles.systemCategoryKey}>ID: {editingCategory.system_key || editingCategory.id}</Text></View>
               </View> : null}
-              <Text style={styles.fieldLabel}>MINIATURA</Text>
-              <View style={styles.imageRow}>
-                <TouchableOpacity style={styles.imagePicker} onPress={() => void pickCategoryImage()}>
-                  {categoryImage && !categoryImageRemoved ? <Image source={{ uri: categoryImage }} style={styles.previewImage} /> : <ImageIcon size={27} color={Colors.textMuted} />}
-                </TouchableOpacity>
-                <View style={styles.imageActions}>
-                  <TouchableOpacity style={styles.secondaryButton} onPress={() => void pickCategoryImage()}><Camera size={16} color={Colors.orange} /><Text style={styles.secondaryButtonText}>Alege poza</Text></TouchableOpacity>
-                  {categoryImage && !categoryImageRemoved && <TouchableOpacity onPress={() => { setCategoryImage(null); setCategoryImageBase64(null); setCategoryImageRemoved(true); }}><Text style={styles.removeImageText}>Sterge miniatura</Text></TouchableOpacity>}
+              <View style={styles.catalogFormSection}>
+                <View style={styles.catalogFormSectionHead}><View style={styles.catalogFormStep}><Text style={styles.catalogFormStepText}>01</Text></View><View><Text style={styles.catalogFormSectionTitle}>Identitatea categoriei</Text><Text style={styles.catalogFormSectionText}>Numele și imaginea văzute în catalog.</Text></View></View>
+                <Text style={styles.fieldLabel}>MINIATURĂ</Text>
+                <View style={styles.imageRow}>
+                  <TouchableOpacity style={styles.imagePicker} onPress={() => void pickCategoryImage()}>
+                    {categoryImage && !categoryImageRemoved ? <Image source={{ uri: categoryImage }} style={styles.previewImage} /> : <ImageIcon size={27} color="#F45B7A" />}
+                  </TouchableOpacity>
+                  <View style={styles.imageActions}>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => void pickCategoryImage()}><Camera size={16} color="#F45B7A" /><Text style={[styles.secondaryButtonText, { color: '#F45B7A' }]}>Alege imaginea</Text></TouchableOpacity>
+                    {categoryImage && !categoryImageRemoved && <TouchableOpacity onPress={() => { setCategoryImage(null); setCategoryImageBase64(null); setCategoryImageRemoved(true); }}><Text style={styles.removeImageText}>Șterge miniatura</Text></TouchableOpacity>}
+                  </View>
                 </View>
+                <Text style={styles.fieldLabel}>NUME *</Text>
+                <TextInput style={styles.input} value={categoryName} onChangeText={setCategoryName} placeholder="Ex: Accesorii" placeholderTextColor={Colors.textMuted} maxLength={120} />
+                <Text style={styles.fieldLabel}>DESCRIERE</Text>
+                <TextInput style={[styles.input, styles.textarea]} value={categoryDescription} onChangeText={setCategoryDescription} placeholder="Descriere scurtă pentru categorie" placeholderTextColor={Colors.textMuted} multiline maxLength={1000} />
               </View>
-
-              <Text style={styles.fieldLabel}>NUME *</Text>
-              <TextInput style={styles.input} value={categoryName} onChangeText={setCategoryName} placeholder="Ex: Accesorii" placeholderTextColor={Colors.textMuted} maxLength={120} />
-              <Text style={styles.fieldLabel}>DESCRIERE</Text>
-              <TextInput style={[styles.input, styles.textarea]} value={categoryDescription} onChangeText={setCategoryDescription} placeholder="Descriere scurta pentru categorie" placeholderTextColor={Colors.textMuted} multiline maxLength={1000} />
-              <Text style={styles.fieldLabel}>CATEGORIE PARINTE</Text>
-              <Text style={styles.fieldHint}>Alege un parinte doar daca aceasta este o subcategorie.</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.parentOptions}>
-                <ParentChip label="Fara parinte" selected={categoryParent === null} onPress={() => setCategoryParent(null)} />
-                {availableParents.map((category) => <ParentChip key={category.id} label={categoryHierarchyLabel(category, categories)} selected={categoryParent === category.id} onPress={() => setCategoryParent(category.id)} />)}
-              </ScrollView>
-              <View style={styles.switchRow}><View><Text style={styles.switchTitle}>Categorie activa</Text><Text style={styles.fieldHint}>Poate fi folosita in catalog.</Text></View><Switch value={categoryActive} onValueChange={setCategoryActive} trackColor={{ false: '#363636', true: Colors.orangeMid }} thumbColor={categoryActive ? Colors.orange : '#8A8A8A'} /></View>
+              <View style={styles.catalogFormSection}>
+                <View style={styles.catalogFormSectionHead}><View style={styles.catalogFormStep}><Text style={styles.catalogFormStepText}>02</Text></View><View><Text style={styles.catalogFormSectionTitle}>Poziție și vizibilitate</Text><Text style={styles.catalogFormSectionText}>Alege nivelul și starea categoriei.</Text></View></View>
+                <Text style={styles.fieldLabel}>CATEGORIE PĂRINTE</Text>
+                <Text style={styles.fieldHint}>Alege un părinte doar dacă aceasta este o subcategorie.</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.parentOptions}>
+                  <ParentChip label="Fără părinte" selected={categoryParent === null} onPress={() => setCategoryParent(null)} />
+                  {availableParents.map((category) => <ParentChip key={category.id} label={categoryHierarchyLabel(category, categories)} selected={categoryParent === category.id} onPress={() => setCategoryParent(category.id)} />)}
+                </ScrollView>
+                <View style={[styles.switchRow, categoryActive && styles.switchRowActive]}><View style={styles.switchCopy}><Text style={styles.switchTitle}>Categorie activă</Text><Text style={styles.fieldHint}>Poate fi folosită în catalog.</Text></View><Switch value={categoryActive} onValueChange={setCategoryActive} trackColor={{ false: Theme.colors.border.default, true: '#F45B7A' }} thumbColor={Theme.colors.surface.base} /></View>
+              </View>
               <TouchableOpacity style={[styles.saveButton, saving && styles.buttonDisabled]} onPress={() => void saveCategory()} disabled={saving}>
-                {saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={18} color={Colors.white} /><Text style={styles.saveButtonText}>Salveaza categoria</Text></>}
+                {saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={18} color={Colors.white} /><Text style={styles.saveButtonText}>Salvează categoria</Text></>}
               </TouchableOpacity>
             </ScrollView>
           </Pressable>
@@ -1251,17 +1260,23 @@ export default function ShopModuleScreen() {
         <Pressable style={styles.modalBackdrop} onPress={() => !saving && setBrandModal(false)}>
           <Pressable style={[styles.modalCard, styles.brandModal, { paddingBottom: Math.max(20, insets.bottom) }]} onPress={(event) => event.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <View><Text style={styles.modalKicker}>COMPATIBILITATE SHOP</Text><Text style={styles.modalTitle}>{editingBrand ? 'Editeaza compatibilitatea' : 'Compatibilitate noua'}</Text></View>
+              <View style={[styles.modalHeaderIcon, { backgroundColor: '#009F8B12' }]}><Tags size={24} color="#009F8B" /></View>
+              <View style={styles.modalHeaderCopy}><Text style={[styles.modalKicker, { color: '#009F8B' }]}>COMPATIBILITATE SHOP</Text><Text style={styles.modalTitle}>{editingBrand ? 'Editează compatibilitatea' : 'Compatibilitate nouă'}</Text><Text style={styles.modalSubtitle}>Identitate și legătură oficială.</Text></View>
               <TouchableOpacity style={styles.closeButton} onPress={() => setBrandModal(false)} disabled={saving}><X size={20} color={Colors.textSecondary} /></TouchableOpacity>
             </View>
-            <Text style={styles.fieldLabel}>NUME *</Text>
-            <TextInput style={styles.input} value={brandName} onChangeText={setBrandName} placeholder="Ex: Apple, Samsung" placeholderTextColor={Colors.textMuted} maxLength={120} />
-            <Text style={styles.fieldLabel}>SITE WEB</Text>
-            <TextInput style={styles.input} value={brandWebsite} onChangeText={setBrandWebsite} placeholder="https://..." placeholderTextColor={Colors.textMuted} autoCapitalize="none" keyboardType="url" maxLength={255} />
-            <View style={styles.switchRow}><View><Text style={styles.switchTitle}>Compatibilitate activa</Text><Text style={styles.fieldHint}>Poate fi asociata produselor.</Text></View><Switch value={brandActive} onValueChange={setBrandActive} trackColor={{ false: '#363636', true: Colors.orangeMid }} thumbColor={brandActive ? Colors.orange : '#8A8A8A'} /></View>
-            <TouchableOpacity style={[styles.saveButton, saving && styles.buttonDisabled]} onPress={() => void saveBrand()} disabled={saving}>
-                {saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={18} color={Colors.white} /><Text style={styles.saveButtonText}>Salveaza compatibilitatea</Text></>}
-            </TouchableOpacity>
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.modalBody}>
+              <View style={styles.catalogFormSection}>
+                <View style={styles.catalogFormSectionHead}><View style={styles.catalogFormStep}><Text style={styles.catalogFormStepText}>01</Text></View><View><Text style={styles.catalogFormSectionTitle}>Detaliile brandului</Text><Text style={styles.catalogFormSectionText}>Informațiile folosite în catalog.</Text></View></View>
+                <Text style={styles.fieldLabel}>NUME *</Text>
+                <TextInput style={styles.input} value={brandName} onChangeText={setBrandName} placeholder="Ex: Apple, Samsung" placeholderTextColor={Colors.textMuted} maxLength={120} />
+                <Text style={styles.fieldLabel}>SITE WEB</Text>
+                <TextInput style={styles.input} value={brandWebsite} onChangeText={setBrandWebsite} placeholder="https://..." placeholderTextColor={Colors.textMuted} autoCapitalize="none" keyboardType="url" maxLength={255} />
+                <View style={[styles.switchRow, brandActive && styles.switchRowActive]}><View style={styles.switchCopy}><Text style={styles.switchTitle}>Compatibilitate activă</Text><Text style={styles.fieldHint}>Poate fi asociată produselor.</Text></View><Switch value={brandActive} onValueChange={setBrandActive} trackColor={{ false: Theme.colors.border.default, true: '#009F8B' }} thumbColor={Theme.colors.surface.base} /></View>
+              </View>
+              <TouchableOpacity style={[styles.saveButton, { backgroundColor: '#009F8B' }, saving && styles.buttonDisabled]} onPress={() => void saveBrand()} disabled={saving}>
+                  {saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={18} color={Colors.white} /><Text style={styles.saveButtonText}>Salvează compatibilitatea</Text></>}
+              </TouchableOpacity>
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -1270,17 +1285,23 @@ export default function ShopModuleScreen() {
         <Pressable style={styles.modalBackdrop} onPress={() => !saving && setManufacturerModal(false)}>
           <Pressable style={[styles.modalCard, styles.brandModal, { paddingBottom: Math.max(20, insets.bottom) }]} onPress={(event) => event.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <View><Text style={styles.modalKicker}>PRODUCATOR SHOP</Text><Text style={styles.modalTitle}>{editingManufacturer ? 'Editeaza producatorul' : 'Producator nou'}</Text></View>
+              <View style={[styles.modalHeaderIcon, { backgroundColor: '#087FF512' }]}><Factory size={24} color="#087FF5" /></View>
+              <View style={styles.modalHeaderCopy}><Text style={[styles.modalKicker, { color: '#087FF5' }]}>PRODUCĂTOR SHOP</Text><Text style={styles.modalTitle}>{editingManufacturer ? 'Editează producătorul' : 'Producător nou'}</Text><Text style={styles.modalSubtitle}>Identitate și prezență online.</Text></View>
               <TouchableOpacity style={styles.closeButton} onPress={() => setManufacturerModal(false)} disabled={saving}><X size={20} color={Colors.textSecondary} /></TouchableOpacity>
             </View>
-            <Text style={styles.fieldLabel}>NUME *</Text>
-            <TextInput style={styles.input} value={manufacturerName} onChangeText={setManufacturerName} placeholder="Ex: Bosch" placeholderTextColor={Colors.textMuted} maxLength={120} />
-            <Text style={styles.fieldLabel}>SITE WEB</Text>
-            <TextInput style={styles.input} value={manufacturerWebsite} onChangeText={setManufacturerWebsite} placeholder="https://..." placeholderTextColor={Colors.textMuted} autoCapitalize="none" keyboardType="url" maxLength={255} />
-            <View style={styles.switchRow}><View><Text style={styles.switchTitle}>Producator activ</Text><Text style={styles.fieldHint}>Poate fi asociat produselor.</Text></View><Switch value={manufacturerActive} onValueChange={setManufacturerActive} trackColor={{ false: '#363636', true: Colors.orangeMid }} thumbColor={manufacturerActive ? Colors.orange : '#8A8A8A'} /></View>
-            <TouchableOpacity style={[styles.saveButton, saving && styles.buttonDisabled]} onPress={() => void saveManufacturer()} disabled={saving}>
-              {saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={18} color={Colors.white} /><Text style={styles.saveButtonText}>Salveaza producatorul</Text></>}
-            </TouchableOpacity>
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.modalBody}>
+              <View style={styles.catalogFormSection}>
+                <View style={styles.catalogFormSectionHead}><View style={styles.catalogFormStep}><Text style={styles.catalogFormStepText}>01</Text></View><View><Text style={styles.catalogFormSectionTitle}>Detaliile producătorului</Text><Text style={styles.catalogFormSectionText}>Informațiile afișate în catalog.</Text></View></View>
+                <Text style={styles.fieldLabel}>NUME *</Text>
+                <TextInput style={styles.input} value={manufacturerName} onChangeText={setManufacturerName} placeholder="Ex: Bosch" placeholderTextColor={Colors.textMuted} maxLength={120} />
+                <Text style={styles.fieldLabel}>SITE WEB</Text>
+                <TextInput style={styles.input} value={manufacturerWebsite} onChangeText={setManufacturerWebsite} placeholder="https://..." placeholderTextColor={Colors.textMuted} autoCapitalize="none" keyboardType="url" maxLength={255} />
+                <View style={[styles.switchRow, manufacturerActive && styles.switchRowActive]}><View style={styles.switchCopy}><Text style={styles.switchTitle}>Producător activ</Text><Text style={styles.fieldHint}>Poate fi asociat produselor.</Text></View><Switch value={manufacturerActive} onValueChange={setManufacturerActive} trackColor={{ false: Theme.colors.border.default, true: '#087FF5' }} thumbColor={Theme.colors.surface.base} /></View>
+              </View>
+              <TouchableOpacity style={[styles.saveButton, { backgroundColor: '#087FF5' }, saving && styles.buttonDisabled]} onPress={() => void saveManufacturer()} disabled={saving}>
+                {saving ? <ActivityIndicator color={Colors.white} /> : <><Save size={18} color={Colors.white} /><Text style={styles.saveButtonText}>Salvează producătorul</Text></>}
+              </TouchableOpacity>
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -1384,8 +1405,17 @@ function ParentChip({ label, selected, onPress }: { label: string; selected: boo
   return <TouchableOpacity style={[styles.parentChip, selected && styles.parentChipActive]} onPress={onPress}><Text numberOfLines={1} style={[styles.parentChipText, selected && styles.parentChipTextActive]}>{label}</Text></TouchableOpacity>;
 }
 
-function CategoryTable({ categories, onEdit, onDelete }: { categories: ShopCategory[]; onEdit: (item: ShopCategory) => void; onDelete: (item: ShopCategory) => void }) {
-  if (!categories.length) return <EmptyCatalog icon={<FolderTree size={31} color="#FB7185" />} title="Nicio categorie" text="Apasa butonul + pentru prima categorie." />;
+function CategoryTable({ categories, onEdit, onDelete, compact = false }: { categories: ShopCategory[]; onEdit: (item: ShopCategory) => void; onDelete: (item: ShopCategory) => void; compact?: boolean }) {
+  if (!categories.length) return <EmptyCatalog icon={<FolderTree size={31} color="#F45B7A" />} kicker="STRUCTURĂ CATALOG" title="Catalogul așteaptă prima categorie" text="Adaugă o categorie principală, apoi organizează subcategoriile exact cum ai nevoie." />;
+  if (compact) return <View style={styles.catalogCardList}>{categories.map((category) => <View key={category.id} style={styles.catalogEntityCard}>
+    <View style={styles.catalogEntityTop}>
+      {category.thumbnail_url ? <Image source={{ uri: category.thumbnail_url }} style={styles.catalogEntityImage} /> : <View style={[styles.catalogEntityImageFallback, { backgroundColor: '#F45B7A12' }]}>{category.is_protected ? <LockKeyhole size={22} color="#F45B7A" /> : <FolderTree size={23} color="#F45B7A" />}</View>}
+      <View style={styles.catalogEntityCopy}><View style={styles.catalogEntityTitleRow}><Text numberOfLines={1} style={styles.catalogEntityTitle}>{category.name}</Text>{category.is_protected ? <View style={styles.systemPill}><LockKeyhole size={10} color="#A45100" /><Text style={styles.systemPillText}>SISTEM</Text></View> : null}</View><Text numberOfLines={1} style={styles.catalogEntitySlug}>/{category.slug}</Text></View>
+      <StatusBadge active={category.is_active} />
+    </View>
+    {category.description ? <Text numberOfLines={2} style={styles.catalogEntityDescription}>{category.description}</Text> : null}
+    <View style={styles.catalogEntityFooter}><View style={styles.catalogEntityMeta}><FolderTree size={15} color="#F45B7A" /><View><Text style={styles.catalogEntityMetaLabel}>POZIȚIE ÎN CATALOG</Text><Text numberOfLines={1} style={styles.catalogEntityMetaValue}>{category.parent_name || 'Categorie principală'}</Text></View></View><View style={styles.catalogEntityActions}><TableAction label="Editează" onPress={() => onEdit(category)} icon={<Pencil size={17} color="#087FF5" />} />{category.is_protected ? <View accessibilityLabel="Categorie protejată împotriva ștergerii" style={styles.tableActionLocked}><LockKeyhole size={16} color="#A45100" /></View> : <TableAction label="Șterge" onPress={() => onDelete(category)} icon={<Trash2 size={17} color={Colors.error} />} danger />}</View></View>
+  </View>)}</View>;
   return (
     <View style={styles.tableCard}><ScrollView horizontal showsHorizontalScrollIndicator><View style={styles.tableWide}>
       <View style={[styles.tableRow, styles.tableHead]}><Text style={[styles.th, styles.colImage]}>POZA</Text><Text style={[styles.th, styles.colName]}>CATEGORIE</Text><Text style={[styles.th, styles.colParent]}>PARINTE</Text><Text style={[styles.th, styles.colStatus]}>STATUS</Text><Text style={[styles.th, styles.colActions]}>ACTIUNI</Text></View>
@@ -1400,8 +1430,9 @@ function CategoryTable({ categories, onEdit, onDelete }: { categories: ShopCateg
   );
 }
 
-function BrandTable({ brands, onEdit, onDelete }: { brands: ShopBrand[]; onEdit: (item: ShopBrand) => void; onDelete: (item: ShopBrand) => void }) {
-  if (!brands.length) return <EmptyCatalog icon={<Tags size={31} color="#078F88" />} title="Nicio compatibilitate" text="Apasa butonul + pentru prima compatibilitate de brand." />;
+function BrandTable({ brands, onEdit, onDelete, compact = false }: { brands: ShopBrand[]; onEdit: (item: ShopBrand) => void; onDelete: (item: ShopBrand) => void; compact?: boolean }) {
+  if (!brands.length) return <EmptyCatalog icon={<Tags size={31} color="#009F8B" />} kicker="COMPATIBILITĂȚI" title="Adaugă primul brand compatibil" text="Clienții vor înțelege mai ușor pentru ce mărci este potrivit fiecare produs." />;
+  if (compact) return <View style={styles.catalogCardList}>{brands.map((brand) => <CatalogRegistryCard key={brand.id} item={brand} kind="brand" onEdit={() => onEdit(brand)} onDelete={() => onDelete(brand)} />)}</View>;
   return (
     <View style={styles.tableCard}><ScrollView horizontal showsHorizontalScrollIndicator><View style={styles.tableWide}>
       <View style={[styles.tableRow, styles.tableHead]}><Text style={[styles.th, styles.colBrandName]}>COMPATIBILITATE</Text><Text style={[styles.th, styles.colWebsite]}>SITE WEB</Text><Text style={[styles.th, styles.colStatus]}>STATUS</Text><Text style={[styles.th, styles.colActions]}>ACTIUNI</Text></View>
@@ -1415,8 +1446,9 @@ function BrandTable({ brands, onEdit, onDelete }: { brands: ShopBrand[]; onEdit:
   );
 }
 
-function ManufacturerTable({ manufacturers, onEdit, onDelete }: { manufacturers: ShopManufacturer[]; onEdit: (item: ShopManufacturer) => void; onDelete: (item: ShopManufacturer) => void }) {
-  if (!manufacturers.length) return <EmptyCatalog icon={<Factory size={31} color="#09BFD9" />} title="Niciun producator" text="Apasa butonul + pentru primul producator." />;
+function ManufacturerTable({ manufacturers, onEdit, onDelete, compact = false }: { manufacturers: ShopManufacturer[]; onEdit: (item: ShopManufacturer) => void; onDelete: (item: ShopManufacturer) => void; compact?: boolean }) {
+  if (!manufacturers.length) return <EmptyCatalog icon={<Factory size={31} color="#087FF5" />} kicker="PRODUCĂTORI" title="Adaugă primul producător" text="Centralizează firmele care fabrică produsele și păstrează datele catalogului curate." />;
+  if (compact) return <View style={styles.catalogCardList}>{manufacturers.map((manufacturer) => <CatalogRegistryCard key={manufacturer.id} item={manufacturer} kind="manufacturer" onEdit={() => onEdit(manufacturer)} onDelete={() => onDelete(manufacturer)} />)}</View>;
   return (
     <View style={styles.tableCard}><ScrollView horizontal showsHorizontalScrollIndicator><View style={styles.tableWide}>
       <View style={[styles.tableRow, styles.tableHead]}><Text style={[styles.th, styles.colBrandName]}>PRODUCATOR</Text><Text style={[styles.th, styles.colWebsite]}>SITE WEB</Text><Text style={[styles.th, styles.colStatus]}>STATUS</Text><Text style={[styles.th, styles.colActions]}>ACTIUNI</Text></View>
@@ -1428,6 +1460,19 @@ function ManufacturerTable({ manufacturers, onEdit, onDelete }: { manufacturers:
       </View>)}
     </View></ScrollView></View>
   );
+}
+
+function CatalogRegistryCard({ item, kind, onEdit, onDelete }: { item: ShopBrand | ShopManufacturer; kind: 'brand' | 'manufacturer'; onEdit: () => void; onDelete: () => void }) {
+  const isBrand = kind === 'brand';
+  const accent = isBrand ? '#009F8B' : '#087FF5';
+  return <View style={styles.catalogEntityCard}>
+    <View style={styles.catalogEntityTop}>
+      <View style={[styles.catalogEntityImageFallback, { backgroundColor: `${accent}12` }]}>{isBrand ? <Tags size={23} color={accent} /> : <Factory size={23} color={accent} />}</View>
+      <View style={styles.catalogEntityCopy}><Text numberOfLines={1} style={styles.catalogEntityTitle}>{item.name}</Text><Text numberOfLines={1} style={[styles.catalogEntitySlug, { color: accent }]}>/{item.slug}</Text></View>
+      <StatusBadge active={item.is_active} />
+    </View>
+    <View style={styles.catalogEntityFooter}><View style={styles.catalogEntityMeta}>{isBrand ? <Tags size={15} color={accent} /> : <Factory size={15} color={accent} />}<View style={styles.catalogEntityMetaCopy}><Text style={styles.catalogEntityMetaLabel}>{isBrand ? 'SITE COMPATIBILITATE' : 'SITE PRODUCĂTOR'}</Text><Text numberOfLines={1} style={item.website_url ? styles.catalogEntityMetaValue : styles.catalogEntityMetaMuted}>{item.website_url || 'Nespecificat'}</Text></View></View><View style={styles.catalogEntityActions}><TableAction label="Editează" onPress={onEdit} icon={<Pencil size={17} color="#087FF5" />} /><TableAction label="Șterge" onPress={onDelete} icon={<Trash2 size={17} color={Colors.error} />} danger /></View></View>
+  </View>;
 }
 
 function formatShopMoney(value: number) {
@@ -1672,15 +1717,15 @@ function DashboardMetric({ title, value, color, selected, onPress }: { title: st
 }
 
 function StatusBadge({ active }: { active: boolean }) {
-  return <View style={[styles.badge, active ? styles.badgeActive : styles.badgeInactive]}><View style={[styles.badgeDot, { backgroundColor: active ? Colors.success : Colors.textMuted }]} /><Text style={[styles.badgeText, { color: active ? '#168457' : Colors.textSecondary }]}>{active ? 'Activa' : 'Inactiva'}</Text></View>;
+  return <View style={[styles.badge, active ? styles.badgeActive : styles.badgeInactive]}><View style={[styles.badgeDot, { backgroundColor: active ? Colors.success : Colors.textMuted }]} /><Text style={[styles.badgeText, { color: active ? '#168457' : Colors.textSecondary }]}>{active ? 'Activă' : 'Inactivă'}</Text></View>;
 }
 
 function TableAction({ label, icon, onPress, danger }: { label: string; icon: React.ReactNode; onPress: () => void; danger?: boolean }) {
   return <TouchableOpacity accessibilityLabel={label} style={[styles.tableAction, danger && styles.tableActionDanger]} onPress={onPress}>{icon}</TouchableOpacity>;
 }
 
-function EmptyCatalog({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
-  return <View style={styles.emptyBox}><View style={styles.emptyIcon}>{icon}</View><Text style={styles.emptyTitle}>{title}</Text><Text style={styles.emptyText}>{text}</Text></View>;
+function EmptyCatalog({ icon, kicker, title, text }: { icon: React.ReactNode; kicker: string; title: string; text: string }) {
+  return <View style={styles.emptyBox}><View style={styles.emptyAura} /><View style={styles.emptyIcon}>{icon}</View><Text style={styles.emptyKicker}>{kicker}</Text><Text style={styles.emptyTitle}>{title}</Text><Text style={styles.emptyText}>{text}</Text><View style={styles.emptyHint}><Plus size={15} color="#087FF5" /><Text style={styles.emptyHintText}>Folosește butonul plutitor pentru a începe</Text></View></View>;
 }
 
 const styles = StyleSheet.create({
@@ -1856,23 +1901,26 @@ const styles = StyleSheet.create({
   bottomNavigationIcon: { width: 38, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   bottomNavigationLabel: { color: Colors.textMuted, fontFamily: 'Inter-Medium', fontSize: 9 },
   bottomNavigationLabelActive: { color: Colors.orange, fontFamily: 'Inter-SemiBold' },
-  headerAction: { width: 40, height: 40, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.orangeDim, borderWidth: 1, borderColor: Colors.orangeMid },
-  catalogContent: { padding: 16 },
-  catalogHero: { flexDirection: 'row', alignItems: 'center', gap: 15, padding: 19, borderRadius: 24, borderWidth: 0, backgroundColor: Theme.colors.surface.base },
-  catalogHeroIcon: { width: 48, height: 48, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted },
-  catalogHeroText: { flex: 1 },
-  catalogKicker: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1.2 },
-  catalogTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 17, marginTop: 3 },
-  catalogSubtitle: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 15, marginTop: 4 },
-  counter: { alignItems: 'center', minWidth: 52, padding: 9, borderRadius: 16, backgroundColor: Theme.colors.surface.muted },
-  counterValue: { color: Colors.navy, fontFamily: 'Inter-Bold', fontSize: 18 },
-  counterLabel: { color: Colors.textMuted, fontFamily: 'Inter-Bold', fontSize: 7, letterSpacing: 0.8 },
-  tabs: { flexDirection: 'row', gap: 6, marginVertical: 16, padding: 5, borderRadius: 22, backgroundColor: Theme.colors.surface.base },
-  tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 12, borderRadius: 18 },
-  tabActive: { backgroundColor: Colors.orange },
-  tabText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 12 },
+  headerAction: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.brandSoft, borderWidth: 1, borderColor: Theme.colors.border.brandSoft },
+  catalogContent: { width: '100%', maxWidth: 820, alignSelf: 'center', padding: 12 },
+  catalogHero: { minHeight: 148, position: 'relative', overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 13, padding: 17, borderRadius: 27, borderWidth: 1, borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.base, shadowColor: '#2B5E85', shadowOpacity: 0.08, shadowRadius: 14, shadowOffset: { width: 0, height: 7 }, elevation: 2 },
+  catalogHeroAura: { width: 190, height: 190, position: 'absolute', right: -88, top: -92, borderRadius: 95 },
+  catalogHeroIcon: { width: 58, height: 58, flexShrink: 0, borderRadius: 19, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-4deg' }] },
+  catalogHeroText: { minWidth: 0, flex: 1 },
+  catalogKicker: { fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1.15 },
+  catalogTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 20, lineHeight: 25, marginTop: 4 },
+  catalogSubtitle: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10, lineHeight: 15, marginTop: 5 },
+  counter: { alignItems: 'center', minWidth: 50, paddingHorizontal: 8, paddingVertical: 9, borderWidth: 1, borderRadius: 16, backgroundColor: Theme.colors.surface.base },
+  counterValue: { fontFamily: 'Inter-Bold', fontSize: 18 },
+  counterLabel: { color: Colors.textMuted, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: 0.7 },
+  tabs: { minHeight: 76, flexDirection: 'row', gap: 5, marginVertical: 12, padding: 5, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 23, backgroundColor: Theme.colors.surface.base },
+  tab: { minWidth: 0, flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 3, paddingVertical: 7, borderRadius: 18 },
+  tabActive: { backgroundColor: Theme.colors.brand.primaryAction },
+  tabIcon: { width: 28, height: 27, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.muted },
+  tabIconActive: { backgroundColor: '#FFFFFF20' },
+  tabText: { maxWidth: '100%', color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 8.5 },
   tabTextActive: { color: Colors.white },
-  stateBox: { minHeight: 230, alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 0, borderRadius: 24, backgroundColor: Theme.colors.surface.base },
+  stateBox: { minHeight: 230, alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 25, backgroundColor: Theme.colors.surface.base },
   stateText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 12 },
   errorText: { color: Theme.colors.state.error, fontFamily: 'Inter-Regular', fontSize: 12, textAlign: 'center', paddingHorizontal: 24 },
   retryButton: { borderRadius: 10, backgroundColor: Colors.orangeDim, paddingHorizontal: 14, paddingVertical: 9 },
@@ -1900,43 +1948,79 @@ const styles = StyleSheet.create({
   badgeActive: { borderColor: 'rgba(34,197,94,0.22)', backgroundColor: 'rgba(34,197,94,0.07)' },
   badgeInactive: { borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.muted },
   badgeDot: { width: 6, height: 6, borderRadius: 3 }, badgeText: { fontFamily: 'Inter-SemiBold', fontSize: 9 },
-  emptyBox: { minHeight: 250, alignItems: 'center', justifyContent: 'center', borderWidth: 0, borderRadius: 24, backgroundColor: Theme.colors.surface.base },
-  emptyIcon: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted, marginBottom: 14 },
-  emptyTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 15 },
-  emptyText: { color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 11, marginTop: 5 },
-  fab: { position: 'absolute', right: 22, width: 58, height: 58, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.orange, shadowColor: Theme.colors.shadow.color, shadowOpacity: 0.34, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
-  modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: Theme.colors.overlay.scrim },
-  modalCard: { maxHeight: '91%', paddingHorizontal: 22, paddingTop: 22, borderTopLeftRadius: 28, borderTopRightRadius: 28, borderWidth: 0, backgroundColor: Theme.colors.surface.base },
-  brandModal: { maxHeight: '76%' },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
-  modalKicker: { color: Colors.orange, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1.2 },
-  modalTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 20, marginTop: 3 },
+  catalogCardList: { gap: 9 },
+  catalogEntityCard: { gap: 11, padding: 13, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 22, backgroundColor: Theme.colors.surface.base },
+  catalogEntityTop: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  catalogEntityImage: { width: 52, height: 52, flexShrink: 0, borderRadius: 16, backgroundColor: Theme.colors.surface.muted },
+  catalogEntityImageFallback: { width: 52, height: 52, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 16 },
+  catalogEntityCopy: { minWidth: 0, flex: 1 },
+  catalogEntityTitleRow: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  catalogEntityTitle: { minWidth: 0, flexShrink: 1, color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 13 },
+  catalogEntitySlug: { marginTop: 3, color: '#F45B7A', fontFamily: 'Inter-Medium', fontSize: 8.5 },
+  catalogEntityDescription: { color: Theme.colors.text.secondary, fontFamily: 'Inter-Regular', fontSize: 9.5, lineHeight: 14 },
+  systemPill: { flexShrink: 0, flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 4, borderRadius: 8, backgroundColor: '#FFF2E2' },
+  systemPillText: { color: '#A45100', fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: 0.5 },
+  catalogEntityFooter: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: Theme.colors.border.subtle },
+  catalogEntityMeta: { minWidth: 0, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  catalogEntityMetaCopy: { minWidth: 0, flex: 1 },
+  catalogEntityMetaLabel: { color: Theme.colors.text.muted, fontFamily: 'Inter-Bold', fontSize: 6.5, letterSpacing: 0.65 },
+  catalogEntityMetaValue: { marginTop: 2, color: Theme.colors.text.secondary, fontFamily: 'Inter-SemiBold', fontSize: 9 },
+  catalogEntityMetaMuted: { marginTop: 2, color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 9 },
+  catalogEntityActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  emptyBox: { minHeight: 320, position: 'relative', overflow: 'hidden', alignItems: 'center', justifyContent: 'center', padding: 25, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 27, backgroundColor: Theme.colors.surface.base },
+  emptyAura: { width: 240, height: 240, position: 'absolute', left: -145, bottom: -145, borderRadius: 120, backgroundColor: Theme.colors.surface.brandSoft },
+  emptyIcon: { width: 68, height: 68, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted, marginBottom: 11, transform: [{ rotate: '-4deg' }] },
+  emptyKicker: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 8, letterSpacing: 1.1, marginBottom: 7 },
+  emptyTitle: { maxWidth: 290, color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 17, lineHeight: 22, textAlign: 'center' },
+  emptyText: { maxWidth: 295, color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 10.5, lineHeight: 16, textAlign: 'center', marginTop: 7 },
+  emptyHint: { marginTop: 17, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 13, backgroundColor: Theme.colors.surface.brandSoft },
+  emptyHintText: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-SemiBold', fontSize: 8.5 },
+  catalogFloatingActions: { position: 'absolute', right: 17, flexDirection: 'row', alignItems: 'center', gap: 9 },
+  fab: { position: 'absolute', right: 22, width: 58, height: 58, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.brand.primaryAction, shadowColor: Theme.colors.shadow.color, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 7 },
+  modalBackdrop: { flex: 1, justifyContent: 'flex-end', paddingTop: 28, backgroundColor: Theme.colors.overlay.scrim },
+  modalCard: { width: '100%', maxWidth: 760, maxHeight: '94%', alignSelf: 'center', paddingHorizontal: 13, paddingTop: 13, borderTopLeftRadius: 30, borderTopRightRadius: 30, borderWidth: 1, borderBottomWidth: 0, borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.subtle },
+  brandModal: { maxHeight: '82%' },
+  modalHeader: { minHeight: 82, flexDirection: 'row', alignItems: 'center', gap: 11, marginBottom: 12, padding: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 21, backgroundColor: Theme.colors.surface.base },
+  modalHeaderIcon: { width: 48, height: 48, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 16, transform: [{ rotate: '-4deg' }] },
+  modalHeaderCopy: { minWidth: 0, flex: 1 },
+  modalKicker: { fontFamily: 'Inter-Bold', fontSize: 7.5, letterSpacing: 1.05 },
+  modalTitle: { color: Colors.textPrimary, fontFamily: 'Inter-Bold', fontSize: 18, marginTop: 3 },
+  modalSubtitle: { color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 8.5, marginTop: 3 },
+  modalBody: { gap: 11, paddingBottom: 5 },
+  catalogFormSection: { gap: 2, padding: 13, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 22, backgroundColor: Theme.colors.surface.base },
+  catalogFormSectionHead: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 13, paddingBottom: 11, borderBottomWidth: 1, borderBottomColor: Theme.colors.border.subtle },
+  catalogFormStep: { width: 37, height: 37, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 13, backgroundColor: Theme.colors.surface.brandSoft },
+  catalogFormStepText: { color: Theme.colors.brand.primaryText, fontFamily: 'Inter-Bold', fontSize: 9 },
+  catalogFormSectionTitle: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 12 },
+  catalogFormSectionText: { marginTop: 3, color: Theme.colors.text.muted, fontFamily: 'Inter-Regular', fontSize: 8.5 },
   systemCategoryNote: { flexDirection: 'row', gap: 11, marginBottom: 18, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: 'rgba(240,127,0,0.26)', backgroundColor: 'rgba(240,127,0,0.08)' },
   systemCategoryNoteIcon: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(240,127,0,0.14)' },
   systemCategoryNoteCopy: { flex: 1 },
   systemCategoryNoteTitle: { color: Theme.colors.text.primary, fontFamily: 'Inter-Bold', fontSize: 11 },
   systemCategoryNoteText: { marginTop: 4, color: Colors.textSecondary, fontFamily: 'Inter-Regular', fontSize: 9.5, lineHeight: 14 },
   systemCategoryKey: { marginTop: 7, color: Colors.orange, fontFamily: 'Inter-SemiBold', fontSize: 8.5 },
-  closeButton: { width: 39, height: 39, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: Theme.colors.surface.muted },
+  closeButton: { width: 40, height: 40, flexShrink: 0, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.muted },
   fieldLabel: { color: Colors.textSecondary, fontFamily: 'Inter-Bold', fontSize: 9, letterSpacing: 0.8, marginBottom: 7, marginTop: 3 },
   fieldHint: { color: Colors.textMuted, fontFamily: 'Inter-Regular', fontSize: 9, marginTop: -3, marginBottom: 7 },
-  input: { minHeight: 52, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 12, backgroundColor: 'transparent', color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 13, paddingHorizontal: 15, marginBottom: 18 },
+  input: { minHeight: 52, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 15, backgroundColor: Theme.colors.surface.subtle, color: Colors.textPrimary, fontFamily: 'Inter-Regular', fontSize: 13, paddingHorizontal: 15, marginBottom: 14 },
   textarea: { minHeight: 78, paddingTop: 12, textAlignVertical: 'top' },
   imageRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 18 },
-  imagePicker: { width: 82, height: 82, borderRadius: 17, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 1, borderColor: Colors.cardBorder, borderStyle: 'dashed', backgroundColor: Theme.colors.surface.base },
+  imagePicker: { width: 82, height: 82, borderRadius: 20, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.brandSoft, borderStyle: 'dashed', backgroundColor: Theme.colors.surface.subtle },
   previewImage: { width: '100%', height: '100%' },
   imageActions: { flex: 1, alignItems: 'flex-start', gap: 9 },
-  secondaryButton: { flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 0, borderRadius: 999, paddingHorizontal: 15, paddingVertical: 11, backgroundColor: Colors.orangeDim },
+  secondaryButton: { flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 11, backgroundColor: Theme.colors.surface.muted },
   secondaryButtonText: { color: Colors.orange, fontFamily: 'Inter-SemiBold', fontSize: 10 },
   removeImageText: { color: Theme.colors.state.error, fontFamily: 'Inter-SemiBold', fontSize: 9 },
   parentOptions: { gap: 7, paddingBottom: 16 },
-  parentChip: { maxWidth: 220, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: 'transparent' },
-  parentChipActive: { borderColor: Colors.orange, backgroundColor: Colors.orangeDim },
+  parentChip: { maxWidth: 220, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 13, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: Theme.colors.surface.subtle },
+  parentChipActive: { borderColor: Theme.colors.border.focus, backgroundColor: Theme.colors.surface.brandSoft },
   parentChipText: { color: Colors.textSecondary, fontFamily: 'Inter-SemiBold', fontSize: 10 },
-  parentChipTextActive: { color: Colors.orange },
-  switchRow: { minHeight: 64, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.cardBorder, marginBottom: 18 },
+  parentChipTextActive: { color: Theme.colors.brand.primaryText },
+  switchRow: { minHeight: 70, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingHorizontal: 12, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 17, backgroundColor: Theme.colors.surface.subtle, marginBottom: 2 },
+  switchRowActive: { borderColor: Theme.colors.border.brandSoft, backgroundColor: Theme.colors.surface.brandSoft },
+  switchCopy: { minWidth: 0, flex: 1 },
   switchTitle: { color: Colors.textPrimary, fontFamily: 'Inter-SemiBold', fontSize: 12 },
-  saveButton: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9, borderRadius: 999, backgroundColor: Colors.orange, marginBottom: 4 },
+  saveButton: { minHeight: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9, borderRadius: 17, backgroundColor: Theme.colors.brand.primaryAction, marginBottom: 4 },
   saveButtonText: { color: Colors.white, fontFamily: 'Inter-Bold', fontSize: 12 },
   buttonDisabled: { opacity: 0.58 },
   deleteBackdrop: { justifyContent: 'center', paddingHorizontal: 22 },
