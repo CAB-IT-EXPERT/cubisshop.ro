@@ -76,7 +76,9 @@ app.whenReady().then(async () => {
       getPaymentSettings: async () => ({ card_enabled:true, cash_on_delivery_enabled:true, card_label:'Card online', cash_on_delivery_label:'Ramburs la curier' }), updatePaymentSettings: async value => value,
       listShippingMethods: async () => [], createShippingMethod: async value => value, updateShippingMethod: async (_id, value) => value, deleteShippingMethod: async () => ({success:true}),
       getSmartBillSettings: async () => ({ read_enabled:true, issuing_enabled:false, issuing_ready:false, issuing_block_reason:'QA local', auto_sync_interval_seconds:300, warehouses:[{ id:'wh-1', name:'Gestiune QA' }], series:[{ name:'QA', next_number:'101' }], capabilities:[] }),
-      lookupSmartBillSku: async (sku, warehouseId) => ({ status:'linked', sku, match:{ id:'sbp-1', name:'Produs Cubis 1', measuring_unit:'buc' }, stock:{ warehouse_id:warehouseId || 'wh-1', warehouse_name:'Gestiune QA', quantity:7 } }),
+      lookupSmartBillSku: async (sku, warehouseId) => sku === 'SKU-INEXISTENT'
+        ? ({ status:'not_found', sku, match:null, stock:null })
+        : ({ status:'verified', sku, match:{ id:'sbp-1', name:'Produs Cubis 1', measuring_unit:'buc' }, stock:{ warehouse_id:warehouseId || 'wh-1', warehouse_name:'Gestiune QA', quantity:7 } }),
       syncSmartBillReferences: async () => ({ read_enabled:true, issuing_enabled:false, warehouses:[{ id:'wh-1', name:'Gestiune QA' }], series:[{ name:'QA', next_number:'101' }], capabilities:[] })
     };
     window.AUTH = { ...(window.AUTH || {}), isLoggedIn: () => true, getToken: () => 'qa-local' };
@@ -114,8 +116,53 @@ app.whenReady().then(async () => {
 
   await win.webContents.executeJavaScript(`document.querySelector('#shop-products-content [data-product-edit]').click()`);
   await waitForSelector(win, '#shop-product-modal:not([hidden]) #shop-smartbill-product-warehouse');
+  await sleep(700);
   const editorPath = path.join(outputDir, 'product-editor.png');
   fs.writeFileSync(editorPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.getElementById('shop-smartbill-product-warehouse-toggle').click()`);
+  await sleep(120);
+  const editorWarehousePath = path.join(outputDir, 'product-editor-warehouse.png');
+  fs.writeFileSync(editorWarehousePath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.getElementById('shop-smartbill-product-warehouse-toggle').click()`);
+  await win.webContents.executeJavaScript(`(() => {
+    const feedback = document.getElementById('shop-product-sku-feedback');
+    window.__qaSmartBillFoundState = { className:feedback?.className || '', text:feedback?.textContent?.trim() || '' };
+    const input = document.getElementById('shop-product-sku');
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+  })()`);
+  await sleep(50);
+  await win.webContents.executeJavaScript(`(() => {
+    const feedback = document.getElementById('shop-product-sku-feedback');
+    window.__qaSmartBillEmptyState = { className:feedback?.className || '', text:feedback?.textContent?.trim() || '' };
+    const input = document.getElementById('shop-product-sku');
+    input.value = 'SKU-INEXISTENT';
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+  })()`);
+  await sleep(700);
+  const editorSkuMissingPath = path.join(outputDir, 'product-editor-sku-missing.png');
+  fs.writeFileSync(editorSkuMissingPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`(() => {
+    const feedback = document.getElementById('shop-product-sku-feedback');
+    window.__qaSmartBillMissingState = { className:feedback?.className || '', text:feedback?.textContent?.trim() || '' };
+    const input = document.getElementById('shop-product-sku');
+    input.value = 'CS-001';
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+  })()`);
+  await sleep(700);
+  await win.webContents.executeJavaScript(`document.querySelector('#shop-product-modal .shop-commerce-modal-scroll').scrollTop = 720`);
+  await sleep(100);
+  const editorMiddlePath = path.join(outputDir, 'product-editor-middle.png');
+  fs.writeFileSync(editorMiddlePath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.querySelector('#shop-product-modal .shop-commerce-modal-scroll').scrollTop = 2100`);
+  await sleep(100);
+  const editorCatalogPath = path.join(outputDir, 'product-editor-catalog.png');
+  fs.writeFileSync(editorCatalogPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`(() => { const scroll = document.querySelector('#shop-product-modal .shop-commerce-modal-scroll'); scroll.scrollTop = scroll.scrollHeight; })()`);
+  await sleep(100);
+  const editorBottomPath = path.join(outputDir, 'product-editor-bottom.png');
+  fs.writeFileSync(editorBottomPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.querySelector('#shop-product-modal .shop-commerce-modal-scroll').scrollTop = 0`);
   await win.webContents.executeJavaScript(`(() => {
     const cards = [...document.querySelectorAll('#shop-product-gallery .shop-gallery-card')];
     const before = cards[0]?.querySelector('.shop-product-gallery-image')?.style.backgroundImage || '';
@@ -138,8 +185,9 @@ app.whenReady().then(async () => {
     window.__qaBrandSummaryUpdates = document.getElementById('shop-product-brands-summary').textContent.includes('Universal');
     window.__qaNoManualCostInput = !document.getElementById('shop-product-cost-price');
     window.__qaSmartBillSku = document.getElementById('shop-product-sku').value;
-    window.__qaSmartBillWarehouseOptions = document.querySelectorAll('#shop-smartbill-product-warehouse option').length;
+    window.__qaSmartBillWarehouseOptions = document.querySelectorAll('#shop-smartbill-product-warehouse-options [data-smartbill-warehouse]').length;
     window.__qaSmartBillWarehouseSelected = document.getElementById('shop-smartbill-product-warehouse').value;
+    window.__qaNoAccountingToggle = !document.getElementById('shop-product-accounting-tracked');
     window.__qaSmartBillAuthorityNote = document.querySelector('.shop-nir-note')?.textContent.includes('exclusiv în SmartBill');
     const sourceSelect = document.getElementById('shop-product-source');
     if (![...sourceSelect.options].some(option => option.value === 's2')) sourceSelect.add(new Option('Boomag · boomag.ro', 's2'));
@@ -209,6 +257,10 @@ app.whenReady().then(async () => {
     smartBillSku: window.__qaSmartBillSku || '',
     smartBillWarehouseOptions: Number(window.__qaSmartBillWarehouseOptions || 0),
     smartBillWarehouseSelected: window.__qaSmartBillWarehouseSelected || '',
+    noAccountingToggle: Boolean(window.__qaNoAccountingToggle),
+    smartBillFoundState: window.__qaSmartBillFoundState || null,
+    smartBillEmptyState: window.__qaSmartBillEmptyState || null,
+    smartBillMissingState: window.__qaSmartBillMissingState || null,
     smartBillAuthorityNote: Boolean(window.__qaSmartBillAuthorityNote),
     boomagPricingVisible: Boolean(window.__qaBoomagPricingVisible),
     boomagSupplierPriceDisabled: Boolean(window.__qaBoomagSupplierPriceDisabled),
@@ -232,7 +284,7 @@ app.whenReady().then(async () => {
     orderModalRects: (() => { const modal = document.querySelector('#shop-order-modal .shop-commerce-modal'); const scroll = document.getElementById('shop-order-details'); const footer = modal?.querySelector(':scope > footer'); return Object.fromEntries([['modal',modal],['scroll',scroll],['footer',footer]].map(([key,node]) => [key, node ? { top:Math.round(node.getBoundingClientRect().top), bottom:Math.round(node.getBoundingClientRect().bottom), height:Math.round(node.getBoundingClientRect().height), scrollHeight:node.scrollHeight } : null])); })(),
     heroRects: (() => { const hero = document.querySelector('.shop-commerce-hero'); const back = hero?.querySelector('.shop-back-btn'); const title = hero?.querySelector('.shop-commerce-title'); const actions = hero?.querySelector('.shop-commerce-head-actions'); return Object.fromEntries([['hero',hero],['back',back],['title',title],['actions',actions]].map(([key,node]) => [key, node ? { x:Math.round(node.getBoundingClientRect().x), width:Math.round(node.getBoundingClientRect().width) } : null])); })(),
   }))()`);
-  console.log(JSON.stringify({ ...metrics, errors, screenshots: { dashboardPath, productsPath, productDetailStockPath, productDetailPath, editorPath, ordersPath, orderContactPath, orderModalPath } }, null, 2));
+  console.log(JSON.stringify({ ...metrics, errors, screenshots: { dashboardPath, productsPath, productDetailStockPath, productDetailPath, editorPath, editorWarehousePath, editorSkuMissingPath, editorMiddlePath, editorCatalogPath, editorBottomPath, ordersPath, orderContactPath, orderModalPath } }, null, 2));
   await win.destroy();
   app.quit();
 }).catch((error) => {
