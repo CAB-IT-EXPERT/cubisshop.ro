@@ -14,7 +14,19 @@
   }
 
   document.querySelectorAll('.nav-btn[data-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
-  document.querySelectorAll('[data-shop-open]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.shopOpen)));
+  // Dashboard content is rendered asynchronously, so navigation triggers may
+  // not exist yet when this module starts. Delegate the click to keep both the
+  // initial controls and dynamically rendered dashboard actions functional.
+  document.addEventListener('click', event => {
+    const trigger = event.target.closest('[data-shop-open]');
+    if (!trigger) return;
+    if (trigger.dataset.shopOrderFilter) {
+      window.dispatchEvent(new CustomEvent('shop-order-filter-change', {
+        detail: trigger.dataset.shopOrderFilter,
+      }));
+    }
+    switchTab(trigger.dataset.shopOpen);
+  });
 
   window.addEventListener('auth-change', () => {
     const current = document.querySelector('.nav-btn.active[data-tab]')?.dataset.tab;

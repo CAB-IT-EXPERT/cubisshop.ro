@@ -91,6 +91,46 @@ app.whenReady().then(async () => {
   fs.mkdirSync(outputDir, { recursive: true });
   const dashboardPath = path.join(outputDir, 'dashboard.png');
   fs.writeFileSync(dashboardPath, (await win.webContents.capturePage()).toPNG());
+
+  const newOrdersTrigger = await win.webContents.executeJavaScript(`(() => {
+    const trigger = document.querySelector('.shop-dashboard-new-orders');
+    window.__qaOrderFilterEvent = '';
+    window.addEventListener('shop-order-filter-change', event => { window.__qaOrderFilterEvent = event.detail || ''; }, { once:true });
+    const data = { open:trigger?.dataset.shopOpen || '', filter:trigger?.dataset.shopOrderFilter || '' };
+    trigger?.click();
+    return data;
+  })()`);
+  await waitForSelector(win, '#shop-orders-status-filter');
+  await sleep(200);
+  const newOrdersNavigation = await win.webContents.executeJavaScript(`(() => ({
+    activeTab: document.querySelector('.tab-panel.active')?.id || '',
+    statusFilter: document.getElementById('shop-orders-status-filter')?.value || '',
+    filterEvent: window.__qaOrderFilterEvent || '',
+  }))()`);
+  if (newOrdersNavigation.activeTab !== 'tab-shop-orders' || newOrdersNavigation.statusFilter !== 'new') {
+    throw new Error(`Butonul de comenzi noi nu a deschis filtrul corect: ${JSON.stringify({ trigger:newOrdersTrigger, ...newOrdersNavigation })}`);
+  }
+
+  await win.webContents.executeJavaScript(`window.switchTab('shop-dashboard')`);
+  await waitForSelector(win, '.shop-dashboard-see-all');
+  await win.webContents.executeJavaScript(`document.querySelector('.shop-dashboard-see-all').click()`);
+  await waitForSelector(win, '#shop-orders-status-filter');
+  await sleep(200);
+  const seeAllNavigation = await win.webContents.executeJavaScript(`(() => ({
+    activeTab: document.querySelector('.tab-panel.active')?.id || '',
+    statusFilter: document.getElementById('shop-orders-status-filter')?.value || '',
+  }))()`);
+  if (seeAllNavigation.activeTab !== 'tab-shop-orders' || seeAllNavigation.statusFilter !== 'new') {
+    throw new Error(`Butonul Vezi toate nu a deschis filtrul corect: ${JSON.stringify(seeAllNavigation)}`);
+  }
+
+  await win.webContents.executeJavaScript(`window.switchTab('shop-dashboard')`);
+  await waitForSelector(win, '.shop-dashboard-action[data-shop-open="shop-products"]');
+  await win.webContents.executeJavaScript(`document.querySelector('.shop-dashboard-action[data-shop-open="shop-products"]').click()`);
+  await waitForSelector(win, '#shop-products-content [data-product-open]');
+  const quickActionTab = await win.webContents.executeJavaScript(`document.querySelector('.tab-panel.active')?.id || ''`);
+  if (quickActionTab !== 'tab-shop-products') throw new Error(`Acțiunea rapidă Produse nu a navigat corect: ${quickActionTab}`);
+
   await win.webContents.executeJavaScript(`window.switchTab('shop-products')`);
   await waitForSelector(win, '#shop-products-content [data-product-open]');
   const productsPath = path.join(outputDir, 'products.png');
@@ -218,8 +258,32 @@ app.whenReady().then(async () => {
   fs.writeFileSync(ordersPath, (await win.webContents.capturePage()).toPNG());
   await win.webContents.executeJavaScript(`document.querySelector('#shop-orders-content [data-order-open]').click()`);
   await sleep(250);
+  const statusIndicatorStyles = await win.webContents.executeJavaScript(`[...document.querySelectorAll('.shop-order-status-option')].map(option => {
+    const indicator = option.querySelector(':scope > i');
+    const style = getComputedStyle(indicator);
+    return {
+      value: option.querySelector('input')?.value || '',
+      selected: option.classList.contains('selected'),
+      completed: option.classList.contains('completed'),
+      background: style.backgroundColor,
+      color: style.color,
+    };
+  })`);
+  const selectedStatusIndicator = statusIndicatorStyles.find(item => item.selected);
+  const futureStatusIndicator = statusIndicatorStyles.find(item => !item.selected && !item.completed);
+  if (!selectedStatusIndicator || !futureStatusIndicator || selectedStatusIndicator.background === futureStatusIndicator.background || futureStatusIndicator.color !== 'rgba(0, 0, 0, 0)') {
+    throw new Error(`Bifele statusurilor viitoare nu sunt neutre: ${JSON.stringify(statusIndicatorStyles)}`);
+  }
   const orderContactPath = path.join(outputDir, 'order-modal-contact.png');
   fs.writeFileSync(orderContactPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`(() => {
+    const details = document.getElementById('shop-order-details');
+    const timeline = details.querySelector('.shop-order-timeline');
+    details.scrollTop = Math.max(0, timeline.offsetTop - 10);
+  })()`);
+  await sleep(100);
+  const orderTimelinePath = path.join(outputDir, 'order-modal-timeline.png');
+  fs.writeFileSync(orderTimelinePath, (await win.webContents.capturePage()).toPNG());
   win.webContents.setZoomFactor(2);
   await sleep(120);
   await win.webContents.executeJavaScript(`(() => {
@@ -286,7 +350,7 @@ app.whenReady().then(async () => {
     orderModalRects: (() => { const modal = document.querySelector('#shop-order-modal .shop-commerce-modal'); const scroll = document.getElementById('shop-order-details'); const footer = modal?.querySelector(':scope > footer'); return Object.fromEntries([['modal',modal],['scroll',scroll],['footer',footer]].map(([key,node]) => [key, node ? { top:Math.round(node.getBoundingClientRect().top), bottom:Math.round(node.getBoundingClientRect().bottom), height:Math.round(node.getBoundingClientRect().height), scrollHeight:node.scrollHeight } : null])); })(),
     heroRects: (() => { const hero = document.querySelector('.shop-commerce-hero'); const back = hero?.querySelector('.shop-back-btn'); const title = hero?.querySelector('.shop-commerce-title'); const actions = hero?.querySelector('.shop-commerce-head-actions'); return Object.fromEntries([['hero',hero],['back',back],['title',title],['actions',actions]].map(([key,node]) => [key, node ? { x:Math.round(node.getBoundingClientRect().x), width:Math.round(node.getBoundingClientRect().width) } : null])); })(),
   }))()`);
-  console.log(JSON.stringify({ ...metrics, errors, screenshots: { dashboardPath, productsPath, productDetailStockPath, productDetailPath, editorPath, editorWarehousePath, editorSkuMissingPath, editorMiddlePath, editorCatalogPath, editorBottomPath, ordersPath, orderContactPath, orderModalPath } }, null, 2));
+  console.log(JSON.stringify({ ...metrics, errors, screenshots: { dashboardPath, productsPath, productDetailStockPath, productDetailPath, editorPath, editorWarehousePath, editorSkuMissingPath, editorMiddlePath, editorCatalogPath, editorBottomPath, ordersPath, orderContactPath, orderTimelinePath, orderModalPath } }, null, 2));
   await win.destroy();
   app.quit();
 }).catch((error) => {

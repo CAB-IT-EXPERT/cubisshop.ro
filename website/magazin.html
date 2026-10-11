@@ -1,402 +1,74 @@
 <!doctype html>
-<html lang="ro">
+<html lang="ro" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <script id="gt-theme-bootstrap">(()=>{const r=document.documentElement;try{const k='g-trots-color-theme-v1',s=localStorage.getItem(k),t=s==='light'||s==='dark'?s:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');r.dataset.theme=t;r.style.colorScheme=t}catch{const t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';r.dataset.theme=t;r.style.colorScheme=t}if(location.pathname.includes('/magazin/produs/')){r.classList.add('gt-product-booting');addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>requestAnimationFrame(()=>r.classList.remove('gt-product-booting'))),{once:true});setTimeout(()=>r.classList.remove('gt-product-booting'),3000)}})();</script>
-<style id="gt-theme-critical">html[data-theme="light"],html[data-theme="light"] body{background:#f7f8fb;color:#171b24}html[data-theme="dark"],html[data-theme="dark"] body{background:#071a36;color:#f7f9ff}html.gt-product-booting body{opacity:0!important}html[data-theme="light"] .product-static-seo,html[data-theme="light"] .product-static-seo img{background:#fff!important;color:#171b24!important}html[data-theme="dark"] .product-static-seo,html[data-theme="dark"] .product-static-seo img{background:#0c274d!important;color:#f7f9ff!important}html[data-theme="light"] body.contact-body{background:#f7f8fb!important;color:#171b24!important}html[data-theme="light"] .contact-stage{background:radial-gradient(circle at 18% 34%,rgba(255,133,0,.13),transparent 29rem),linear-gradient(132deg,#fffaf5,#fff 55%,#f7f9fc)!important}html[data-theme="light"] .contact-whatsapp{background:rgba(255,255,255,.96)!important;color:#171b24!important}html[data-theme="light"] .contact-scooter{opacity:.18!important}</style>
-    <base href="/">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magazin online | Cubis Shop</title>
-    <meta name="description" content="Catalogul online Cubis Shop. Produsele vor fi publicate exclusiv din baza de date Cubis Shop.">
-    <meta name="theme-color" content="#080808">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://cubisshop.ro/magazin">
-    <link rel="icon" href="assets/logo.png" type="image/png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="ro_RO">
-    <meta property="og:title" content="Magazin online | Cubis Shop">
-    <meta property="og:description" content="Catalogul online Cubis Shop.">
-    <meta property="og:url" content="https://cubisshop.ro/magazin">
-    <meta property="og:image" content="https://cubisshop.ro/assets/vehicle-performance-scooter.png">
-    <link rel="stylesheet" href="styles.css?v=20260827-shop-call">
-    <link rel="stylesheet" href="magazin.css?v=20261001-filter-help-v3">
-    <link rel="stylesheet" href="favorites.css?v=20260909-nav-v2">
-    <link rel="stylesheet" href="shop-live.css?v=20260910-ssr-catalog-v1">
-    <link rel="stylesheet" href="performance.css?v=20260906-cart-active-v1">
-                      <script src="/theme.js?v=20260920-public-theme-v11"></script>
-  <link rel="stylesheet" href="/theme.css?v=20260920-public-theme-v11">
-  </head>
-  <body class="shop-page" data-catalog-page="1">
-    <a class="skip-link" href="/magazin#catalog">Sari la produse</a>
-
-    <header class="site-header">
-      <div class="header-inner">
-        <a class="logo" href="/" aria-label="Cubis Shop, pagina principală">
-          <img src="assets/logo.png" width="1024" height="1024" alt="" fetchpriority="high">
-          <b>Cubis Shop</b>
-        </a>
-
-        <nav class="main-nav" aria-label="Navigație principală">
-          <div class="mobile-nav-heading" aria-hidden="true">
-            <span>Meniu</span>
-            <small>Cubis Shop</small>
-          </div>
-          <a class="nav-shop-link active" href="/magazin" aria-current="page"><span class="nav-shop-icon" aria-hidden="true"></span><span>Shop</span></a>
-          <a href="/service-trotinete-electrice-bucuresti-ilfov">Service</a>
-          <a href="/despre-g-trots">Despre</a>
-          <a href="/contact">Contact</a>
-          <a class="mobile-nav-call" href="/contact">
-            <span aria-hidden="true">☎</span>
-            <strong>Sună chiar acum</strong>
-            <small>Contact</small>
-          </a>
-        </nav>
-
-        <button class="menu-toggle" type="button" aria-label="Deschide meniul" aria-expanded="false">
-          <span></span>
-          <span></span>
-        </button>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073a69">
+  <meta name="description" content="Toate produsele Cubis Shop, cu filtre după categorie, brand, producător, preț și disponibilitate.">
+  <meta name="color-scheme" content="light">
+  <link rel="canonical" href="https://cubisshop.ro/magazin">
+  <link rel="icon" href="/assets/cubis-favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261011-phase-c1">
+  <title>Toate produsele | Cubis Shop</title>
+</head>
+<body class="cs-page cs-catalog-page">
+  <div data-site-header class="cs-shell-placeholder"></div>
+  <main id="main" class="cs-catalog-main">
+    <div class="cs-container">
+      <nav class="cs-breadcrumb" aria-label="Breadcrumb"><a href="/">Acasă</a><span>›</span><span aria-current="page">Magazin</span></nav>
+      <div class="cs-catalog-hero">
+        <div><h1>Toate produsele</h1><p>Descoperă gama publicată în catalogul Cubis Shop și folosește filtrele pentru a găsi rapid produsul potrivit.</p></div>
+        <a class="cs-assistance-card" href="/contact"><span data-assistance-icon></span><div><strong>Nu ești sigur ce produs ți se potrivește?</strong><small>Folosește filtrele sau cere ajutor pentru verificare.</small></div><b>Contactează-ne →</b></a>
       </div>
-    </header>
+      <div class="cs-category-tabs" data-catalog-categories aria-label="Categorii principale"><div class="cs-loading-card">Se încarcă categoriile…</div></div>
 
-    <main id="main" class="shop-main">
-      <section class="shop-heading shell" id="top" aria-labelledby="shop-title">
-        <div class="shop-breadcrumb" aria-label="Fir de navigare">
-          <a href="/">Acasă</a>
-          <span aria-hidden="true">/</span>
-          <strong>Magazin</strong>
-        </div>
-
-        <div class="shop-heading-row">
-          <div class="shop-heading-copy">
-            <h1 id="shop-title">Magazin <span>Cubis Shop</span></h1>
-            <p>Piese, accesorii și trotinete electrice.</p>
-          </div>
-          <p class="shop-heading-note"><span aria-hidden="true">✓</span> Catalog Cubis Shop</p>
-        </div>
-
-        <div class="smart-search-overlay" data-smart-search-overlay hidden></div>
-        <form class="shop-search-deck" role="search" onsubmit="return false;">
-          <div class="shop-search-field">
-            <button class="shop-search-icon-wrap" type="button" data-smart-search-mobile-back aria-label="Închide căutarea">
-              <i class="shop-search-icon" aria-hidden="true"></i><i class="shop-search-back-icon" aria-hidden="true"></i>
-            </button>
-            <span class="shop-search-copy">
-              <small>Caută în magazin</small>
-              <input id="product-search" type="search" autocomplete="off" placeholder="Anvelopă, baterie, display..." aria-label="Caută în magazin" aria-describedby="search-hint">
-            </span>
-            <span class="shop-search-actions">
-              <button class="shop-search-clear" type="button" aria-label="Șterge căutarea" hidden><span aria-hidden="true">×</span></button>
-              <button class="shop-search-submit" type="button" data-smart-search-submit aria-label="Arată toate rezultatele"><span aria-hidden="true">›</span></button>
-            </span>
-            <kbd aria-hidden="true"><span>Ctrl</span><span>K</span></kbd>
-          </div>
-          <p id="search-hint"><i aria-hidden="true"></i><span><strong>Catalog produse</strong><small>pentru trotineta ta</small></span></p>
-          <a href="/contact"><i aria-hidden="true">?</i><span><small>Ajutor la alegere</small><strong>Contact</strong></span><b aria-hidden="true"></b></a>
-          <section class="smart-search-panel" id="smart-search-panel" aria-label="Căutare inteligentă produse" hidden>
-            <header class="smart-search-head">
-              <span><i aria-hidden="true"></i><b>Căutare inteligentă</b><small>Găsește piesa potrivită după denumire, model sau marcă</small></span>
-              <button type="button" data-smart-search-close aria-label="Închide căutarea"><span aria-hidden="true">×</span></button>
-            </header>
-            <div class="smart-search-content" data-smart-search-content></div>
-            <footer class="smart-search-footer">
-              <button type="button" data-smart-search-back><span aria-hidden="true">←</span><b>Înapoi la magazin</b></button>
-              <small><kbd>↑</kbd><kbd>↓</kbd> navighează <kbd>Enter</kbd> deschide</small>
-            </footer>
-          </section>
-        </form>
-      </section>
-
-      <section class="shop-catalog shell" id="catalog" aria-labelledby="catalog-title">
-        <button class="mobile-filter-button" type="button" aria-controls="shop-filters" aria-expanded="false">
-          <span aria-hidden="true"><i></i><i></i><i></i></span><strong>Filtrează produsele</strong><b data-mobile-filter-count hidden>0</b>
-        </button>
-
-        <div class="catalog-layout">
-          <div class="filters-overlay" aria-hidden="true"></div>
-          <div class="filters-sticky-column">
-            <aside class="filters-panel" id="shop-filters" aria-label="Filtre produse">
-            <div class="filters-mobile-head">
-              <button class="filters-close" type="button" aria-label="Închide filtrele">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7a.996.996 0 0 0-1.41.01Z"/></svg>
-              </button>
-              <div><small>Aplicare instantă</small><strong>Filtrează produsele</strong></div>
-            </div>
-
-            <div class="filter-group filter-categories">
-              <div class="filter-heading"><strong>Categorii</strong><button type="button" class="clear-filters">Resetează</button></div>
-              <div class="filter-options-scroll category-tree" tabindex="0" aria-label="Arborele categoriilor">
-                <button class="category-filter active" type="button" data-category="all"><span>Toate produsele</span></button>
-
-                <div class="category-tree-node category-tree-level-1" data-tree-open>
-                  <button class="category-filter category-filter-parent" type="button" data-category="piese"><i class="category-tree-marker" aria-hidden="true"></i><span>Piese și componente</span></button>
-                  <div class="category-tree-children">
-                    <div class="category-tree-node category-tree-level-2">
-                      <button class="category-filter" type="button" data-category="roti"><i class="category-thumb category-thumb-anvelope" aria-hidden="true"></i><span>Roți și rulare</span></button>
-                      <div class="category-tree-children">
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="anvelope-10-inch"><span>Anvelope 10 inch</span></button></div>
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="anvelope-offroad"><span>Anvelope off-road</span></button></div>
-                      </div>
-                    </div>
-
-                    <div class="category-tree-node category-tree-level-2">
-                      <button class="category-filter" type="button" data-category="electronica"><i class="category-thumb category-thumb-electronica" aria-hidden="true"></i><span>Electronică</span></button>
-                      <div class="category-tree-children">
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="displayuri"><span>Display-uri</span></button></div>
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="controlere"><span>Controlere</span></button></div>
-                      </div>
-                    </div>
-
-                    <div class="category-tree-node category-tree-level-2">
-                      <button class="category-filter" type="button" data-category="alimentare"><i class="category-thumb category-thumb-alimentare" aria-hidden="true"></i><span>Alimentare</span></button>
-                      <div class="category-tree-children">
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="baterii"><span>Baterii</span></button></div>
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="incarcatoare"><span>Încărcătoare</span></button></div>
-                      </div>
-                    </div>
-
-                    <div class="category-tree-node category-tree-level-2">
-                      <button class="category-filter" type="button" data-category="motoare"><i class="category-thumb category-thumb-motoare" aria-hidden="true"></i><span>Motoare</span></button>
-                      <div class="category-tree-children">
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="motoare-2000w"><span>Motoare 2000W</span></button></div>
-                      </div>
-                    </div>
-
-                    <div class="category-tree-node category-tree-level-2">
-                      <button class="category-filter" type="button" data-category="franare"><i class="category-thumb category-thumb-franare" aria-hidden="true"></i><span>Frânare</span></button>
-                      <div class="category-tree-children">
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="frane-hidraulice"><span>Kituri hidraulice</span></button></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="category-tree-node category-tree-level-1">
-                  <button class="category-filter category-filter-parent" type="button" data-category="trotinete"><i class="category-tree-marker category-tree-marker-scooter" aria-hidden="true"></i><span>Trotinete electrice</span></button>
-                  <div class="category-tree-children">
-                    <div class="category-tree-node category-tree-level-2">
-                      <button class="category-filter category-filter-leaf" type="button" data-category="trotinete-offroad"><span>Off-road</span></button>
-                      <div class="category-tree-children">
-                        <div class="category-tree-node category-tree-level-3"><button class="category-filter category-filter-leaf" type="button" data-category="trotinete-dual-motor"><span>Dual motor</span></button></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group price-filter">
-              <div class="filter-heading"><strong>Buget maxim</strong><output id="price-output" for="price-range">2.600 lei</output></div>
-              <input id="price-range" type="range" min="100" max="2600" value="2600" step="50" aria-label="Preț maxim">
-              <div class="price-scale"><span>100 lei</span><span>2.600 lei</span></div>
-            </div>
-
-            <div class="filter-group brand-filter compatibility-filter collapsible-filter is-collapsed" role="group" aria-labelledby="brand-filter-title" data-collapsible-filter="compatibility">
-              <button class="filter-collapse-toggle" type="button" aria-expanded="false" aria-controls="compatibility-filter-options">
-                <span class="filter-collapse-title" id="brand-filter-title">Mărci compatibile</span>
-                <span class="filter-selected-count" aria-live="polite" hidden>0 selectate</span>
-                <span class="filter-collapse-chevron" aria-hidden="true"></span>
-              </button>
-              <div class="filter-collapse-body" aria-hidden="true" inert>
-                <div class="filter-options-scroll" id="compatibility-filter-options" tabindex="-1" aria-label="Lista mărcilor compatibile">
-                  <label><input type="checkbox" value="universal"><span>Universal</span></label>
-                  <label><input type="checkbox" value="kukirin"><span>KuKirin</span></label>
-                  <label><input type="checkbox" value="xiaomi"><span>Xiaomi</span></label>
-                  <label><input type="checkbox" value="ninebot"><span>Ninebot</span></label>
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group brand-filter stock-filter" role="group" aria-labelledby="stock-filter-title">
-              <strong class="brand-filter-title" id="stock-filter-title">Stoc</strong>
-              <div class="filter-options-scroll" tabindex="0" aria-label="Filtrare după disponibilitate">
-                <label><input type="checkbox" value="in-stock"><span>În stoc</span></label>
-                <label><input type="checkbox" value="out-of-stock"><span>Nu este în stoc</span></label>
-              </div>
-            </div>
-
-            <div class="filter-group brand-filter manufacturer-filter collapsible-filter is-collapsed" role="group" aria-labelledby="manufacturer-filter-title" data-collapsible-filter="manufacturers">
-              <button class="filter-collapse-toggle" type="button" aria-expanded="false" aria-controls="manufacturer-filter-options">
-                <span class="filter-collapse-title" id="manufacturer-filter-title">Producători</span>
-                <span class="filter-selected-count" aria-live="polite" hidden>0 selectate</span>
-                <span class="filter-collapse-chevron" aria-hidden="true"></span>
-              </button>
-              <div class="filter-collapse-body" aria-hidden="true" inert>
-                <div class="filter-options-scroll" id="manufacturer-filter-options" tabindex="-1" aria-label="Lista producătorilor">
-                </div>
-              </div>
-            </div>
-
-            <a class="filter-help-card" href="/contact?text=Bun%C4%83%2C%20am%20nevoie%20de%20ajutor%20pentru%20a%20alege%20o%20pies%C4%83%20compatibil%C4%83." target="_blank" rel="noopener nofollow">
-              <div class="filter-help-heading">
-                <span class="filter-help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13V11a8 8 0 0 1 16 0v6a4 4 0 0 1-4 4h-3"/><rect x="2" y="10" width="5" height="8" rx="2"/><rect x="17" y="10" width="5" height="8" rx="2"/></svg></span>
-                <span>Asistență <b>Cubis Shop</b></span>
-              </div>
-              <strong class="filter-help-title">Nu găsești piesa?</strong>
-              <p class="filter-help-description">Trimite-ne modelul trotinetei. Verificăm compatibilitatea împreună.</p>
-              <span class="filter-help-cta"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a12.8 12.8 0 0 0-11 19.3L3.4 29l6.9-1.6A12.9 12.9 0 1 0 16 3Zm0 23.3c-2 0-3.8-.5-5.4-1.5l-.4-.2-4 .9.9-3.9-.3-.4A10.3 10.3 0 1 1 16 26.3Zm5.7-7.7c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.5 8.5 0 0 1-2.5-1.6 9.3 9.3 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.7l.5-.6.3-.6c.1-.2 0-.4 0-.6l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.3 3.4 1.5 3.6c.2.2 2.5 3.8 6 5.3 3.6 1.6 3.6 1 4.3.9.6 0 1.9-.8 2.2-1.6.3-.8.3-1.5.2-1.6-.1-.2-.3-.3-.6-.4Z"/></svg><span>Scrie-ne pe WhatsApp</span><b aria-hidden="true">↗</b></span>
-            </a>
-
-            </aside>
-          </div>
-
-          <div class="catalog-results">
-            <div class="catalog-toolbar reveal">
-              <p aria-live="polite"><strong id="results-count">0 produse</strong><span> în catalogul Cubis Shop</span></p>
-              <div class="toolbar-actions">
-                <div class="sort-control"><span id="sort-products-label">Sortează:</span>
-                  <div class="sort-select-wrap">
-                  <select class="sort-native-select" id="sort-products" tabindex="-1" aria-hidden="true">
-                    <option value="featured">Recomandate</option>
-                    <option value="price-asc">Preț crescător</option>
-                    <option value="price-desc">Preț descrescător</option>
-                    <option value="name">Denumire A–Z</option>
-                  </select>
-                    <button class="sort-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="sort-products-menu" aria-labelledby="sort-products-label sort-products-value">
-                      <span class="sort-select-value" id="sort-products-value">Recomandate</span>
-                      <i aria-hidden="true"></i>
-                    </button>
-                    <div class="sort-select-menu" id="sort-products-menu" role="listbox" aria-label="Sortarea produselor" hidden>
-                      <button type="button" role="option" data-value="featured" aria-selected="true">Recomandate</button>
-                      <button type="button" role="option" data-value="price-asc" aria-selected="false">Preț crescător</button>
-                      <button type="button" role="option" data-value="price-desc" aria-selected="false">Preț descrescător</button>
-                      <button type="button" role="option" data-value="name" aria-selected="false">Denumire A–Z</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="view-switch" aria-label="Mod afișare">
-                  <button class="active" type="button" data-view="grid" aria-label="Afișare grilă" aria-pressed="true"><i></i><i></i><i></i><i></i></button>
-                  <button type="button" data-view="list" aria-label="Afișare listă" aria-pressed="false"><i></i><i></i><i></i></button>
-                </div>
-              </div>
-            </div>
-
-            <div class="product-grid" id="product-grid" aria-busy="false">
-              <!-- CUBIS:SSR_PRODUCTS_START -->
-              <!-- CUBIS:SSR_PRODUCTS_END -->
-            </div>
-
-            <div class="no-results" id="no-results" hidden>
-              <span aria-hidden="true">⌕</span>
-              <h3>N-am găsit produsul.</h3>
-              <p>Încearcă alt termen sau trimite-ne modelul trotinetei și o căutăm împreună.</p>
-              <button class="button clear-filters" type="button">Arată toate produsele <span aria-hidden="true">↺</span></button>
-            </div>
-
-            <nav class="product-pagination" id="product-pagination" aria-label="Navigare între paginile de produse">
-              <div class="pagination-size">
-                <span id="products-per-page-label">Produse pe pagină</span>
-                <div class="pagination-select-wrap">
-                  <select class="pagination-native-select" id="products-per-page" tabindex="-1" aria-hidden="true">
-                    <option value="10" selected>10</option>
-                    <option value="15">15</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="75">75</option>
-                    <option value="100">100</option>
-                  </select>
-                  <button class="pagination-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="products-per-page-menu" aria-labelledby="products-per-page-label products-per-page-value">
-                    <span class="pagination-select-value" id="products-per-page-value">10</span>
-                    <i aria-hidden="true"></i>
-                  </button>
-                  <div class="pagination-select-menu" id="products-per-page-menu" role="listbox" aria-label="Număr de produse afișate pe pagină" hidden>
-                    <button type="button" role="option" data-value="10" aria-selected="true">10</button>
-                    <button type="button" role="option" data-value="15" aria-selected="false">15</button>
-                    <button type="button" role="option" data-value="25" aria-selected="false">25</button>
-                    <button type="button" role="option" data-value="50" aria-selected="false">50</button>
-                    <button type="button" role="option" data-value="75" aria-selected="false">75</button>
-                    <button type="button" role="option" data-value="100" aria-selected="false">100</button>
-                  </div>
-                </div>
-              </div>
-              <p class="pagination-range" id="pagination-range" aria-live="polite">0 produse</p>
-              <div class="pagination-pages" id="pagination-pages"><!-- CUBIS:SSR_PAGINATION_START -->
-              <!-- CUBIS:SSR_PAGINATION_END --></div>
-            </nav>
-          </div>
-        </div>
-
-        <div class="catalog-intro reveal">
-          <div class="catalog-part-visual" aria-hidden="true">
-            <img src="assets/magazin-produse-v1.png" alt="">
-          </div>
-
-          <div class="catalog-intro-copy">
-            <span class="shop-section-label">
-              <img src="assets/logo.png" width="1024" height="1024" alt="">
-              <span class="catalog-brand-copy"><small>Magazin online</small><strong>Catalog <b>Cubis</b> Shop</strong></span>
-            </span>
-            <h2 id="catalog-title">Găsești simplu.<br><em class="catalog-typewriter" data-reserve="Ajutor de service."><span class="catalog-typewriter-line"><span class="catalog-typewriter-text" data-phrases="Piese verificate.|Potrivire sigură.|Ajutor de service.">Piese verificate.</span><i class="catalog-typewriter-cursor" aria-hidden="true"></i></span></em></h2>
-          </div>
-
-          <div class="catalog-image-note">
-            <i aria-hidden="true">!</i>
-            <span><small>Compatibilitate verificată</small><strong>Spune-ne modelul trotinetei și confirmăm piesa înainte de comandă.</strong></span>
-          </div>
-        </div>
-      </section>
-
-      <section class="shop-service-bridge shell reveal" aria-labelledby="shop-service-title">
-        <div class="shop-service-copy">
-          <span class="service-brand-label">
-            <span class="service-brand-logo"><img src="assets/logo.png" width="1024" height="1024" alt=""></span>
-            <span><small>Asistență Cubis Shop</small><strong>Magazin + service</strong></span>
-          </span>
-          <h2 id="shop-service-title"><span>Nu cumperi pe</span><em>presupuneri.</em></h2>
-          <p>Ne trimiți modelul și o fotografie. Verificăm compatibilitatea înainte de comandă, iar la nevoie montăm și testăm piesa în atelier.</p>
-          <ul class="service-assurances" aria-label="Avantajele verificării Cubis Shop">
-            <li><span>01</span><strong>Potrivire confirmată</strong></li>
-            <li><span>02</span><strong>Montaj disponibil</strong></li>
-            <li><span>03</span><strong>Răspuns de tehnician</strong></li>
-          </ul>
-        </div>
-
-        <aside class="service-concierge" aria-label="Verificare compatibilitate">
-          <div class="service-concierge-top">
-            <span>Verificare înainte de comandă</span>
-            <small><i aria-hidden="true"></i> Disponibil</small>
-          </div>
-          <div class="service-concierge-message">
-            <span class="service-question-mark" aria-hidden="true">?</span>
-            <div><small>Nu știi ce piesă se potrivește?</small><strong>O identificăm împreună.</strong></div>
-          </div>
-          <a class="service-whatsapp-button" href="/contact?text=Bun%C4%83%2C%20vreau%20s%C4%83%20verific%20compatibilitatea%20unei%20piese." target="_blank" rel="noopener nofollow">
-            <span class="service-whatsapp-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 3a12.8 12.8 0 0 0-11 19.3L3.4 29l6.9-1.6A12.9 12.9 0 1 0 16 3Zm0 23.3c-2 0-3.8-.5-5.4-1.5l-.4-.2-4 .9.9-3.9-.3-.4A10.3 10.3 0 1 1 16 26.3Zm5.7-7.7c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.5 8.5 0 0 1-2.5-1.6 9.3 9.3 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.7l.5-.6.3-.6c.1-.2 0-.4 0-.6l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.3 3.4 1.5 3.6c.2.2 2.5 3.8 6 5.3 3.6 1.6 3.6 1 4.3.9.6 0 1.9-.8 2.2-1.6.3-.8.3-1.5.2-1.6-.1-.2-.3-.3-.6-.4Z"/></svg></span>
-            <strong>Trimite modelul pe WhatsApp</strong>
-            <b aria-hidden="true">›</b>
-          </a>
-          <div class="service-concierge-meta">
-            <span>Răspuns uman, fără formular</span>
-            <strong>Luni–Vineri · 10:00–19:00</strong>
-          </div>
+      <div class="cs-catalog-layout" id="catalog">
+        <button class="cs-mobile-filter-trigger" type="button" data-filter-open><span data-filter-icon></span>Filtrează produsele <b data-mobile-filter-count hidden>0</b></button>
+        <aside class="cs-filter-panel" data-filter-panel aria-label="Filtre produse">
+          <div class="cs-filter-panel__mobile-head"><strong>Filtrează produsele</strong><button type="button" data-filter-close aria-label="Închide filtrele">×</button></div>
+          <div class="cs-filter-panel__head"><strong>Filtrează produsele</strong><button type="button" data-reset-filters>Resetează filtrele ↻</button></div>
+          <fieldset class="cs-filter-group"><legend>Categorie</legend><div class="cs-filter-options" data-filter-categories></div></fieldset>
+          <fieldset class="cs-filter-group"><legend>Brand</legend><div class="cs-filter-options" data-filter-brands></div></fieldset>
+          <fieldset class="cs-filter-group"><legend>Producător</legend><div class="cs-filter-options" data-filter-manufacturers></div></fieldset>
+          <fieldset class="cs-filter-group"><legend>Preț</legend><div class="cs-price-filter"><div><label><span>Minim</span><input name="price_min" type="number" min="0" step="1"></label><label><span>Maxim</span><input name="price_max" type="number" min="0" step="1"></label></div><input class="cs-price-range" name="price_range" type="range" min="0" max="1000" step="1" aria-label="Preț maxim"></div></fieldset>
+          <fieldset class="cs-filter-group"><legend>Disponibilitate</legend><div class="cs-filter-options"><label><input type="checkbox" name="availability" value="in_stock"><span>În stoc</span><b data-count-in-stock>0</b></label><label><input type="checkbox" name="availability" value="out_of_stock"><span>Stoc epuizat</span><b data-count-out-stock>0</b></label></div></fieldset>
+          <div class="cs-filter-help"><span>?</span><div><strong>Ai nevoie de ajutor?</strong><p>Trimite-ne SKU-ul sau detaliile produsului.</p><a href="/contact">Cere ajutor →</a></div></div>
+          <button class="cs-button cs-button--primary cs-filter-apply" type="button" data-filter-close>Vezi rezultatele</button>
         </aside>
-      </section>
-    </main>
+        <button class="cs-filter-scrim" type="button" data-filter-close aria-label="Închide filtrele" hidden></button>
 
-    <footer class="shell shop-footer">
-      <div class="footer-inner">
-        <a class="logo" href="/"><img src="assets/logo.png" width="1024" height="1024" alt=""><b>Cubis Shop</b></a>
-        <p>Reparații și piese pentru trotinete electrice în București și Ilfov.</p>
-        <nav aria-label="Navigație subsol">
-          <a href="/magazin">Magazin piese trotinete electrice</a>
-          <a href="/service-trotinete-electrice-bucuresti-ilfov">Service trotinete electrice</a>
-          <a href="/despre-g-trots">Despre</a>
-          <a href="/contact">Contact și date firmă</a>
-        </nav>
-        <a class="footer-phone" href="/contact">Contact</a>
-        <small>© 2026 Cubis Shop</small>
+        <section class="cs-catalog-results" aria-labelledby="catalog-results-title">
+          <form class="cs-compatibility-panel is-catalog" data-catalog-compatibility>
+            <div class="cs-compatibility-panel__intro"><span class="cs-compatibility-icon" aria-hidden="true">a<small>⌕</small></span><div><h2>Găsește rapid produsul compatibil</h2><p>Alege numai dintre opțiunile existente în catalog.</p></div></div>
+            <label><span>1. Alege categoria</span><select name="category"><option value="">Selectează categoria</option></select></label>
+            <label><span>2. Alege marca</span><select name="brand" disabled><option value="">Selectează marca</option></select></label>
+            <label><span>3. Alege producătorul</span><select name="manufacturer" disabled><option value="">Selectează producătorul</option></select></label>
+            <button type="submit" class="cs-button cs-button--primary">Caută produse</button>
+          </form>
+
+          <div class="cs-catalog-toolbar">
+            <div><p id="catalog-results-title">Se afișează <strong data-results-range>0 produse</strong></p><div class="cs-active-filters" data-active-filters></div></div>
+            <label>Sortare:<select name="sort" data-catalog-sort><option value="recommended">Recomandate</option><option value="price_asc">Preț crescător</option><option value="price_desc">Preț descrescător</option><option value="name_asc">Nume A–Z</option><option value="rating_desc">Rating</option></select></label>
+          </div>
+
+          <div class="cs-product-grid cs-product-grid--catalog" data-catalog-grid aria-live="polite"><div class="cs-loading-card">Se încarcă produsele din API…</div></div>
+          <div class="cs-pagination-row"><nav class="cs-pagination" data-catalog-pagination aria-label="Paginare catalog"></nav><label>Produse pe pagină:<select data-page-size><option value="12">12</option><option value="24">24</option><option value="48">48</option></select></label></div>
+        </section>
       </div>
-    </footer>
 
-    <a class="whatsapp-sticky" href="/contact?text=Bun%C4%83%2C%20am%20nevoie%20de%20ajutor%20cu%20o%20pies%C4%83%20pentru%20trotineta%20mea." target="_blank" rel="noopener nofollow" aria-label="Trimite mesaj Cubis Shop pe WhatsApp">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a12.8 12.8 0 0 0-11 19.3L3.4 29l6.9-1.6A12.9 12.9 0 1 0 16 3Zm0 23.3c-2 0-3.8-.5-5.4-1.5l-.4-.2-4 .9.9-3.9-.3-.4A10.3 10.3 0 1 1 16 26.3Zm5.7-7.7c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.5 8.5 0 0 1-2.5-1.6 9.3 9.3 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.7l.5-.6.3-.6c.1-.2 0-.4 0-.6l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.4-1.2 1.2-1.2 2.9s1.3 3.4 1.5 3.6c.2.2 2.5 3.8 6 5.3 3.6 1.6 3.6 1 4.3.9.6 0 1.9-.8 2.2-1.6.3-.8.3-1.5.2-1.6-.1-.2-.3-.3-.6-.4Z"/></svg>
-      <span>WhatsApp</span>
-    </a>
-    <script src="favorites.js?v=20260910-navbar-v1" defer></script>
-    <script src="magazin.js?v=20260917-distinct-sku-v1" defer></script>
-    <script src="shop-live.js?v=20260917-catalog-stock-dedup-v1" defer></script>
-<script src="/legal-footer.js?v=20260920-public-theme-v11" defer></script></body>
+      <div class="cs-catalog-trust">
+        <span><i data-catalog-trust="shield"></i><b>Date verificate</b><small>din catalogul API</small></span>
+        <span><i data-catalog-trust="truck"></i><b>Livrare configurată</b><small>confirmată la checkout</small></span>
+        <span><i data-catalog-trust="rotate"></i><b>Retur verificat</b><small>după eligibilitatea comenzii</small></span>
+        <span><i data-catalog-trust="lock"></i><b>Plată securizată</b><small>prin metodele active</small></span>
+        <span><i data-catalog-trust="headset"></i><b>Suport dedicat</b><small>pentru alegerea produsului</small></span>
+      </div>
+    </div>
+  </main>
+  <div data-site-footer class="cs-footer-placeholder"></div>
+  <script type="module" src="/cubis-catalog.mjs?v=20261011-phase-c1"></script>
+</body>
 </html>

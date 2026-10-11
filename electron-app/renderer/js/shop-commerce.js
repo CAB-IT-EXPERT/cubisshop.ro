@@ -622,10 +622,13 @@
     ['shop-nir-registry-from', 'shop-nir-registry-to'].forEach(id => $(id)?.addEventListener('change', updateNirRegistryDownloadDialog));
     document.addEventListener('click', event => {
       if (!$('shop-smartbill-product-warehouse-options')?.hidden && !event.target.closest('.shop-smartbill-warehouse-picker')) closeSmartBillWarehousePicker();
-      const trigger = event.target.closest('[data-shop-order-filter]');
-      if (!trigger) return;
-      state.orderStatusFilter = trigger.dataset.shopOrderFilter || 'all';
+    });
+    window.addEventListener('shop-order-filter-change', event => {
+      state.orderStatusFilter = event.detail || 'all';
       state.pages.orders = 1;
+      // A recently visited orders view is served from the short-lived cache.
+      // Re-render it immediately so navigation filters never expose stale UI.
+      if (shopViewFreshAt.has('shop-orders')) renderOrders();
     });
     $('shop-product-form').addEventListener('submit', saveProduct);
     $('shop-product-sku')?.addEventListener('input', scheduleSmartBillProductLookup);
@@ -2389,7 +2392,8 @@
       const reached = Boolean(entry) || (!terminalCurrent && (item.value === order.status || (flowIndex >= 0 && currentFlowIndex >= 0 && flowIndex <= currentFlowIndex)));
       const current = item.value === order.status;
       const date = entry ? new Date(String(entry.created_at).replace(' ', 'T')).toLocaleString('ro-RO') : '';
-      return `<div class="shop-order-timeline-step ${reached ? 'reached' : ''} ${current ? 'current' : ''}" style="--status-color:${statusColors[item.value]}"><div class="shop-order-timeline-rail"><span>${statusIcon(item.value)}</span>${index < flow.length - 1 ? '<i></i>' : ''}</div><strong>${esc(statusShortLabels[item.value] || statusLabels[item.value])}</strong><small>${date ? esc(date) : current ? 'Status actual' : 'Pas următor'}</small></div>`;
+      const stepMeta = date ? date : current ? 'Status actual' : reached ? 'Parcurs' : 'Urmează';
+      return `<div class="shop-order-timeline-step ${reached ? 'reached' : ''} ${current ? 'current' : ''}" style="--status-color:${statusColors[item.value]}"><div class="shop-order-timeline-rail"><span>${statusIcon(item.value)}</span>${index < flow.length - 1 ? '<i></i>' : ''}</div><strong>${esc(statusShortLabels[item.value] || statusLabels[item.value])}</strong><small>${esc(stepMeta)}</small></div>`;
     }).join('');
     const currentMeta = terminalCurrent || flow.find(item => item.value === order.status) || flow[0];
     const currentEntry = [...history].reverse().find(historyItem => historyItem.to_status === currentMeta.value);
@@ -2398,9 +2402,16 @@
     return `<section class="shop-order-timeline"><div class="shop-order-section-title"><span>EVOLUȚIA COMENZII</span><strong>Istoric status</strong></div><div class="shop-order-timeline-flow">${flowHtml}</div>${currentState}</section>`;
   }
   function orderStatusPicker(order) {
+    const historyStatuses = new Set((Array.isArray(order.status_history) ? order.status_history : []).map(item => item.to_status));
+    const progression = [...mainStatusFlow, 'refunded'];
+    const currentProgressIndex = progression.indexOf(order.status);
+    const furthestProgressIndex = Math.max(currentProgressIndex, ...Array.from(historyStatuses, status => progression.indexOf(status)));
     return `<section class="shop-order-status-section"><div class="shop-order-section-title"><span>ACTUALIZEAZĂ</span><strong>Alege următorul status</strong></div><div class="shop-order-status-picker">${statusDefinitions.map((item, index) => {
       const allowed = canChangeOrderStatus(order.status, item.value);
-      return `<label class="shop-order-status-option ${order.status === item.value ? 'selected' : ''} ${allowed ? '' : 'locked'}" style="--status-color:${statusColors[item.value]}"><input type="radio" name="shop-order-status" value="${item.value}" ${order.status === item.value ? 'checked' : ''} ${allowed ? '' : 'disabled'}><span class="shop-order-status-icon">${statusIcon(item.value)}<b>${String(index + 1).padStart(2, '0')}</b></span><span><strong>${esc(statusLabels[item.value])}</strong><small>${esc(item.description)}</small></span><i>✓</i></label>`;
+      const progressIndex = progression.indexOf(item.value);
+      const completed = historyStatuses.has(item.value)
+        || (progressIndex >= 0 && progressIndex < furthestProgressIndex && item.value !== 'return_refused');
+      return `<label class="shop-order-status-option ${order.status === item.value ? 'selected' : ''} ${completed ? 'completed' : ''} ${allowed ? '' : 'locked'}" style="--status-color:${statusColors[item.value]}"><input type="radio" name="shop-order-status" value="${item.value}" ${order.status === item.value ? 'checked' : ''} ${allowed ? '' : 'disabled'}><span class="shop-order-status-icon">${statusIcon(item.value)}<b>${String(index + 1).padStart(2, '0')}</b></span><span><strong>${esc(statusLabels[item.value])}</strong><small>${esc(item.description)}</small></span><i>✓</i></label>`;
     }).join('')}</div></section>`;
   }
   function normalizeWhatsAppPhone(value) {

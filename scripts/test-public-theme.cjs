@@ -1,30 +1,26 @@
-const fs=require('node:fs');
-const vm=require('node:vm');
-const assert=require('node:assert/strict');
-const source=fs.readFileSync(require('node:path').join(__dirname,'../website/theme.js'),'utf8');
-function setup(systemDark,saved=null,blocked=false){
-  const storage=new Map(saved?[['g-trots-color-theme-v1',saved]]:[]);
-  const listeners={}; const root={dataset:{},style:{}};
-  const media={matches:systemDark,addEventListener:(name,fn)=>{listeners.system=fn;}};
-  const ctx={location:{pathname:'/'},document:{documentElement:root,readyState:'loading',querySelector:()=>({content:''}),querySelectorAll:()=>[],addEventListener:()=>{},dispatchEvent:()=>{}},localStorage:{getItem:k=>{if(blocked)throw Error('blocked');return storage.get(k)||null;},setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},MutationObserver:class{observe(){}},CustomEvent:class{},window:{matchMedia:()=>media,addEventListener:()=>{}}};
-  vm.runInNewContext(source,ctx);
-  return {root,theme:ctx.window.GTrotsTheme,storage,listeners,media};
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const website = path.join(__dirname, '..', 'website');
+const read = file => fs.readFileSync(path.join(website, file), 'utf8');
+const pages = ['index.html', 'magazin.html', 'produs.html'];
+
+for (const file of pages) {
+  const html = read(file);
+  assert.match(html, /<html[^>]+data-theme="light"/i, `${file} must start in light mode`);
+  assert.match(html, /<meta[^>]+name="color-scheme"[^>]+content="light"/i, `${file} must advertise light-only controls`);
+  assert.match(html, /cubis-storefront\.css/i, `${file} must load the Cubis design system`);
+  assert.doesNotMatch(html, /g-trots|gt-theme-bootstrap|theme\.js|theme\.css/i, `${file} must not load the legacy public theme`);
 }
-assert.equal(setup(true).theme.current(),'dark');
-assert.equal(setup(false).theme.current(),'light');
-assert.equal(setup(true,'light').theme.current(),'light');
-assert.equal(setup(false,'dark').theme.current(),'dark');
-assert.equal(setup(true,null,true).theme.current(),'dark');
-assert.equal(setup(false,null,true).theme.current(),'light');
-const a=setup(false);a.theme.toggle();assert.equal(a.storage.get('g-trots-color-theme-v1'),'dark');
-a.listeners.system({matches:false});assert.equal(a.theme.current(),'dark');
-a.theme.reset();assert.equal(a.theme.current(),'light');
-a.media.matches=true;a.listeners.system({matches:true});assert.equal(a.theme.current(),'dark');
-const html=fs.readFileSync(require('node:path').join(__dirname,'../website/index.html'),'utf8');
-const bootstrap=html.match(/<script id="gt-theme-bootstrap">([\s\S]*?)<\/script>/)[1];
-for(const blocked of [false,true]) for(const dark of [false,true]) {
-  const root={dataset:{},style:{}};
-  vm.runInNewContext(bootstrap,{document:{documentElement:root},location:{pathname:'/'},matchMedia:()=>({matches:dark}),localStorage:{getItem:()=>{if(blocked)throw Error('blocked');return null;}}});
-  assert.equal(root.dataset.theme,dark?'dark':'light');
-}
-console.log('public-theme: OK · device preference, first paint, blocked storage, persistence, system changes');
+
+const storefront = read('cubis-storefront.mjs');
+assert.match(storefront, /document\.documentElement\.dataset\.theme = "light"/, 'the Cubis shell must enforce the light theme');
+assert.match(storefront, /document\.documentElement\.style\.colorScheme = "light"/, 'native controls must remain light');
+assert.doesNotMatch(storefront, /GTrotsTheme|g-trots-color-theme/, 'the Cubis shell must not expose the legacy theme runtime');
+
+const css = read('cubis-storefront.css');
+assert.match(css, /--cs-blue-700:/, 'the Cubis color system must define its primary blue');
+assert.match(css, /--cs-cyan-100:/, 'the Cubis color system must define its cyan accent');
+
+console.log('public-theme: OK · Cubis storefront is light-only and independent from the legacy theme');

@@ -1430,6 +1430,145 @@
 :root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state strong { font-size: 11px; }
 :root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state p { font-size: 8px; }
 
+/* Material 3 order journey: one continuous rail with clear past/current/future states. */
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline {
+  overflow: hidden;
+  position: relative;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(8, 127, 245, .075), transparent 24%),
+    radial-gradient(circle at 94% 100%, rgba(20, 184, 166, .07), transparent 25%),
+    linear-gradient(145deg, #fff, #fbfdff);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline .shop-order-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-flow {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(108px, 1fr));
+  align-items: start;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 4px 13px;
+  scrollbar-color: #bfd0de transparent;
+  scrollbar-width: thin;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step {
+  min-width: 108px;
+  min-height: 78px;
+  grid-template-rows: 40px auto auto;
+  gap: 5px;
+  padding: 0 6px;
+  scroll-snap-align: start;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail { height: 40px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail > span {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #cfdee9;
+  border-radius: 12px;
+  color: #7890a4;
+  background: #f4f8fb;
+  box-shadow: none;
+  transition: border-color .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail svg {
+  width: 17px;
+  height: 17px;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-rail > i {
+  height: 2px;
+  left: calc(50% + 20px);
+  right: -8px;
+  background: #d8e3eb;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.reached:not(.current) .shop-order-timeline-rail > i {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--status-color) 72%, #a9bfce), #cbdbe6);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.reached:not(.current) .shop-order-timeline-rail > span {
+  border-color: color-mix(in srgb, var(--status-color) 46%, #cadce7);
+  color: color-mix(in srgb, var(--status-color) 78%, #356279);
+  background: color-mix(in srgb, var(--status-color) 10%, #f8fbfd);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.current .shop-order-timeline-rail > span {
+  border-color: var(--status-color);
+  color: #fff;
+  background: var(--status-color);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--status-color) 12%, transparent), 0 8px 18px color-mix(in srgb, var(--status-color) 24%, transparent);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step > strong {
+  color: #657b8f;
+  font-weight: 850;
+  letter-spacing: -.01em;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.reached > strong { color: #20384e; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.current > strong {
+  color: color-mix(in srgb, var(--status-color) 72%, #123047);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step > small {
+  width: fit-content;
+  max-width: 100%;
+  justify-self: center;
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: #8294a4;
+  background: #f2f6f9;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-timeline-step.current > small {
+  color: color-mix(in srgb, var(--status-color) 72%, #24506c);
+  background: color-mix(in srgb, var(--status-color) 11%, #f7fafc);
+  font-weight: 800;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state {
+  min-height: 72px;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  margin-top: 2px;
+  border-color: color-mix(in srgb, var(--status-color) 32%, #c8dce6);
+  border-radius: 18px;
+  padding: 11px 13px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--status-color) 10%, #f8fcfd), #fff);
+  box-shadow: 0 8px 20px rgba(35, 84, 117, .07);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: #fff;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state small { color: #587187; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state strong { color: #183149; font-size: 11px; }
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state p { color: #60798e; font-size: 8px; }
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-current-state > em {
+  align-self: center;
+  color: color-mix(in srgb, var(--status-color) 78%, #17384c);
+  background: color-mix(in srgb, var(--status-color) 16%, #f4fbfc);
+}
+
 :root[data-theme="cubis-light"] #shop-order-details .shop-order-status-picker {
   padding-bottom: 4px;
 }
@@ -1455,8 +1594,21 @@
 :root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option > i {
   width: 19px;
   height: 19px;
+  border-color: var(--color-border-strong);
+  color: transparent;
+  background: var(--color-surface-muted);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option:is(.completed, .selected) > i {
+  border-color: var(--status-color);
   color: #fff;
   background: var(--status-color);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--status-color) 20%, transparent);
+}
+
+:root[data-theme="cubis-light"] #shop-order-details .shop-order-status-option.completed.locked {
+  opacity: .78;
 }
 
 /* Notices and fields */

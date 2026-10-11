@@ -1,11 +1,6 @@
 Options -Indexes
-DirectoryIndex index.html index.php
+DirectoryIndex index.html
 ErrorDocument 404 /404.html
-
-AddType text/plain .txt
-AddType text/markdown .md
-AddType application/ld+json .jsonld
-AddType application/x-ndjson .jsonl
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -13,89 +8,42 @@ AddType application/x-ndjson .jsonl
   RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
   RewriteRule ^index\.html$ https://cubisshop.ro/ [R=301,L]
 
-  # Produsele demonstrative vechi nu mai există și nu trebuie confundate cu
-  # articolele reale din catalog, nici prin URL-urile istorice.
-  RewriteRule ^(anvelopa-g10-all-terrain|baterie-powercore-52v-23ah|display-smart-ride-s3|incarcator-fastcharge-54-6v|kit-frana-hydrostop-pro|motor-dualhub-x2-2000w)(?:\.html)?/?$ - [R=410,L]
-  RewriteRule ^magazin/produs/(anvelopa-g10-all-terrain|baterie-powercore-52v-23ah|display-smart-ride-s3|incarcator-fastcharge-54-6v|kit-frana-hydrostop-pro|motor-dualhub-x2-2000w)/?$ - [R=410,L]
-
-  RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
-  RewriteRule ^(.+)\.html$ https://cubisshop.ro/$1 [R=301,L]
-
   RewriteCond %{HTTPS} !=on [OR]
   RewriteCond %{HTTP_HOST} ^www\.cubisshop\.ro$ [NC]
   RewriteRule ^ https://cubisshop.ro%{REQUEST_URI} [R=301,L]
 
-  # /magazin este si directorul paginilor de produs; servim explicit catalogul.
+  # Catalogul și fiecare slug de produs sunt randate exclusiv de paginile Cubis.
+  # Regula precede verificarea fișierelor pentru a nu servi HTML legacy regenerat.
   RewriteRule ^magazin/?$ /magazin.html [END]
-
-  # Paginile generate la salvarea produsului au HTML, canonical și schema proprii.
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteCond %{REQUEST_FILENAME}/index.html -f
-  RewriteRule ^magazin/produs/[^/]+/?$ - [END]
-
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteCond %{REQUEST_FILENAME}/index.php -f
-  RewriteRule ^magazin/produs/[^/]+/?$ - [END]
-
-  # Un slug de produs fără pagină generată este o rută inexistentă, nu un
-  # șablon gol cu status 200. Produsele șterse au propriul răspuns 410.
-  RewriteRule ^magazin/produs/([^/]+)/?$ - [R=404,L]
+  RewriteRule ^magazin/produs/[^/]+/?$ /produs.html [END]
+  RewriteRule ^produs/?$ /produs.html [END]
 
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME}.html -f
-  RewriteRule ^(.+?)/?$ $1.html [L]
+  RewriteRule ^(.+?)/?$ $1.html [END]
 </IfModule>
 
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
 </IfModule>
 
 <IfModule mod_expires.c>
   ExpiresActive On
-  # Paginile și produsele se pot schimba din aplicație; browserul trebuie să
-  # confirme versiunea curentă la fiecare acces, fără să păstreze o oră HTML vechi.
   ExpiresByType text/html "access plus 0 seconds"
   ExpiresByType text/css "access plus 7 days"
   ExpiresByType text/javascript "access plus 7 days"
   ExpiresByType application/javascript "access plus 7 days"
-  ExpiresByType image/jpeg "access plus 30 days"
   ExpiresByType image/png "access plus 30 days"
-  ExpiresByType image/webp "access plus 30 days"
-  ExpiresByType image/svg+xml "access plus 30 days"
 </IfModule>
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set X-Frame-Options "SAMEORIGIN"
-
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
-
-  <FilesMatch "^(?:ai-catalog\.json|openai-products(?:-status)?\.json|openai-products\.jsonl(?:\.gz)?)$">
-    Header set Cache-Control "no-cache, must-revalidate"
+  <FilesMatch "\.(?:css|js|mjs|png)$">
+    Header set Cache-Control "public, max-age=604800"
   </FilesMatch>
-
-  # Fișierele de interfață sunt versionate în URL, astfel pot fi păstrate
-  # local fără a întârzia actualizările de catalog și imaginile produselor.
-  <FilesMatch "\.(?:css|js)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-  <FilesMatch "^(?:legal-footer\.js|promotions\.(?:css|js))$">
-    Header set Cache-Control "no-cache, must-revalidate"
-  </FilesMatch>
-  SetEnvIf Request_URI "^/assets/" GT_STATIC_ASSET=1
-  Header set Cache-Control "public, max-age=31536000, immutable" env=GT_STATIC_ASSET
-
-  # llms.txt este o hartă editorială suplimentară pentru agenți AI. Nu
-  # înlocuiește robots.txt, sitemap-urile sau datele structurate Product.
-  <FilesMatch "\.(?:html|php)$">
-    Header set Link "</llms.txt>; rel=\"describedby\"; type=\"text/markdown\""
-  </FilesMatch>
-
-  # Paginile tranzacționale/private trebuie să poată fi accesate de utilizator,
-  # dar nu trebuie păstrate în indexul motoarelor de căutare.
-  SetEnvIf Request_URI "^/(?:login|cont|cont-nou|cos|favorite|produs|resetare-parola|shop-indisponibil|checkout|plata-finalizata|plata-esuata|urmarire-comanda|solicita-retur)(?:\.html)?/?(?:\?.*)?$" GT_PRIVATE_PAGE=1
-  Header always set X-Robots-Tag "noindex, follow" env=GT_PRIVATE_PAGE
 </IfModule>
