@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   ActivityIndicator,
   Alert,
@@ -97,12 +98,12 @@ export default function ShopNewsletterSubscribersManager({ onSearchFocus }: { on
   if (loading) return <View style={styles.loading}><ActivityIndicator size="large" color={Colors.orange} /><Text style={styles.loadingTitle}>Se pregătește lista de abonați</Text><Text style={styles.loadingText}>Citirea stării newsletterului și a datelor de contact</Text></View>;
 
   return <View style={styles.page}>
-    <View style={[styles.hero, compact && styles.heroCompact]}>
+    <LinearGradient colors={['#FFFFFF', '#F1FBF7', '#EEF6FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.hero, compact && styles.heroCompact]}>
       <View style={styles.heroOrb} />
-      <View style={styles.heroIcon}><MailCheck size={29} color="#09BFD9" /></View>
-      <View style={styles.heroCopy}><Text style={styles.eyebrow}>NEWSLETTER CUBIS SHOP</Text><Text style={styles.heroTitle}>Clienți abonați</Text><Text style={styles.heroText}>Consimțăminte reale din checkout, starea dezabonării și livrarea ultimelor noutăți într-un singur loc.</Text></View>
-      <TouchableOpacity style={styles.refresh} onPress={() => void load()} accessibilityLabel="Actualizează lista abonaților"><RefreshCw size={18} color="#EEF6FF" /></TouchableOpacity>
-    </View>
+      <View style={styles.heroIcon}><MailCheck size={27} color="#0B9E70" /></View>
+      <View style={styles.heroCopy}><Text style={styles.eyebrow}>NEWSLETTER CUBIS SHOP</Text><Text style={styles.heroTitle}>Comunitatea magazinului</Text><Text style={styles.heroText}>Abonări, consimțăminte și istoricul ultimelor notificări.</Text></View>
+      <TouchableOpacity activeOpacity={0.72} style={styles.refresh} onPress={() => void load()} accessibilityLabel="Actualizează lista abonaților"><RefreshCw size={18} color="#087C54" /></TouchableOpacity>
+    </LinearGradient>
 
     <View style={[styles.metrics, compact && styles.metricsCompact]}>
       <Metric Icon={CheckCircle2} label="ABONAȚI" value={totals.subscribed} color="#34D399" note="primesc noutățile" />
@@ -119,16 +120,20 @@ export default function ShopNewsletterSubscribersManager({ onSearchFocus }: { on
       ] as const).map(([key, label, count]) => <TouchableOpacity key={key} style={[styles.filter, filter === key && styles.filterActive]} onPress={() => { setFilter(key); setPage(1); }}><Text style={[styles.filterText, filter === key && styles.filterTextActive]}>{label}</Text><View style={[styles.filterCount, filter === key && styles.filterCountActive]}><Text style={[styles.filterCountText, filter === key && styles.filterCountTextActive]}>{count}</Text></View></TouchableOpacity>)}</View>
     </View>
 
-    <View style={styles.listHead}><Text style={styles.listTitle}>{filtered.length} {filtered.length === 1 ? 'înregistrare' : 'înregistrări'}</Text><Text style={styles.listHint}>Pagina {safePage} din {totalPages}</Text></View>
+    <View style={styles.listHead}><View><Text style={styles.listEyebrow}>LISTĂ NEWSLETTER</Text><Text style={styles.listTitle}>{filtered.length} {filtered.length === 1 ? 'persoană' : 'persoane'}</Text></View>{totalPages > 1 ? <Text style={styles.listHint}>Pagina {safePage} din {totalPages}</Text> : <View style={styles.synced}><View style={styles.syncedDot} /><Text style={styles.syncedText}>Actualizat</Text></View>}</View>
     <Animated.View style={[styles.list, { opacity: reveal, transform: [{ translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [9, 0] }) }] }]}>
       {visible.map((item) => <View key={item.id} style={[styles.card, !item.is_subscribed && styles.cardOff]}>
-        <View style={[styles.avatar, !item.is_subscribed && styles.avatarOff]}><Text style={[styles.avatarText, !item.is_subscribed && styles.avatarTextOff]}>{initials(item.full_name, item.email)}</Text><View style={[styles.statusDot, !item.is_subscribed && styles.statusDotOff]} /></View>
-        <View style={styles.cardBody}>
-          <View style={styles.identityLine}><Text numberOfLines={1} style={styles.name}>{item.full_name || 'Client fără nume'}</Text><View style={[styles.badge, !item.is_subscribed && styles.badgeOff]}><Text style={[styles.badgeText, !item.is_subscribed && styles.badgeTextOff]}>{item.is_subscribed ? 'ABONAT' : 'DEZABONAT'}</Text></View></View>
-          <View style={[styles.contactGrid, compact && styles.contactGridCompact]}><Contact Icon={Mail} value={item.email} /><Contact Icon={Phone} value={item.phone || 'Telefon necompletat'} /></View>
-          <View style={styles.timeline}><View style={styles.timelineItem}><CalendarDays size={13} color="#087FF5" /><Text style={styles.timelineText}>Acord: {dateTime(item.consent_at)}</Text></View>{item.is_subscribed ? <View style={styles.timelineItem}><BellRing size={13} color="#F59E0B" /><Text style={styles.timelineText}>Ultimul e-mail: {dateTime(item.last_notified_at, 'încă netrimis')}</Text></View> : <View style={styles.timelineItem}><MailX size={13} color="#FB7185" /><Text style={styles.timelineText}>Retras: {dateTime(item.unsubscribed_at)}</Text></View>}</View>
-          {item.last_error ? <View style={styles.error}><Text numberOfLines={2} style={styles.errorText}>Ultima trimitere: {item.last_error}</Text></View> : null}
+        <View style={styles.cardTop}>
+          <View style={[styles.avatar, !item.is_subscribed && styles.avatarOff]}><Text style={[styles.avatarText, !item.is_subscribed && styles.avatarTextOff]}>{initials(item.full_name, item.email)}</Text><View style={[styles.statusDot, !item.is_subscribed && styles.statusDotOff]} /></View>
+          <View style={styles.identity}><Text numberOfLines={1} style={styles.name}>{item.full_name || 'Client fără nume'}</Text><View style={styles.emailLine}><Mail size={13} color="#698094" /><Text selectable numberOfLines={1} style={styles.emailText}>{item.email}</Text></View></View>
+          <View style={[styles.badge, !item.is_subscribed && styles.badgeOff]}>{item.is_subscribed ? <CheckCircle2 size={13} color="#168457" /> : <MailX size={13} color="#C43650" />}<Text style={[styles.badgeText, !item.is_subscribed && styles.badgeTextOff]}>{item.is_subscribed ? 'Abonat' : 'Dezabonat'}</Text></View>
         </View>
+        <View style={styles.cardDetails}>
+          <Contact Icon={Phone} label="Telefon" value={item.phone || 'Necompletat'} />
+          <Contact Icon={CalendarDays} label={item.consent_source === 'checkout_historical' ? 'Checkout · istoric' : 'Consimțământ'} value={dateTime(item.consent_at)} />
+        </View>
+        <View style={[styles.activity, !item.is_subscribed && styles.activityOff]}>{item.is_subscribed ? <BellRing size={15} color="#9B6100" /> : <MailX size={15} color="#C43650" />}<View style={styles.activityCopy}><Text style={styles.activityLabel}>{item.is_subscribed ? 'Ultima notificare' : 'Dezabonare'}</Text><Text style={styles.activityValue}>{item.is_subscribed ? dateTime(item.last_notified_at, 'Nicio notificare trimisă') : dateTime(item.unsubscribed_at)}</Text></View></View>
+        {item.last_error ? <View style={styles.error}><View style={styles.errorIcon}><X size={13} color="#C43650" /></View><Text numberOfLines={3} style={styles.errorText}>{item.last_error}</Text></View> : null}
       </View>)}
       {!visible.length ? <View style={styles.empty}><MailCheck size={30} color="#087FF5" /><Text style={styles.emptyTitle}>Nicio înregistrare aici</Text><Text style={styles.emptyText}>{query ? 'Schimbă termenul de căutare.' : 'Abonații vor apărea automat după ce bifează opțiunea la checkout.'}</Text></View> : null}
     </Animated.View>
@@ -138,18 +143,94 @@ export default function ShopNewsletterSubscribersManager({ onSearchFocus }: { on
 }
 
 function Metric({ Icon, label, value, color, note }: { Icon: typeof UserRound; label: string; value: number; color: string; note: string }) {
-  return <View style={styles.metric}><View style={[styles.metricIcon, { backgroundColor: `${color}17` }]}><Icon size={21} color={color} /></View><View style={styles.metricCopy}><Text style={[styles.metricLabel, { color }]}>{label}</Text><Text style={styles.metricValue}>{value}</Text><Text style={styles.metricNote}>{note}</Text></View></View>;
+  return <View style={[styles.metric, { borderColor: `${color}25`, backgroundColor: `${color}0B` }]}><View style={[styles.metricIcon, { backgroundColor: `${color}16` }]}><Icon size={19} color={color} /></View><View style={styles.metricCopy}><Text style={[styles.metricLabel, { color }]}>{label}</Text><Text style={styles.metricValue}>{value}</Text><Text numberOfLines={2} style={styles.metricNote}>{note}</Text></View></View>;
 }
 
-function Contact({ Icon, value }: { Icon: typeof Mail; value: string }) {
-  return <View style={styles.contact}><Icon size={14} color="#8D858C" /><Text selectable numberOfLines={1} style={styles.contactText}>{value}</Text></View>;
+function Contact({ Icon, label, value }: { Icon: typeof Mail; label: string; value: string }) {
+  return <View style={styles.contact}><View style={styles.contactIcon}><Icon size={14} color="#087FF5" /></View><View style={styles.contactCopy}><Text style={styles.contactLabel}>{label}</Text><Text selectable numberOfLines={1} style={styles.contactText}>{value}</Text></View></View>;
 }
 
 const styles = StyleSheet.create({
-  page: { padding: 14, gap: 12 },
-  loading: { minHeight: 380, alignItems: 'center', justifyContent: 'center', gap: 8 }, loadingTitle: { marginTop: 8, color: Theme.colors.text.primary, fontSize: 17, fontWeight: '900' }, loadingText: { color: Theme.colors.text.muted, fontSize: 11, textAlign: 'center' },
-  hero: { minHeight: 146, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 15, overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 28, backgroundColor: Theme.colors.surface.base }, heroCompact: { minHeight: 176, alignItems: 'flex-start', paddingTop: 24 }, heroOrb: { width: 250, height: 250, position: 'absolute', right: -90, top: -130, borderRadius: 125, backgroundColor: Theme.colors.surface.brandSoft }, heroIcon: { width: 60, height: 60, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#09BFD945', borderRadius: 20, backgroundColor: Theme.colors.surface.brandSoft }, heroCopy: { minWidth: 0, flex: 1 }, eyebrow: { color: Theme.colors.brand.primaryText, fontSize: 9, fontWeight: '900', letterSpacing: 1.3 }, heroTitle: { marginTop: 5, color: Theme.colors.text.primary, fontSize: 29, fontWeight: '900', letterSpacing: -1 }, heroText: { maxWidth: 660, marginTop: 5, color: '#9A918B', fontSize: 11, lineHeight: 17 }, refresh: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: Theme.colors.surface.brandSoft },
-  metrics: { flexDirection: 'row', gap: 9 }, metricsCompact: { flexDirection: 'column' }, metric: { minHeight: 92, padding: 13, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 11, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 20, backgroundColor: Theme.colors.surface.base }, metricIcon: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14 }, metricCopy: { minWidth: 0, flex: 1 }, metricLabel: { fontSize: 8, fontWeight: '900', letterSpacing: .9 }, metricValue: { marginTop: 1, color: Theme.colors.text.primary, fontSize: 21, fontWeight: '900' }, metricNote: { color: Theme.colors.text.muted, fontSize: 9 },
-  controls: { padding: 10, gap: 9, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 22, backgroundColor: Theme.colors.surface.base }, search: { minHeight: 50, paddingHorizontal: 13, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 15, backgroundColor: Theme.colors.surface.base }, searchInput: { minWidth: 0, flex: 1, color: Theme.colors.text.primary, fontSize: 12, fontWeight: '700' }, clear: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.muted }, filters: { flexDirection: 'row', gap: 6 }, filter: { minHeight: 39, paddingHorizontal: 11, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 13, backgroundColor: Theme.colors.surface.muted }, filterActive: { backgroundColor: Theme.colors.brand.primaryAction }, filterText: { color: '#A49CA4', fontSize: 9, fontWeight: '900' }, filterTextActive: { color: Theme.colors.brand.navy }, filterCount: { minWidth: 21, height: 21, paddingHorizontal: 5, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: Theme.colors.surface.muted }, filterCountActive: { backgroundColor: Theme.colors.surface.muted }, filterCountText: { color: '#CAC2CA', fontSize: 8, fontWeight: '900' }, filterCountTextActive: { color: Theme.colors.brand.navy },
-  listHead: { paddingHorizontal: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, listTitle: { color: Theme.colors.text.primary, fontSize: 14, fontWeight: '900' }, listHint: { color: Theme.colors.text.muted, fontSize: 9 }, list: { gap: 8 }, card: { padding: 13, flexDirection: 'row', alignItems: 'flex-start', gap: 12, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 21, backgroundColor: Theme.colors.surface.base }, cardOff: { borderColor: Theme.colors.border.default, backgroundColor: Theme.colors.surface.base }, avatar: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center', borderRadius: 17, backgroundColor: Theme.colors.surface.cyanSoft }, avatarOff: { backgroundColor: Theme.colors.state.errorSoft }, avatarText: { color: Theme.colors.state.success, fontSize: 15, fontWeight: '900' }, avatarTextOff: { color: '#FDA4B7' }, statusDot: { width: 10, height: 10, position: 'absolute', right: -2, bottom: -2, borderWidth: 2, borderColor: Theme.colors.border.default, borderRadius: 5, backgroundColor: Theme.colors.state.successBright }, statusDotOff: { borderColor: Theme.colors.border.default, backgroundColor: '#FB7185' }, cardBody: { minWidth: 0, flex: 1 }, identityLine: { flexDirection: 'row', alignItems: 'center', gap: 8 }, name: { minWidth: 0, flexShrink: 1, color: Theme.colors.text.primary, fontSize: 13, fontWeight: '900' }, badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99, backgroundColor: Theme.colors.surface.cyanSoft }, badgeOff: { backgroundColor: Theme.colors.state.errorSoft }, badgeText: { color: '#58E09F', fontSize: 7, fontWeight: '900', letterSpacing: .5 }, badgeTextOff: { color: '#FB8EA5' }, contactGrid: { marginTop: 8, flexDirection: 'row', gap: 7 }, contactGridCompact: { flexDirection: 'column' }, contact: { minWidth: 0, flex: 1, paddingHorizontal: 9, minHeight: 30, flexDirection: 'row', alignItems: 'center', gap: 7, borderRadius: 10, backgroundColor: Theme.colors.surface.base }, contactText: { minWidth: 0, flex: 1, color: '#BEB5BC', fontSize: 9, fontWeight: '700' }, timeline: { marginTop: 8, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, timelineItem: { flexDirection: 'row', alignItems: 'center', gap: 5 }, timelineText: { color: Theme.colors.text.muted, fontSize: 8 }, error: { marginTop: 8, padding: 8, borderRadius: 10, backgroundColor: Theme.colors.state.errorSoft }, errorText: { color: Theme.colors.state.error, fontSize: 8, lineHeight: 12 }, empty: { minHeight: 210, alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 1, borderStyle: 'dashed', borderColor: Theme.colors.border.default, borderRadius: 22 }, emptyTitle: { color: Theme.colors.text.primary, fontSize: 15, fontWeight: '900' }, emptyText: { maxWidth: 310, color: Theme.colors.text.muted, fontSize: 10, lineHeight: 15, textAlign: 'center' }, pagination: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 }, pageButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.brandSoft }, pageButtonText: { color: Theme.colors.brand.primaryText, fontSize: 22, fontWeight: '900' }, pageStatus: { minWidth: 62, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.muted }, pageStatusText: { color: '#CFC7CE', fontSize: 10, fontWeight: '900' }, disabled: { opacity: .28 },
+  page: { padding: 12, gap: 12 },
+  loading: { minHeight: 380, alignItems: 'center', justifyContent: 'center', gap: 8 },
+  loadingTitle: { marginTop: 8, color: Theme.colors.text.primary, fontSize: 17, fontWeight: '900' },
+  loadingText: { color: Theme.colors.text.muted, fontSize: 11, textAlign: 'center' },
+  hero: { minHeight: 138, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#CFE9DF', borderRadius: 27, ...Theme.shadow.card },
+  heroCompact: { minHeight: 128, padding: 16, gap: 11 },
+  heroOrb: { width: 190, height: 190, position: 'absolute', right: -76, top: -105, borderWidth: 26, borderColor: '#14A8730A', borderRadius: 95 },
+  heroIcon: { width: 54, height: 54, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#14A87332', borderRadius: 18, backgroundColor: '#EAF9F3' },
+  heroCopy: { minWidth: 0, flex: 1 },
+  eyebrow: { color: '#087C54', fontSize: 8, fontWeight: '900', letterSpacing: 1.1 },
+  heroTitle: { marginTop: 4, color: Theme.colors.text.primary, fontSize: 20, fontWeight: '900', letterSpacing: -.5 },
+  heroText: { maxWidth: 520, marginTop: 5, color: Theme.colors.text.muted, fontSize: 10, lineHeight: 14 },
+  refresh: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#14A8732B', borderRadius: 14, backgroundColor: '#FFFFFFE8' },
+  metrics: { padding: 6, flexDirection: 'row', gap: 6, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 23, backgroundColor: '#FFFFFF', ...Theme.shadow.card },
+  metricsCompact: { flexDirection: 'row' },
+  metric: { minHeight: 105, paddingHorizontal: 6, paddingVertical: 9, flex: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: 17 },
+  metricIcon: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 12 },
+  metricCopy: { minWidth: 0, alignItems: 'center' },
+  metricLabel: { marginTop: 6, fontSize: 7, fontWeight: '900', letterSpacing: .45, textAlign: 'center' },
+  metricValue: { marginTop: 1, color: Theme.colors.text.primary, fontSize: 21, fontWeight: '900', lineHeight: 23 },
+  metricNote: { minHeight: 22, color: Theme.colors.text.muted, fontSize: 7, lineHeight: 10, textAlign: 'center' },
+  controls: { padding: 8, gap: 8, borderWidth: 1, borderColor: Theme.colors.border.default, borderRadius: 22, backgroundColor: Theme.colors.surface.base, ...Theme.shadow.card },
+  search: { minHeight: 52, paddingHorizontal: 13, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: Theme.colors.border.strong, borderRadius: 16, backgroundColor: Theme.colors.surface.subtle },
+  searchInput: { minWidth: 0, flex: 1, color: Theme.colors.text.primary, fontSize: 13, fontWeight: '700' },
+  clear: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.muted },
+  filters: { padding: 4, flexDirection: 'row', gap: 4, borderRadius: 15, backgroundColor: Theme.colors.surface.muted },
+  filter: { minHeight: 40, paddingHorizontal: 6, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, borderRadius: 12 },
+  filterActive: { backgroundColor: '#087C54' },
+  filterText: { color: Theme.colors.text.muted, fontSize: 9, fontWeight: '900' },
+  filterTextActive: { color: '#FFFFFF' },
+  filterCount: { minWidth: 20, height: 20, paddingHorizontal: 5, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: '#FFFFFF' },
+  filterCountActive: { backgroundColor: '#EAF9F3' },
+  filterCountText: { color: Theme.colors.text.muted, fontSize: 8, fontWeight: '900' },
+  filterCountTextActive: { color: '#087C54' },
+  listHead: { paddingHorizontal: 3, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  listEyebrow: { color: '#087C54', fontSize: 7, fontWeight: '900', letterSpacing: .9 },
+  listTitle: { marginTop: 2, color: Theme.colors.text.primary, fontSize: 16, fontWeight: '900' },
+  listHint: { color: Theme.colors.text.muted, fontSize: 9 },
+  synced: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  syncedDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: Theme.colors.state.successBright },
+  syncedText: { color: Theme.colors.text.muted, fontSize: 9, fontWeight: '700' },
+  list: { gap: 10 },
+  card: { padding: 14, overflow: 'hidden', borderWidth: 1, borderColor: '#CEE8DD', borderRadius: 23, backgroundColor: Theme.colors.surface.base, ...Theme.shadow.card },
+  cardOff: { borderColor: Theme.colors.border.default },
+  cardTop: { minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatar: { width: 48, height: 48, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#BDE8D4', borderRadius: 16, backgroundColor: '#EAF9F3' },
+  avatarOff: { borderColor: '#F6CBD4', backgroundColor: Theme.colors.state.errorSoft },
+  avatarText: { color: Theme.colors.state.success, fontSize: 15, fontWeight: '900' },
+  avatarTextOff: { color: Theme.colors.state.error },
+  statusDot: { width: 10, height: 10, position: 'absolute', right: -2, bottom: -2, borderWidth: 2, borderColor: '#FFFFFF', borderRadius: 5, backgroundColor: Theme.colors.state.successBright },
+  statusDotOff: { backgroundColor: Theme.colors.state.errorBright },
+  identity: { minWidth: 0, flex: 1 },
+  name: { color: Theme.colors.text.primary, fontSize: 14, fontWeight: '900' },
+  emailLine: { minWidth: 0, marginTop: 5, flexDirection: 'row', alignItems: 'center', gap: 5 },
+  emailText: { minWidth: 0, flex: 1, color: Theme.colors.text.secondary, fontSize: 9, fontWeight: '700' },
+  badge: { minHeight: 30, paddingHorizontal: 9, flexDirection: 'row', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: '#BDE8D4', borderRadius: 99, backgroundColor: Theme.colors.state.successSoft },
+  badgeOff: { borderColor: '#F6CBD4', backgroundColor: Theme.colors.state.errorSoft },
+  badgeText: { color: Theme.colors.state.success, fontSize: 8, fontWeight: '900' },
+  badgeTextOff: { color: Theme.colors.state.error },
+  cardDetails: { marginTop: 12, flexDirection: 'row', gap: 7 },
+  contact: { minWidth: 0, minHeight: 53, paddingHorizontal: 9, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 7, borderWidth: 1, borderColor: Theme.colors.border.subtle, borderRadius: 14, backgroundColor: Theme.colors.surface.subtle },
+  contactIcon: { width: 29, height: 29, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: Theme.colors.surface.brandSoft },
+  contactCopy: { minWidth: 0, flex: 1 },
+  contactLabel: { color: Theme.colors.text.muted, fontSize: 7, fontWeight: '800' },
+  contactText: { marginTop: 2, color: Theme.colors.text.primary, fontSize: 8, fontWeight: '800' },
+  activity: { minHeight: 48, marginTop: 8, paddingHorizontal: 11, flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 14, backgroundColor: Theme.colors.state.warningSoft },
+  activityOff: { backgroundColor: Theme.colors.state.errorSoft },
+  activityCopy: { minWidth: 0, flex: 1 },
+  activityLabel: { color: Theme.colors.text.muted, fontSize: 7, fontWeight: '800' },
+  activityValue: { marginTop: 1, color: Theme.colors.text.primary, fontSize: 9, fontWeight: '800' },
+  error: { marginTop: 8, padding: 9, flexDirection: 'row', alignItems: 'flex-start', gap: 8, borderWidth: 1, borderColor: '#F6CBD4', borderRadius: 14, backgroundColor: Theme.colors.state.errorSoft },
+  errorIcon: { width: 24, height: 24, flexShrink: 0, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#FFFFFF' },
+  errorText: { minWidth: 0, flex: 1, color: Theme.colors.state.error, fontSize: 9, lineHeight: 13 },
+  empty: { minHeight: 210, alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 1, borderStyle: 'dashed', borderColor: Theme.colors.border.default, borderRadius: 22, backgroundColor: '#FFFFFF' },
+  emptyTitle: { color: Theme.colors.text.primary, fontSize: 15, fontWeight: '900' },
+  emptyText: { maxWidth: 310, color: Theme.colors.text.muted, fontSize: 10, lineHeight: 15, textAlign: 'center' },
+  pagination: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  pageButton: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.brandSoft },
+  pageButtonText: { color: Theme.colors.brand.primaryText, fontSize: 22, fontWeight: '900' },
+  pageStatus: { minWidth: 62, height: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: Theme.colors.surface.muted },
+  pageStatusText: { color: Theme.colors.text.secondary, fontSize: 10, fontWeight: '900' },
+  disabled: { opacity: .28 },
 });
