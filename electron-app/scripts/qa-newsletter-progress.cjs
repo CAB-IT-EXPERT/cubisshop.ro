@@ -25,6 +25,18 @@ app.whenReady().then(async () => {
       { id:'n2', full_name:'Maria Ionescu', email:'maria@example.ro', phone:'0722 000 222', status:'unsubscribed', consent_source:'checkout_historical', consent_at:'2026-09-01 12:00:00', unsubscribed_at:'2026-09-13 11:45:00', last_notified_at:null, last_error:null, created_at:'2026-09-01 12:00:00' },
       { id:'n3', full_name:'Client Test', email:'test@example.ro', phone:'', status:'subscribed', consent_source:'checkout', consent_at:'2026-09-13 12:00:00', last_notified_at:null, last_error:null, created_at:'2026-09-13 12:00:00' }
     ];
+    for (let index = 4; index <= 13; index += 1) subscribers.push({
+      id: 'n' + index,
+      full_name: 'Abonat Test ' + index,
+      email: 'abonat' + index + '@example.ro',
+      phone: '0722 100 ' + String(index).padStart(3, '0'),
+      status: index % 4 === 0 ? 'unsubscribed' : 'subscribed',
+      consent_source: 'checkout',
+      consent_at: '2026-09-14 12:00:00',
+      last_notified_at: index % 3 === 0 ? '2026-09-15 10:00:00' : null,
+      last_error: null,
+      created_at: '2026-09-14 12:00:00'
+    });
     window.SHOP_API = {
       listNewsletterSubscribers: async () => subscribers,
       listCategories: async () => [], listBrands: async () => [], listManufacturers: async () => [],
@@ -44,8 +56,81 @@ app.whenReady().then(async () => {
   const newsletterLayout = await win.webContents.executeJavaScript(`(() => {
     const metrics = document.querySelector('.shop-newsletter-metrics');
     const cards = [...document.querySelectorAll('.shop-newsletter-metrics article')];
-    return metrics ? { viewport: innerWidth, columns: getComputedStyle(metrics).gridTemplateColumns, width: metrics.getBoundingClientRect().width, cardWidths: cards.map(card => card.getBoundingClientRect().width) } : { viewport: innerWidth, missing: true };
+    const list = document.querySelector('.shop-newsletter-list');
+    return metrics ? {
+      viewport: innerWidth,
+      hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      columns: getComputedStyle(metrics).gridTemplateColumns,
+      width: metrics.getBoundingClientRect().width,
+      cardWidths: cards.map(card => card.getBoundingClientRect().width),
+      subscriberCards: list ? list.querySelectorAll('.shop-newsletter-card').length : 0
+    } : { viewport: innerWidth, missing: true };
   })()`);
+
+  const newsletterSingleResult = await win.webContents.executeJavaScript(`(() => {
+    const input = document.getElementById('shop-newsletter-search');
+    input.value = 'Andrei Popescu';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const card = document.querySelector('.shop-newsletter-card');
+    return {
+      cards: document.querySelectorAll('.shop-newsletter-card').length,
+      hasPagination: Boolean(document.querySelector('.shop-newsletter-pagination')),
+      personWidth: card ? Math.round(card.querySelector('.shop-newsletter-person').getBoundingClientRect().width) : 0,
+      cardWidth: card ? Math.round(card.getBoundingClientRect().width) : 0
+    };
+  })()`);
+  await win.webContents.executeJavaScript(`document.getElementById('shop-newsletter-search-clear').click()`);
+  await wait(120);
+
+  win.setSize(390, 844);
+  await wait(350);
+  await win.webContents.executeJavaScript(`document.querySelector('[data-newsletter-status="all"]').click()`);
+  await wait(180);
+  const newsletterMobilePath = path.join(outputDir, 'newsletter-mobile.png');
+  fs.writeFileSync(newsletterMobilePath, (await win.webContents.capturePage()).toPNG());
+  const newsletterMobileLayout = await win.webContents.executeJavaScript(`(() => {
+    const metrics = document.querySelector('.shop-newsletter-metrics');
+    const toolbar = document.querySelector('.shop-newsletter-toolbar');
+    const cards = [...document.querySelectorAll('.shop-newsletter-card')];
+    const viewportWidth = document.documentElement.clientWidth;
+    return {
+      viewport: innerWidth,
+      hasHorizontalOverflow: document.documentElement.scrollWidth > viewportWidth,
+      metricsColumns: metrics ? getComputedStyle(metrics).gridTemplateColumns : '',
+      toolbarWidth: toolbar ? Math.round(toolbar.getBoundingClientRect().width) : 0,
+      cardWidths: cards.map(card => Math.round(card.getBoundingClientRect().width)),
+      cardsInsideViewport: cards.every(card => {
+        const rect = card.getBoundingClientRect();
+        return rect.left >= -1 && rect.right <= viewportWidth + 1;
+      }),
+      pageCopy: document.querySelector('.shop-newsletter-page-copy')?.textContent.trim() || '',
+      activePage: document.querySelector('.shop-newsletter-page-numbers .active')?.textContent.trim() || ''
+    };
+  })()`);
+  await win.webContents.executeJavaScript(`document.querySelector('.shop-newsletter-pagination').scrollIntoView({ block: 'end' })`);
+  await wait(180);
+  const newsletterMobilePaginationPath = path.join(outputDir, 'newsletter-mobile-pagination.png');
+  fs.writeFileSync(newsletterMobilePaginationPath, (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`document.querySelector('.shop-newsletter-pagination .next').click()`);
+  await wait(180);
+  const newsletterMobilePageTwo = await win.webContents.executeJavaScript(`(() => ({
+    activePage: document.querySelector('.shop-newsletter-page-numbers .active')?.textContent.trim() || '',
+    cards: document.querySelectorAll('.shop-newsletter-card').length,
+    pageCopy: document.querySelector('.shop-newsletter-page-copy')?.textContent.trim() || ''
+  }))()`);
+
+  win.setSize(650, 900);
+  await wait(250);
+  const newsletterMobileWidePath = path.join(outputDir, 'newsletter-mobile-wide.png');
+  fs.writeFileSync(newsletterMobileWidePath, (await win.webContents.capturePage()).toPNG());
+  const newsletterMobileWideLayout = await win.webContents.executeJavaScript(`(() => ({
+    hasHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    cards: document.querySelectorAll('.shop-newsletter-card').length,
+    metricColumns: getComputedStyle(document.querySelector('.shop-newsletter-metrics')).gridTemplateColumns
+  }))()`);
+
+  win.setSize(1440, 900);
+  await wait(250);
 
   await win.webContents.executeJavaScript(`document.querySelector('[data-commerce-add="shop-products-content"]').click()`);
   await wait(350);
@@ -68,8 +153,35 @@ app.whenReady().then(async () => {
   }))()`);
   await wait(2200);
   const after = await win.webContents.executeJavaScript(`({ hidden: document.getElementById('shop-product-save-progress').hidden })`);
-  const passed = during.visible && during.steps === 5 && after.hidden && errors.length === 0;
-  console.log(JSON.stringify({ passed, newsletterLayout, during, after, errors, screenshots: { newsletterPath, progressPath } }, null, 2));
+  const passed = during.visible
+    && during.steps === 5
+    && after.hidden
+    && newsletterLayout.subscriberCards === 12
+    && !newsletterLayout.hasHorizontalOverflow
+    && newsletterSingleResult.cards === 1
+    && !newsletterSingleResult.hasPagination
+    && newsletterSingleResult.personWidth > 250
+    && newsletterMobileLayout.cardWidths.length === 4
+    && newsletterMobileLayout.cardsInsideViewport
+    && !newsletterMobileLayout.hasHorizontalOverflow
+    && newsletterMobileLayout.activePage === '1'
+    && newsletterMobilePageTwo.activePage === '2'
+    && newsletterMobilePageTwo.cards === 4
+    && newsletterMobileWideLayout.cards === 4
+    && !newsletterMobileWideLayout.hasHorizontalOverflow
+    && errors.length === 0;
+  console.log(JSON.stringify({
+    passed,
+    newsletterLayout,
+    newsletterSingleResult,
+    newsletterMobileLayout,
+    newsletterMobilePageTwo,
+    newsletterMobileWideLayout,
+    during,
+    after,
+    errors,
+    screenshots: { newsletterPath, newsletterMobilePath, newsletterMobilePaginationPath, newsletterMobileWidePath, progressPath }
+  }, null, 2));
   await win.destroy();
   app.exit(passed ? 0 : 1);
 }).catch(error => { console.error(error); app.exit(1); });
