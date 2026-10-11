@@ -1448,6 +1448,1014 @@
   background: var(--color-surface);
 }
 
+/* SmartBill configuration · Material 3 */
+:root[data-theme="cubis-light"] .shop-invoice-configurator-page {
+  padding-top: 22px;
+  background:
+    radial-gradient(circle at 96% 3%, rgba(50, 196, 138, 0.08), transparent 25rem),
+    linear-gradient(180deg, var(--color-canvas), var(--color-canvas-alt));
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-hero {
+  min-height: 250px;
+  grid-template-columns: 106px minmax(0, 1fr) 350px;
+  align-items: center;
+  gap: 24px;
+  padding: 30px;
+  border-color: var(--color-border);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(0, 169, 126, 0.12), transparent 18rem),
+    radial-gradient(circle at 91% 15%, rgba(52, 155, 224, 0.1), transparent 22rem),
+    linear-gradient(132deg, var(--color-surface), var(--color-surface-cyan));
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-hero::before {
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.5), transparent 42%, rgba(255, 255, 255, 0.22));
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-hero::after {
+  width: 290px;
+  height: 290px;
+  right: -145px;
+  bottom: -190px;
+  border-color: var(--color-cyan-border);
+  box-shadow: 0 0 0 42px rgba(9, 201, 229, 0.035), 0 0 0 84px rgba(8, 127, 245, 0.025);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-glow {
+  width: 230px;
+  height: 230px;
+  left: -95px;
+  top: -130px;
+  background: rgba(0, 169, 126, 0.11);
+  filter: blur(48px);
+}
+
+:root[data-theme="cubis-light"] .smartbill-hero-logo {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  align-self: center;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 28px;
+  padding: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .smartbill-hero-logo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 21px;
+  object-fit: contain;
+  transform: scale(1.22);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy {
+  align-self: center;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-state {
+  margin-bottom: 11px;
+  padding: 7px 11px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy .shop-kicker {
+  color: var(--color-brand-text);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy h1 {
+  margin-top: 6px;
+  font-size: clamp(30px, 3vw, 43px);
+  letter-spacing: -0.045em;
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-copy p {
+  max-width: 670px;
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview {
+  position: relative;
+  z-index: 1;
+  min-height: 180px;
+  align-self: stretch;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview-head > span {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview svg,
+:root[data-theme="cubis-light"] .shop-smartbill-overview svg,
+:root[data-theme="cubis-light"] .shop-smartbill-sync svg,
+:root[data-theme="cubis-light"] .shop-smartbill-issuing svg,
+:root[data-theme="cubis-light"] .shop-smartbill-form svg,
+:root[data-theme="cubis-light"] .shop-smartbill-secrets svg,
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities svg,
+:root[data-theme="cubis-light"] .shop-smartbill-save svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview-head svg {
+  width: 20px;
+  height: 20px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview-head div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview-head small {
+  color: var(--color-brand-text);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-overview-head strong {
+  color: var(--color-text-primary);
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-flow {
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-flow > span {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 12px;
+  padding: 0 9px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+  font-size: 8px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-flow > span i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-success-bright);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-flow > svg {
+  width: 16px;
+  height: 16px;
+  justify-self: center;
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-points span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-text-secondary);
+  font-size: 7.5px;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-hero-points svg {
+  width: 13px;
+  height: 13px;
+  color: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] .shop-invoice-configurator-workspace {
+  max-width: 1440px;
+  margin-top: 18px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border-color: var(--color-border-subtle);
+  border-radius: 26px;
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > .shop-smartbill-panel-logo {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 6px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-panel-logo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 17px;
+  object-fit: contain;
+  transform: scale(1.22);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > div {
+  min-width: 0;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head small {
+  color: var(--color-brand-text);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head h2 {
+  margin: 5px 0 0;
+  color: var(--color-text-primary);
+  font-size: 18px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head p {
+  max-width: 780px;
+  margin: 5px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > b {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: var(--radius-round);
+  padding: 0 12px;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > b i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > b.active {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-config-head > b.paused {
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview article {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 21px;
+  padding: 12px;
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview article > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 15px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview article > span svg {
+  width: 20px;
+  height: 20px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview article div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview article small {
+  color: var(--color-text-muted);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-overview article strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border-color: var(--color-cyan-border);
+  border-radius: 22px;
+  background: var(--color-surface-cyan);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync > span {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--color-cyan-deep);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync > span svg {
+  width: 21px;
+  height: 21px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync > div {
+  min-width: 0;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync > div > small {
+  color: var(--color-cyan-deep);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-text-primary);
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync p {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync button {
+  width: auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 14px;
+  padding: 0 14px;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action-secondary);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-sync button svg {
+  width: 15px;
+  height: 15px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  padding: 16px;
+  border-color: var(--color-border-subtle);
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing.active {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-power {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing.active .shop-smartbill-power {
+  color: var(--color-success);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-power svg {
+  width: 23px;
+  height: 23px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing > div > small {
+  display: block;
+  color: var(--color-brand-text);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing p {
+  margin: 4px 0;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing em {
+  color: var(--color-success);
+  font-size: 7.5px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing > button {
+  width: 50px;
+  height: 30px;
+  border-radius: var(--radius-round);
+  background: var(--color-border-strong);
+  cursor: pointer;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing.active > button {
+  background: var(--color-success-border);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing > button i {
+  top: 4px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 7px rgba(49, 80, 109, 0.18);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-issuing.active > button i {
+  left: 24px;
+  background: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-form {
+  gap: 14px;
+  margin-top: 12px;
+  padding: 18px;
+  border-color: var(--color-border-subtle);
+  border-radius: 26px;
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading > span {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading > span svg {
+  width: 21px;
+  height: 21px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading div {
+  min-width: 0;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading div > small {
+  color: var(--color-brand-text);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-section-heading p {
+  margin: 3px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-form > label,
+:root[data-theme="cubis-light"] .shop-smartbill-fields label > span {
+  color: var(--color-text-secondary);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-series-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice {
+  min-height: 70px;
+  gap: 11px;
+  justify-content: flex-start;
+  border-color: var(--color-border-subtle);
+  border-radius: 19px;
+  padding: 10px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  cursor: pointer;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice.active {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+  box-shadow: inset 0 0 0 1px var(--color-border-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-series-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice.active .shop-smartbill-series-icon {
+  color: var(--color-brand-text);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-series-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice > span {
+  min-width: 0;
+  flex: 1;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice strong {
+  color: var(--color-text-primary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice small {
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice > b {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-choice > b:empty {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-empty {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 18px;
+  padding: 11px;
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-empty > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 13px;
+  background: var(--color-surface);
+  font-weight: 900;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-empty > div {
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-empty strong {
+  color: var(--color-text-primary);
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-empty small {
+  color: var(--color-text-secondary);
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-warehouse-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 17px;
+  padding: 10px 12px;
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-warehouse-note > span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  color: var(--color-info);
+  background: var(--color-info-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-warehouse-note svg {
+  width: 17px;
+  height: 17px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-warehouse-note p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-fields {
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-fields label {
+  display: grid;
+  gap: 7px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-fields :is(input, textarea) {
+  min-height: 52px;
+  border-color: var(--color-border);
+  border-radius: 17px;
+  padding: 12px 14px;
+  color: var(--color-text-primary);
+  background: var(--color-surface-subtle);
+  font: 650 10px inherit;
+  outline: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-fields textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-fields :is(input, textarea):focus {
+  border-color: var(--color-brand-primary);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-focus);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules > button,
+:root[data-theme="cubis-light"] .shop-smartbill-rules > article {
+  min-height: 76px;
+  border-color: var(--color-border-subtle);
+  border-radius: 20px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules > button:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules > button.active,
+:root[data-theme="cubis-light"] .shop-smartbill-rules > article.active {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules b {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-rules i,
+:root[data-theme="cubis-light"] .shop-smartbill-rules .active i {
+  color: var(--color-success);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border-color: var(--color-success-border);
+  border-radius: 22px;
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets > b {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  color: var(--color-success);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets svg {
+  width: 21px;
+  height: 21px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets strong {
+  color: var(--color-text-primary);
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-secrets p {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities {
+  gap: 9px;
+  margin-top: 12px;
+  padding: 16px;
+  border-color: var(--color-border-subtle);
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities > header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities > header > span {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities > header svg {
+  width: 19px;
+  height: 19px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities > header div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities > header strong {
+  color: var(--color-text-primary);
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities > header small {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities article {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  border-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities-empty {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 17px;
+  padding: 10px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities-empty > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  font-weight: 900;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities-empty > div {
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities-empty strong {
+  color: var(--color-text-primary);
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities-empty small {
+  color: var(--color-text-secondary);
+  font-size: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  border-radius: 21px;
+  padding: 9px 12px 9px 18px;
+  color: var(--color-text-on-brand);
+  background: var(--color-brand-action);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  text-align: left;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save small {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save strong {
+  color: var(--color-text-on-brand);
+  font-size: 11px;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save > svg {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 14px;
+  padding: 11px;
+  color: var(--color-text-on-brand);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save:disabled {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+  opacity: 1;
+  cursor: default;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save:disabled small,
+:root[data-theme="cubis-light"] .shop-smartbill-save:disabled strong,
+:root[data-theme="cubis-light"] .shop-smartbill-save:disabled > svg {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-save:disabled > svg {
+  background: var(--color-surface);
+}
+
 :root[data-theme="cubis-light"] .shop-commerce-empty > b {
   color: var(--color-brand-action);
 }
@@ -1490,5 +2498,76 @@
 
   :root[data-theme="cubis-light"] .shop-commerce-hero .shop-commerce-hero-symbol {
     opacity: 0.62;
+  }
+}
+
+@media (max-width: 1180px) {
+  :root[data-theme="cubis-light"] .shop-invoice-configurator-hero {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-hero-overview {
+    display: none;
+  }
+}
+
+@media (max-width: 820px) {
+  :root[data-theme="cubis-light"] .shop-smartbill-overview {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-sync,
+  :root[data-theme="cubis-light"] .shop-smartbill-issuing {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-sync button,
+  :root[data-theme="cubis-light"] .shop-smartbill-issuing > button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-config-head {
+    grid-template-columns: 66px minmax(0, 1fr);
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-config-head > b {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  :root[data-theme="cubis-light"] .shop-invoice-configurator-page {
+    padding: 18px 12px 40px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-invoice-configurator-hero {
+    min-height: 360px;
+    grid-template-columns: 1fr;
+    align-content: end;
+    gap: 18px;
+    padding: 24px;
+    border-radius: 28px;
+  }
+
+  :root[data-theme="cubis-light"] .smartbill-hero-logo {
+    width: 84px;
+    height: 84px;
+    border-radius: 24px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-config-head {
+    padding: 15px;
+    border-radius: 23px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-config-head > .shop-smartbill-panel-logo {
+    width: 62px;
+    height: 62px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-series-list {
+    grid-template-columns: 1fr;
   }
 }
