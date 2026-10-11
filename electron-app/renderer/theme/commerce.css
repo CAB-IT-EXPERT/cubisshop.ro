@@ -2731,3 +2731,769 @@
     grid-row: 1 / 3;
   }
 }
+
+/* Promotions workspace — focused Material 3 treatment. */
+:root[data-theme="cubis-light"] #tab-shop-discounts .shop-commerce-hero[data-commerce-kind="discounts"] {
+  border-color: color-mix(in srgb, var(--color-warning-border) 72%, var(--color-border));
+  background:
+    radial-gradient(circle at 82% 24%, color-mix(in srgb, var(--color-warning-soft) 88%, transparent), transparent 25%),
+    radial-gradient(circle at 94% 78%, color-mix(in srgb, var(--color-surface-cyan) 78%, transparent), transparent 32%),
+    linear-gradient(135deg, var(--color-surface) 22%, var(--color-surface-brand) 67%, var(--color-surface-cyan));
+}
+
+:root[data-theme="cubis-light"] #tab-shop-discounts .shop-commerce-hero[data-commerce-kind="discounts"] .shop-commerce-title > span {
+  color: var(--color-warning-deep);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-discounts .shop-commerce-hero[data-commerce-kind="discounts"] .shop-commerce-hero-symbol {
+  border-color: var(--color-warning-border);
+  color: var(--color-warning);
+  background: linear-gradient(145deg, var(--color-surface), var(--color-warning-soft));
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--color-warning) 17%, transparent);
+}
+
+:root[data-theme="cubis-light"] #tab-shop-discounts .shop-commerce-hero[data-commerce-kind="discounts"] .shop-commerce-add {
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+}
+
+:root[data-theme="cubis-light"] #shop-discounts-content {
+  display: grid;
+  gap: 14px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview {
+  min-height: 118px;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 94% 0%, var(--color-warning-soft), transparent 34%),
+    linear-gradient(135deg, var(--color-surface), var(--color-surface-subtle));
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-warning-border);
+  border-radius: 20px;
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview-icon svg,
+:root[data-theme="cubis-light"] .shop-promotion-metrics svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > div > small {
+  color: var(--color-warning-deep);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > div > strong {
+  color: var(--color-text-primary);
+  font-size: 19px;
+  letter-spacing: -0.025em;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > div > p {
+  max-width: 660px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > aside {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > aside > span {
+  min-width: 116px;
+  min-height: 66px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--color-surface) 86%, transparent);
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > aside b {
+  color: var(--color-text-primary);
+  font-size: 20px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotions-overview > aside small {
+  color: var(--color-text-muted);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article {
+  min-height: 96px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article:hover {
+  border-color: var(--color-border-brand);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article[data-tone="active"] > span {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article[data-tone="uses"] > span {
+  color: var(--color-cyan-deep);
+  background: var(--color-surface-cyan);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article[data-tone="value"] > span {
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics small {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics strong {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 19px;
+  letter-spacing: -0.025em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-metrics > article > i {
+  grid-column: 1 / -1;
+  color: var(--color-text-muted);
+  font-size: 9px;
+  font-style: normal;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty {
+  min-height: 270px;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 30px 34px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 100% 0%, var(--color-surface-cyan), transparent 38%),
+    radial-gradient(circle at 0% 100%, var(--color-warning-soft), transparent 34%),
+    var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty-orb {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-warning-border);
+  border-radius: 30px;
+  color: var(--color-warning);
+  background: linear-gradient(145deg, var(--color-surface), var(--color-warning-soft));
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--color-warning) 14%, transparent);
+  font-size: 36px;
+  font-weight: 850;
+  transform: rotate(-6deg);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty > div {
+  max-width: 570px;
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty > div > small {
+  color: var(--color-warning-deep);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: clamp(20px, 2vw, 27px);
+  letter-spacing: -0.035em;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 6px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 15px;
+  color: var(--color-text-on-brand);
+  background: linear-gradient(135deg, var(--color-brand-action), var(--color-brand-action-secondary));
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty button:hover {
+  filter: brightness(1.06);
+  transform: translateY(-2px);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty button > span {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty > aside {
+  min-width: 210px;
+  display: grid;
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty > aside > span {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--color-surface) 84%, transparent);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty > aside i {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-empty > aside b {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-card {
+  border-color: var(--color-border);
+  background:
+    radial-gradient(circle at 0 0, var(--color-warning-soft), transparent 260px),
+    var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-card:hover {
+  border-color: var(--color-warning-border);
+  background:
+    radial-gradient(circle at 0 0, var(--color-warning-soft), transparent 300px),
+    var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-icon {
+  border-color: var(--color-warning-border);
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+  box-shadow: none;
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-icon::before {
+  border-color: var(--color-warning-border);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-titleline small,
+:root[data-theme="cubis-light"] .shop-promotion-value b {
+  color: var(--color-warning-deep);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-titleline strong {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-value span {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-inline-badges > span {
+  color: var(--color-text-secondary);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-inline-badges > span b {
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-inline-badges > span:not(:has(b)) {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-inline-badges .open-stats {
+  color: var(--color-warning-deep);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-actions > button {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-actions > button.danger {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-actions > i {
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal {
+  padding: 14px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-modal {
+  width: min(1000px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  max-height: calc(100dvh - 28px);
+  border-color: var(--color-border);
+  border-radius: 30px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head {
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 42px;
+  align-items: center;
+  justify-content: stretch;
+  gap: 15px;
+  padding: 17px 20px;
+  border-bottom-color: var(--color-border-subtle);
+  background:
+    radial-gradient(circle at 90% 0%, var(--color-warning-soft), transparent 38%),
+    var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] .shop-promotion-editor-orb {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-warning-border);
+  border-radius: 19px;
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+  font-size: 24px;
+  font-weight: 850;
+  transform: rotate(-5deg);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head small {
+  color: var(--color-warning-deep);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 23px;
+  letter-spacing: -0.03em;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head > button {
+  width: 42px;
+  height: 42px;
+  justify-self: end;
+  border-radius: 14px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section {
+  display: grid;
+  gap: 14px;
+  padding: 17px;
+  border: 1px solid var(--color-border);
+  border-radius: 23px;
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section > header > span {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section > header strong {
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section > header small {
+  color: var(--color-text-secondary);
+  font-size: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section label {
+  gap: 7px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.045em;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section :is(input:not([type="checkbox"]), select, textarea) {
+  min-height: 48px;
+  border-radius: 15px;
+  font-size: 12px;
+  letter-spacing: normal;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-section textarea {
+  min-height: 76px;
+  line-height: 1.5;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-shortcut {
+  min-height: 72px;
+  border-color: var(--color-warning-border);
+  color: var(--color-text-primary);
+  background: linear-gradient(135deg, var(--color-warning-soft), var(--color-surface));
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-shortcut:hover {
+  border-color: var(--color-warning);
+  background: linear-gradient(135deg, var(--color-warning-soft), var(--color-surface));
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-shortcut > span,
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-shortcut > i {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning-soft) 72%, var(--color-surface));
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-shortcut > b {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-shortcut > small {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-picker {
+  border-color: var(--color-border);
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-picker > header b {
+  color: var(--color-text-primary);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-picker > header small,
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-empty {
+  color: var(--color-text-secondary);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-picker > header button {
+  border-color: var(--color-border-brand);
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-search,
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-results {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-result {
+  border-bottom-color: var(--color-border-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-result:hover,
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-product-result.selected {
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-toggles {
+  gap: 8px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-toggles > label {
+  min-height: 70px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface-subtle);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-toggles > label:has(input:checked) {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface-brand);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-toggles b {
+  color: var(--color-text-primary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-toggles small {
+  color: var(--color-text-secondary);
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-toggles input[type="checkbox"] {
+  width: 20px;
+  min-height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--color-brand-action);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-from,
+:root[data-theme="cubis-light"] #shop-promotion-until {
+  color-scheme: light;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer {
+  min-height: 76px;
+  justify-content: space-between;
+  padding: 13px 20px;
+  border-top-color: var(--color-border-subtle);
+  background: var(--color-surface);
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer > span {
+  display: grid;
+  gap: 2px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer > span small {
+  color: var(--color-brand-text);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer > span b {
+  color: var(--color-text-secondary);
+  font-size: 10px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer > div {
+  display: flex;
+  gap: 9px;
+}
+
+:root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer button {
+  min-width: 150px;
+  min-height: 44px;
+  border-radius: 15px;
+}
+
+@media (max-width: 980px) {
+  :root[data-theme="cubis-light"] .shop-promotions-overview {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotions-overview > aside {
+    grid-column: 1 / -1;
+    padding-left: 76px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotion-empty {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotion-empty-orb {
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotion-empty > aside {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  :root[data-theme="cubis-light"] .shop-promotion-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotions-overview {
+    padding: 18px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotions-overview > aside {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-left: 0;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotions-overview > aside > span {
+    min-width: 0;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotion-empty {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotion-empty > aside {
+    grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head {
+    grid-template-columns: 48px minmax(0, 1fr) 40px;
+    padding-inline: 14px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-promotion-editor-orb {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+  }
+
+  :root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-head p,
+  :root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer > span {
+    display: none;
+  }
+
+  :root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer > div {
+    width: 100%;
+  }
+
+  :root[data-theme="cubis-light"] #shop-promotion-modal .shop-promotion-editor-footer button {
+    min-width: 0;
+    flex: 1;
+  }
+}
