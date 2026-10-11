@@ -44,8 +44,12 @@ app.whenReady().then(async () => {
       warehouses:[{ id:'wh-1', name:'Gestiune principală' }, { id:'wh-2', name:'Depozit secundar' }],
       series:[{ name:'CS', next_number:'1042' }, { name:'ONLINE', next_number:'288' }],
       capabilities:{
-        catalog_read:{ status:'disponibil', detail:'Produsele și stocurile pot fi citite.' },
-        invoice_issue:{ status:'disponibil', detail:'Emiterea fiscală este pregătită.' },
+        multi_warehouse_invoice:{ status:'documented', detail:'API V1 acceptă warehouseName pe fiecare poziție când useStock=true; validarea live prin emitere este intenționat neexecutată.' },
+        series_numbering:{ status:'smartbill_authoritative', detail:'Cubis recitește nextNumber din SmartBill și nu incrementează local seria. Facturile manuale sunt observate la următoarea sincronizare.' },
+        full_reverse:{ status:'documented_write_blocked', detail:'Endpointul /invoice/reverse permite stornarea integrală; nu este apelat în această etapă.' },
+        partial_reverse:{ status:'manual_required', detail:'Endpointul documentat nu primește poziții sau cantități; returul parțial rămâne pentru intervenție în SmartBill.' },
+        stock_reentry:{ status:'not_guaranteed_by_api_contract', detail:'Cubis nu modifică artificial stocul și nu generează NIR. După o corecție fiscală aprobată, reintrarea trebuie verificată în SmartBill.' },
+        goods_receipts_v3:{ status:'draft_write_blocked', detail:'V3 expune recepții în regim de ciornă; Cubis nu le folosește pentru retur și nu execută operația în această etapă.' },
       },
     };
     window.SHOP_API = new Proxy({
@@ -75,21 +79,35 @@ app.whenReady().then(async () => {
   const bottomScreenshotPath = path.join(outputDir, 'smartbill-material-3-settings.png');
   fs.writeFileSync(bottomScreenshotPath, (await win.webContents.capturePage()).toPNG());
 
+  const accordionMetrics = await win.webContents.executeJavaScript(`(() => {
+    const items = [...document.querySelectorAll('#shop-invoice-configurator-content [data-smartbill-capability]')];
+    const initialOpen = items.filter((item) => item.open).length;
+    items[0]?.querySelector('summary')?.click();
+    return new Promise((resolve) => setTimeout(() => {
+      const openAfterFirst = items.filter((item) => item.open).length;
+      items[1]?.querySelector('summary')?.click();
+      setTimeout(() => resolve({ initialOpen, openAfterFirst, openAfterSecond:items.filter((item) => item.open).length, firstStillOpen:Boolean(items[0]?.open) }), 80);
+    }, 80));
+  })()`);
+  const accordionScreenshotPath = path.join(outputDir, 'smartbill-material-3-accordion.png');
+  fs.writeFileSync(accordionScreenshotPath, (await win.webContents.capturePage()).toPNG());
+
   const metrics = await win.webContents.executeJavaScript(`(() => ({
     logoCount: document.querySelectorAll('#tab-shop-invoice-configurator img[src$="smartbill-logo.png"]').length,
     overviewCards: document.querySelectorAll('#shop-invoice-configurator-content .shop-smartbill-overview article').length,
     seriesCards: document.querySelectorAll('#shop-invoice-configurator-content [data-smartbill-series]').length,
-    capabilityCards: document.querySelectorAll('#shop-invoice-configurator-content .shop-smartbill-capabilities article').length,
+    capabilityCards: document.querySelectorAll('#shop-invoice-configurator-content [data-smartbill-capability]').length,
     issuingChecked: document.getElementById('shop-smartbill-issuing')?.getAttribute('aria-checked'),
     horizontalOverflow: document.querySelector('#tab-shop-invoice-configurator .shop-invoice-configurator-page').scrollWidth > document.querySelector('#tab-shop-invoice-configurator .shop-invoice-configurator-page').clientWidth,
   }))()`);
 
   if (metrics.logoCount < 2) throw new Error('Logo-ul SmartBill nu apare în hero și în panoul de configurare.');
-  if (metrics.overviewCards !== 3 || metrics.seriesCards !== 2) throw new Error(`Structura Material 3 este incompletă: ${JSON.stringify(metrics)}`);
+  if (metrics.overviewCards !== 3 || metrics.seriesCards !== 2 || metrics.capabilityCards !== 6) throw new Error(`Structura Material 3 este incompletă: ${JSON.stringify(metrics)}`);
+  if (accordionMetrics.initialOpen !== 0 || accordionMetrics.openAfterFirst !== 1 || accordionMetrics.openAfterSecond !== 1 || accordionMetrics.firstStillOpen) throw new Error(`Acordeonul SmartBill nu păstrează o singură secțiune deschisă: ${JSON.stringify(accordionMetrics)}`);
   if (metrics.horizontalOverflow) throw new Error('Pagina SmartBill are overflow orizontal.');
   if (errors.length) throw new Error(`Erori în consolă: ${errors.join(' | ')}`);
 
-  console.log(JSON.stringify({ ...metrics, errors, screenshotPath, bottomScreenshotPath }, null, 2));
+  console.log(JSON.stringify({ ...metrics, accordionMetrics, errors, screenshotPath, bottomScreenshotPath, accordionScreenshotPath }, null, 2));
   await win.destroy();
   app.quit();
 }).catch((error) => {

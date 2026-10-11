@@ -2304,9 +2304,9 @@
 }
 
 :root[data-theme="cubis-light"] .shop-smartbill-capabilities {
-  gap: 9px;
+  gap: 7px;
   margin-top: 12px;
-  padding: 16px;
+  padding: 14px;
   border-color: var(--color-border-subtle);
   border-radius: 24px;
   background: var(--color-surface);
@@ -2317,6 +2317,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 1px 2px 5px;
 }
 
 :root[data-theme="cubis-light"] .shop-smartbill-capabilities > header > span {
@@ -2338,6 +2339,7 @@
 :root[data-theme="cubis-light"] .shop-smartbill-capabilities > header div {
   min-width: 0;
   display: grid;
+  flex: 1;
   gap: 3px;
 }
 
@@ -2352,10 +2354,139 @@
   font-size: 8px;
 }
 
-:root[data-theme="cubis-light"] .shop-smartbill-capabilities article {
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 10px;
-  border-color: var(--color-border-subtle);
+:root[data-theme="cubis-light"] .shop-smartbill-capabilities-count {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  font-size: 7.5px;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability {
+  overflow: hidden;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 17px;
+  background: var(--color-surface-subtle);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability:hover {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface);
+  transform: translateY(-1px);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability[open] {
+  border-color: var(--color-border-brand);
+  background: var(--color-surface);
+  transform: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability summary {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: minmax(132px, auto) minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px 7px 10px;
+  list-style: none;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability summary::-webkit-details-marker {
+  display: none;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability summary::marker {
+  content: "";
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability summary:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-border-brand);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability summary > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: 9.5px;
+  font-weight: 780;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability-status {
+  width: max-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 9px;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability-status i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability.warning .shop-smartbill-capability-status {
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability.blocked .shop-smartbill-capability-status {
+  color: var(--color-error);
+  background: var(--color-error-soft);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability summary > svg {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  padding: 8px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  transition: color 160ms ease, background-color 160ms ease, transform 180ms cubic-bezier(.2, .8, .2, 1);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability[open] summary > svg {
+  color: var(--color-brand-text);
+  background: var(--color-surface-brand);
+  transform: rotate(90deg);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability > div {
+  border-top: 1px solid var(--color-border-subtle);
+  padding: 0 12px 11px;
+  animation: shopSmartbillCapabilityIn 180ms cubic-bezier(.2, .8, .2, 1);
+}
+
+:root[data-theme="cubis-light"] .shop-smartbill-capability > div p {
+  margin: 9px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 8.5px;
+  line-height: 1.55;
+}
+
+@keyframes shopSmartbillCapabilityIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 :root[data-theme="cubis-light"] .shop-smartbill-capabilities-empty {
@@ -2569,5 +2700,34 @@
 
   :root[data-theme="cubis-light"] .shop-smartbill-series-list {
     grid-template-columns: 1fr;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-capabilities {
+    padding: 12px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-capabilities-count {
+    display: none;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-capability summary {
+    grid-template-columns: minmax(0, 1fr) 30px;
+    gap: 5px 9px;
+    padding-block: 9px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-capability-status,
+  :root[data-theme="cubis-light"] .shop-smartbill-capability summary > strong {
+    grid-column: 1;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-capability summary > strong {
+    grid-row: 2;
+    padding-left: 2px;
+  }
+
+  :root[data-theme="cubis-light"] .shop-smartbill-capability summary > svg {
+    grid-column: 2;
+    grid-row: 1 / 3;
   }
 }

@@ -4103,8 +4103,20 @@
     const draft = state.smartBillDraft;
     if (!root || !settings || !draft) return;
     const series = (settings.series || []).map(item => `<button type="button" class="shop-smartbill-choice ${draft.invoice_series === item.name ? 'active' : ''}" data-smartbill-series="${esc(item.name)}"><i class="shop-smartbill-series-icon"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6m-6 4h6"/></svg></i><span><strong>Seria ${esc(item.name)}</strong><small>Următorul număr în SmartBill: ${esc(item.next_number || '—')}</small></span><b>${draft.invoice_series === item.name ? '✓' : ''}</b></button>`).join('') || '<div class="shop-smartbill-empty"><span>!</span><div><strong>Nicio serie sincronizată</strong><small>Actualizează referințele din SmartBill pentru a continua.</small></div></div>';
-    const capabilityLabels = { catalog_read:'Catalog și stoc', invoice_issue:'Emiterea facturilor', invoice_read:'Citirea facturilor', stock_read:'Stoc contabil', series_read:'Serii fiscale', pdf_read:'PDF original' };
-    const capabilities = Object.entries(settings.capabilities || {}).map(([key, item]) => `<article><b>${esc(String(item.status || '').replaceAll('_', ' ').toUpperCase())}</b><strong>${esc(capabilityLabels[key] || key.replaceAll('_', ' '))}</strong><small>${esc(item.detail || '')}</small></article>`).join('') || '<div class="shop-smartbill-capabilities-empty"><span>✓</span><div><strong>Conexiunea este protejată</strong><small>Nu există verificări suplimentare de afișat.</small></div></div>';
+    const capabilityLabels = {
+      catalog_read:'Catalog și stoc', invoice_issue:'Emiterea facturilor', invoice_read:'Citirea facturilor', stock_read:'Stoc contabil', series_read:'Serii fiscale', pdf_read:'PDF original',
+      multi_warehouse_invoice:'Facturi din mai multe gestiuni', series_numbering:'Numerotarea seriilor', full_reverse:'Stornare integrală', partial_reverse:'Stornare parțială', stock_reentry:'Reintrarea în stoc', goods_receipts_v3:'Recepții marfă V3',
+    };
+    const capabilityStatusLabels = {
+      available:'Disponibil', disponibil:'Disponibil', documented:'Documentat', smartbill_authoritative:'Sursă SmartBill', documented_write_blocked:'Documentat · blocat', manual_required:'Verificare manuală', not_guaranteed_by_api_contract:'Limitare API', draft_write_blocked:'Draft · blocat',
+    };
+    const capabilityEntries = Object.entries(settings.capabilities || {});
+    const capabilities = capabilityEntries.map(([key, item]) => {
+      const status = String(item?.status || '').trim().toLowerCase();
+      const statusLabel = capabilityStatusLabels[status] || status.replaceAll('_', ' ') || 'Verificat';
+      const tone = status.includes('blocked') ? 'blocked' : (status === 'manual_required' || status === 'not_guaranteed_by_api_contract' ? 'warning' : 'success');
+      return `<details class="shop-smartbill-capability ${tone}" data-smartbill-capability><summary><span class="shop-smartbill-capability-status"><i></i>${esc(statusLabel)}</span><strong>${esc(capabilityLabels[key] || key.replaceAll('_', ' '))}</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></summary><div><p>${esc(item?.detail || '')}</p></div></details>`;
+    }).join('') || '<div class="shop-smartbill-capabilities-empty"><span>✓</span><div><strong>Conexiunea este protejată</strong><small>Nu există verificări suplimentare de afișat.</small></div></div>';
     const dirty = smartBillSettingsDirty();
     const syncMinutes = Math.max(1, Math.round(Number(settings.auto_sync_interval_seconds || 300) / 60));
     const seriesCount = Array.isArray(settings.series) ? settings.series.length : 0;
@@ -4129,10 +4141,14 @@
         <div class="shop-smartbill-rules"><button type="button" id="shop-smartbill-archive" class="${draft.archive_pdf_enabled ? 'active' : ''}"><b>PDF</b><span><strong>Arhivare PDF original</strong><small>Documentul emis este descărcat și păstrat securizat pe server.</small></span><i>${draft.archive_pdf_enabled ? 'ACTIVĂ' : 'OPRITĂ'}</i></button><article class="${settings.email_enabled ? 'active' : ''}"><b>@</b><span><strong>E-mail prin SmartBill</strong><small>Regulile Card/Ramburs se configurează separat în Automatizări.</small></span><i>${settings.email_enabled ? 'PERMIS' : 'BLOCAT'}</i></article></div>
       </section>
       <section class="shop-smartbill-secrets"><b><svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M5 11h14v10H5z"/><circle cx="12" cy="16" r="1"/></svg></b><div><strong>Cheile de acces rămân protejate pe server</strong><p>Tokenurile V1/V3 nu sunt incluse în JavaScript sau în pachetul Electron.</p></div></section>
-      <section class="shop-smartbill-capabilities"><header><span><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><div><strong>Capabilități verificate în siguranță</strong><small>Fără operații fiscale executate în timpul verificării.</small></div></header>${capabilities}</section>
+      <section class="shop-smartbill-capabilities"><header><span><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><div><strong>Capabilități verificate în siguranță</strong><small>Fără operații fiscale executate în timpul verificării.</small></div>${capabilityEntries.length ? `<b class="shop-smartbill-capabilities-count">${capabilityEntries.length} ${capabilityEntries.length === 1 ? 'verificare' : 'verificări'}</b>` : ''}</header>${capabilities}</section>
       <button type="button" class="shop-smartbill-save" id="shop-smartbill-save" ${!dirty || state.smartBillBusy ? 'disabled' : ''}><span><small>${dirty ? 'MODIFICĂRI NESALVATE' : 'CONFIGURAȚIE ACTUALIZATĂ'}</small><strong>${state.smartBillBusy === 'save' ? 'Se salvează…' : dirty ? 'Salvează configurarea SmartBill' : 'Totul este salvat'}</strong></span><svg viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5z"/><path d="M8 4v6h8V4M8 16h8"/></svg></button>`;
     root.querySelectorAll('[data-smartbill-series]').forEach(button => button.addEventListener('click', () => { state.smartBillDraft.invoice_series = button.dataset.smartbillSeries; renderSmartBillConfigurator(); }));
     root.querySelectorAll('[data-smartbill-action]').forEach(button => button.addEventListener('click', () => void runSmartBillAction(button.dataset.smartbillAction)));
+    root.querySelectorAll('[data-smartbill-capability]').forEach(item => item.addEventListener('toggle', () => {
+      if (!item.open) return;
+      root.querySelectorAll('[data-smartbill-capability][open]').forEach(other => { if (other !== item) other.removeAttribute('open'); });
+    }));
     $('shop-smartbill-due-days')?.addEventListener('input', event => { state.smartBillDraft.due_days = event.target.value; $('shop-smartbill-save').disabled = !smartBillSettingsDirty(); });
     $('shop-smartbill-notes')?.addEventListener('input', event => { state.smartBillDraft.default_notes = event.target.value; $('shop-smartbill-save').disabled = !smartBillSettingsDirty(); });
     $('shop-smartbill-archive')?.addEventListener('click', () => { state.smartBillDraft.archive_pdf_enabled = !state.smartBillDraft.archive_pdf_enabled; renderSmartBillConfigurator(); });
