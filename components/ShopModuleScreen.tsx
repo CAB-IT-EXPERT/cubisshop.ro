@@ -1131,6 +1131,7 @@ export default function ShopModuleScreen() {
         <Header title={title} showBack onBack={() => setView('more')} right={notificationButton} />
         <KeyboardAvoidingView style={styles.settingsKeyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0}>
           <ScrollView
+            key={view}
             ref={settingsScrollRef}
             contentContainerStyle={{ paddingBottom: 180 + insets.bottom }}
             showsVerticalScrollIndicator={false}
