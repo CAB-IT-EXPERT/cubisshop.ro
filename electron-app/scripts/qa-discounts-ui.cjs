@@ -50,6 +50,7 @@ app.whenReady().then(async () => {
     overview: document.querySelectorAll('#shop-discounts-content .shop-promotions-overview').length,
     metrics: document.querySelectorAll('#shop-discounts-content .shop-promotion-metrics article').length,
     emptyCta: Boolean(document.querySelector('#shop-discounts-content [data-promotion-empty-add]')),
+    animatedHeroIcon: getComputedStyle(document.querySelector('#tab-shop-discounts .shop-discount-hero-badge')).animationName,
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
   }))()`);
 
@@ -76,7 +77,7 @@ app.whenReady().then(async () => {
     };
   })()`);
 
-  if (pageMetrics.overview !== 1 || pageMetrics.metrics !== 4 || !pageMetrics.emptyCta) throw new Error(`Pagina de reduceri este incompletă: ${JSON.stringify(pageMetrics)}`);
+  if (pageMetrics.overview !== 1 || pageMetrics.metrics !== 4 || !pageMetrics.emptyCta || pageMetrics.animatedHeroIcon === 'none') throw new Error(`Pagina de reduceri este incompletă: ${JSON.stringify(pageMetrics)}`);
   if (pageMetrics.horizontalOverflow) throw new Error('Pagina de reduceri are overflow orizontal.');
   if (editorMetrics.sections !== 3 || editorMetrics.fields !== 8 || editorMetrics.toggles !== 3) throw new Error(`Editorul de reduceri este incomplet: ${JSON.stringify(editorMetrics)}`);
   if (editorMetrics.modalHorizontalOverflow) throw new Error('Editorul de reduceri are overflow orizontal.');
