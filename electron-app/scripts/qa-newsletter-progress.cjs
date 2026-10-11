@@ -75,6 +75,9 @@ app.whenReady().then(async () => {
     return {
       cards: document.querySelectorAll('.shop-newsletter-card').length,
       hasPagination: Boolean(document.querySelector('.shop-newsletter-pagination')),
+      activePage: document.querySelector('.shop-newsletter-page-numbers .active')?.textContent.trim() || '',
+      previousDisabled: Boolean(document.querySelector('.shop-newsletter-pagination .previous')?.disabled),
+      nextDisabled: Boolean(document.querySelector('.shop-newsletter-pagination .next')?.disabled),
       personWidth: card ? Math.round(card.querySelector('.shop-newsletter-person').getBoundingClientRect().width) : 0,
       cardWidth: card ? Math.round(card.getBoundingClientRect().width) : 0
     };
@@ -159,7 +162,10 @@ app.whenReady().then(async () => {
     && newsletterLayout.subscriberCards === 12
     && !newsletterLayout.hasHorizontalOverflow
     && newsletterSingleResult.cards === 1
-    && !newsletterSingleResult.hasPagination
+    && newsletterSingleResult.hasPagination
+    && newsletterSingleResult.activePage === '1'
+    && newsletterSingleResult.previousDisabled
+    && newsletterSingleResult.nextDisabled
     && newsletterSingleResult.personWidth > 250
     && newsletterMobileLayout.cardWidths.length === 4
     && newsletterMobileLayout.cardsInsideViewport
