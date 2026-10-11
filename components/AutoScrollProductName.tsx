@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, LayoutChangeEvent, StyleProp, Text, TextStyle, View } from 'react-native';
+import { Animated, Easing, LayoutChangeEvent, StyleProp, Text, TextStyle, View, ViewStyle } from 'react-native';
 
-export default function AutoScrollProductName({ value, style }: { value: string; style?: StyleProp<TextStyle> }) {
+export default function AutoScrollProductName({ value, style, containerStyle }: { value: string; style?: StyleProp<TextStyle>; containerStyle?: StyleProp<ViewStyle> }) {
   const translateX = useRef(new Animated.Value(0)).current;
   const [containerWidth, setContainerWidth] = useState(0);
   const [textWidth, setTextWidth] = useState(0);
@@ -28,7 +28,7 @@ export default function AutoScrollProductName({ value, style }: { value: string;
   const animatedWidth = Math.max(containerWidth, textWidth + 4);
 
   return (
-    <View style={{ alignSelf: 'stretch', flexShrink: 1, minWidth: 0, overflow: 'hidden' }} onLayout={readContainer}>
+    <View style={[{ alignSelf: 'stretch', flexShrink: 1, minWidth: 0, overflow: 'hidden' }, containerStyle]} onLayout={readContainer}>
       <Text
         accessible={false}
         numberOfLines={1}
