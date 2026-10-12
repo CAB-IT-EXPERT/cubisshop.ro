@@ -10,6 +10,9 @@ const pages = {
   'produs.html': ['data-product-detail', 'data-product-tabs', 'cubis-product.mjs'],
   'contact.html': ['data-contact-form', 'tel:+40726285155', 'office@cubisshop.ro', 'cubis-contact.mjs'],
   'cos.html': ['data-cart-items', 'data-cart-subtotal', 'cubis-cart.mjs'],
+  'login.html': ['data-auth-form', 'data-auth-mode="login"', 'data-google-auth', 'cubis-auth.mjs'],
+  'cont-nou.html': ['data-auth-form', 'data-auth-mode="register"', 'account_consent', 'cubis-auth.mjs'],
+  'cont.html': ['data-account-app', 'data-account-profile-form', 'data-account-orders', 'cubis-account.mjs'],
 };
 
 for (const [file, markers] of Object.entries(pages)) {

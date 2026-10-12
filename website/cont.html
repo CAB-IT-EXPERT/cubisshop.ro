@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073a69">
+  <meta name="description" content="Contul tău Cubis Shop: comenzi, date personale, adrese salvate și promoții.">
+  <meta name="robots" content="noindex,follow">
+  <meta name="color-scheme" content="light">
+  <link rel="canonical" href="https://cubisshop.ro/cont">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-cover">
+  <link rel="stylesheet" href="/cubis-account.css?v=20261012-account-1">
+  <title>Contul meu | Cubis Shop</title>
+</head>
+<body class="cs-page cs-account-page">
+  <div data-site-header class="cs-shell-placeholder"></div>
+
+  <main id="main" class="cs-account-main">
+    <div class="cs-container">
+      <nav class="cs-breadcrumb cs-account-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Acasă</a><span aria-hidden="true">›</span><span aria-current="page">Contul meu</span>
+      </nav>
+
+      <section class="cs-account-hero" aria-labelledby="account-welcome">
+        <div class="cs-account-avatar" data-account-avatar aria-hidden="true"></div>
+        <div class="cs-account-welcome">
+          <span>Contul meu Cubis Shop</span>
+          <h1 id="account-welcome">Bun venit, <em data-account-first-name>client!</em></h1>
+          <p data-account-email>Se încarcă datele contului…</p>
+        </div>
+        <button class="cs-account-logout" type="button" data-account-logout>
+          <i data-account-icon="logout" aria-hidden="true"></i><span>Ieși din cont</span>
+        </button>
+      </section>
+
+      <div class="cs-account-layout" data-account-app aria-busy="true">
+        <nav class="cs-account-navpanel" aria-label="Secțiunile contului">
+          <button class="is-active" type="button" data-account-tab="overview" aria-selected="true"><i data-account-icon="grid"></i><span>Prezentare</span></button>
+          <button type="button" data-account-tab="profile" aria-selected="false"><i data-account-icon="user"></i><span>Date personale</span></button>
+          <button type="button" data-account-tab="orders" aria-selected="false"><i data-account-icon="document"></i><span>Comenzile mele</span><b data-account-count="orders">0</b></button>
+          <button type="button" data-account-tab="addresses" aria-selected="false"><i data-account-icon="home"></i><span>Adrese salvate</span><b data-account-count="addresses">0</b></button>
+          <button type="button" data-account-tab="coupons" aria-selected="false"><i data-account-icon="tag"></i><span>Promoții</span><b data-account-count="coupons">0</b></button>
+        </nav>
+
+        <section class="cs-account-content">
+          <div class="cs-account-loading" data-account-loading role="status"><span></span><b>Pregătim contul tău…</b></div>
+          <div class="cs-account-error" data-account-error role="alert" hidden></div>
+
+          <article class="cs-account-panel is-active" data-account-panel="overview">
+            <header class="cs-account-panel__head"><div><span>Pe scurt</span><h2>Totul este aici.</h2></div><p>Comenzi, livrare și datele tale, fără să cauți prin e-mailuri.</p></header>
+            <div class="cs-account-stats">
+              <button type="button" data-account-jump="orders"><i data-account-icon="document"></i><span><small>Comenzi</small><strong data-stat-orders>0</strong><em>în total</em></span></button>
+              <button type="button" data-account-jump="orders"><i data-account-icon="package"></i><span><small>Active</small><strong data-stat-active>0</strong><em>în desfășurare</em></span></button>
+              <div><i data-account-icon="card"></i><span><small>Valoare</small><strong data-stat-value>0,00 RON</strong><em>toate comenzile</em></span></div>
+            </div>
+            <div class="cs-account-overview-grid">
+              <section class="cs-account-latest" data-account-latest></section>
+              <aside class="cs-account-help">
+                <i data-account-icon="headset"></i><span>Ai nevoie de ajutor?</span>
+                <h3>Discută direct cu echipa Cubis Shop.</h3>
+                <p>Îți răspundem despre produse, comandă sau livrare.</p>
+                <div><a href="tel:+40726285155">Sună acum</a><a href="https://wa.me/40726285155" target="_blank" rel="noopener noreferrer">WhatsApp</a></div>
+              </aside>
+            </div>
+          </article>
+
+          <article class="cs-account-panel" data-account-panel="profile" hidden>
+            <header class="cs-account-panel__head"><div><span>Profil și facturare</span><h2>Date personale</h2></div><p>Actualizează datele folosite pentru livrare și facturare.</p></header>
+            <form class="cs-profile-form" data-account-profile-form>
+              <div class="cs-profile-type" role="radiogroup" aria-label="Tip client">
+                <label><input type="radio" name="customer_type" value="individual"><span><b>PF</b><strong>Persoană fizică<small>Comandă pe numele tău</small></strong></span></label>
+                <label><input type="radio" name="customer_type" value="company"><span><b>PJ</b><strong>Persoană juridică<small>Comandă și date fiscale pe firmă</small></strong></span></label>
+              </div>
+              <div class="cs-profile-fields">
+                <label><span>Nume și prenume *</span><input name="full_name" autocomplete="name" required></label>
+                <label><span>Telefon *</span><input name="phone" type="tel" autocomplete="tel" required></label>
+                <label class="is-wide"><span>Adresă</span><input name="address" autocomplete="street-address" placeholder="Stradă, număr, bloc, apartament"></label>
+                <label><span>Localitate</span><input name="city" autocomplete="address-level2"></label>
+                <label><span>Județ / sector</span><input name="county" autocomplete="address-level1"></label>
+                <label><span>Cod poștal</span><input name="postal_code" autocomplete="postal-code"></label>
+              </div>
+              <div class="cs-company-fields" data-company-fields hidden>
+                <label><span>Denumire firmă *</span><input name="company_name" autocomplete="organization"></label>
+                <label><span>CUI / CIF *</span><input name="company_cui"></label>
+                <label><span>Nr. Registrul Comerțului *</span><input name="company_registration_number"></label>
+                <label class="is-wide"><span>Sediu social *</span><input name="company_address"></label>
+              </div>
+              <p class="cs-profile-status" data-profile-status role="status" hidden></p>
+              <button class="cs-account-primary" type="submit"><span>Salvează datele</span><i data-account-icon="check"></i></button>
+            </form>
+          </article>
+
+          <article class="cs-account-panel" data-account-panel="orders" hidden>
+            <header class="cs-account-panel__head"><div><span>Istoric și status</span><h2>Comenzile mele</h2></div><p>Apasă pe o comandă pentru a-i vedea rezumatul și statusul.</p></header>
+            <div class="cs-account-list" data-account-orders></div>
+          </article>
+
+          <article class="cs-account-panel" data-account-panel="addresses" hidden>
+            <header class="cs-account-panel__head"><div><span>Livrare mai rapidă</span><h2>Adrese salvate</h2></div><button class="cs-account-head-action" type="button" data-address-open><i data-account-icon="plus"></i><span>Adaugă adresă</span></button></header>
+            <div class="cs-account-list cs-address-grid" data-account-addresses></div>
+          </article>
+
+          <article class="cs-account-panel" data-account-panel="coupons" hidden>
+            <header class="cs-account-panel__head"><div><span>Avantajele tale</span><h2>Promoțiile tale</h2></div><p>Reduceri și coduri promoționale disponibile pentru contul tău.</p></header>
+            <div class="cs-account-list cs-coupon-grid" data-account-coupons></div>
+          </article>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <dialog class="cs-address-dialog" data-address-dialog aria-labelledby="address-dialog-title">
+    <form class="cs-address-dialog__card" data-address-form>
+      <header><div><span>Checkout mai rapid</span><h2 id="address-dialog-title">Adaugă o adresă</h2></div><button type="button" data-address-close aria-label="Închide">×</button></header>
+      <div class="cs-address-form-fields">
+        <label><span>Etichetă</span><input name="label" value="Acasă" maxlength="80"></label>
+        <label><span>Destinatar *</span><input name="recipient_name" autocomplete="name" required></label>
+        <label><span>Telefon *</span><input name="phone" type="tel" autocomplete="tel" required></label>
+        <label class="is-wide"><span>Adresă completă *</span><input name="address" autocomplete="street-address" required></label>
+        <label><span>Localitate *</span><input name="city" autocomplete="address-level2" required></label>
+        <label><span>Județ / sector *</span><input name="county" autocomplete="address-level1" required></label>
+        <label><span>Cod poștal</span><input name="postal_code" autocomplete="postal-code"></label>
+        <label class="cs-address-default"><input name="is_default" type="checkbox"><span>Folosește ca adresă implicită</span></label>
+      </div>
+      <p class="cs-profile-status" data-address-status role="status" hidden></p>
+      <footer><button type="button" data-address-close>Anulează</button><button class="cs-account-primary" type="submit">Salvează adresa</button></footer>
+    </form>
+  </dialog>
+
+  <div data-site-footer></div>
+  <script type="module" src="/cubis-account.mjs?v=20261012-account-1"></script>
+</body>
+</html>
