@@ -14,6 +14,27 @@
   background: rgba(8, 127, 245, 0.07);
 }
 
+/* Keep every native select popup aligned with the light Cubis theme. Chromium
+   otherwise reuses the legacy dark option background from style.css. */
+:root[data-theme="cubis-light"] select {
+  color-scheme: light !important;
+}
+
+:root[data-theme="cubis-light"] select :is(option, optgroup) {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-surface-elevated) !important;
+}
+
+:root[data-theme="cubis-light"] select option:checked {
+  color: var(--color-text-on-brand) !important;
+  background-color: var(--color-brand-primary) !important;
+}
+
+:root[data-theme="cubis-light"] select option:disabled {
+  color: var(--color-text-disabled) !important;
+  background-color: var(--color-surface-muted) !important;
+}
+
 :root[data-theme="cubis-light"] :is(.main-content, .main-content::before, .main-content > .tab-panel,
   .tab-panel.active, .shop-tab-panel, .shop-page-scroll, .shop-placeholder-page,
   .shop-invoice-configurator-page, .shop-commerce-page) {

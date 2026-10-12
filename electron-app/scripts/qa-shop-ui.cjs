@@ -83,6 +83,16 @@ app.whenReady().then(async () => {
     categoryRows: document.querySelectorAll('#shop-category-table-body tr').length,
     manufacturerRows: document.querySelectorAll('#shop-manufacturer-table-body tr').length,
     parentOptions: document.querySelectorAll('#shop-category-parent option').length,
+    selectTheme: getComputedStyle(document.getElementById('shop-category-parent')).colorScheme,
+    optionPalette: (() => {
+      const optionStyle = getComputedStyle(document.querySelector('#shop-category-parent option:not(:checked)'));
+      const checkedStyle = getComputedStyle(document.querySelector('#shop-category-parent option:checked'));
+      return {
+        color: optionStyle.color,
+        backgroundColor: optionStyle.backgroundColor,
+        checkedBackgroundColor: checkedStyle.backgroundColor,
+      };
+    })(),
     activePanel: document.querySelector('.tab-panel.active')?.id || '',
     tabs: document.querySelectorAll('#tab-shop-manufacturers .shop-catalog-tabs button').length,
     bodyHorizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -97,6 +107,10 @@ app.whenReady().then(async () => {
     popupHidden: ['shop-category-modal', 'shop-brand-modal', 'shop-manufacturer-modal']
       .every((id) => document.getElementById(id).hidden),
   }))()`);
+
+  if (metrics.selectTheme !== 'light' || metrics.optionPalette.backgroundColor !== 'rgb(255, 255, 255)') {
+    throw new Error(`Dropdown palette invalid: ${JSON.stringify(metrics)}`);
+  }
 
   console.log(JSON.stringify({ ...metrics, errors, screenshots: {
     desktopPath, modalPath, brandModalPath, manufacturerModalPath, compactPath,
