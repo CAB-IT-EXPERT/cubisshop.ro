@@ -8,13 +8,17 @@ import {
   money,
   productBadge,
   productCard,
+  PREVIEW_DEMO,
   productRoute,
 } from "./cubis-storefront.mjs";
+import { bindNewsletter } from "./cubis-newsletter.mjs";
 
 let currentProduct = null;
 let currentConfig = null;
 let currentImages = [];
 let currentImageIndex = 0;
+let imageTransitionId = 0;
+let syncProductTabs = () => {};
 
 const shellPromise = initShell({ active: "catalog" });
 
@@ -54,20 +58,61 @@ function stars(value) {
   return `<span class="cs-stars" aria-hidden="true">${Array.from({ length: 5 }, (_, index) => `<i class="${rating >= index + 0.5 ? "is-filled" : ""}">★</i>`).join("")}</span>`;
 }
 
-function setImage(index) {
+async function setImage(index, { animate = true } = {}) {
   if (!currentImages.length) return;
   currentImageIndex = (index + currentImages.length) % currentImages.length;
   const image = currentImages[currentImageIndex];
   const main = document.querySelector("[data-product-image]");
-  main.src = image.url;
-  main.alt = image.alt_text || currentProduct.name;
-  document.querySelector("[data-gallery-dialog-image]").src = image.url;
-  document.querySelector("[data-gallery-dialog-image]").alt = image.alt_text || currentProduct.name;
+  const dialogImage = document.querySelector("[data-gallery-dialog-image]");
+  const transitionId = ++imageTransitionId;
   document.querySelectorAll("[data-gallery-index]").forEach(button => {
     const active = Number(button.dataset.galleryIndex) === currentImageIndex;
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
+    if (active) button.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
   });
+
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const shouldTransition = animate && main.src && !reduceMotion;
+  const shouldAnimate = shouldTransition && typeof main.animate === "function";
+  const useCssTransition = shouldTransition && !shouldAnimate;
+  const preload = new Image();
+  const imageReady = new Promise(resolve => {
+    preload.addEventListener("load", resolve, { once: true });
+    preload.addEventListener("error", resolve, { once: true });
+  });
+  preload.src = image.url;
+
+  main.getAnimations?.().forEach(animation => { try { animation.finish(); } catch {} });
+  if (useCssTransition) main.classList.add("is-changing");
+  if (shouldAnimate) {
+    await Promise.all([
+      imageReady,
+      main.animate([
+        { opacity: 1, transform: "scale(1)", filter: "blur(0)" },
+        { opacity: .12, transform: "scale(.975)", filter: "blur(3px)" },
+      ], { duration: 150, easing: "cubic-bezier(.4, 0, 1, 1)", fill: "forwards" }).finished.catch(() => {}),
+    ]);
+  } else if (useCssTransition) {
+    await Promise.all([imageReady, new Promise(resolve => setTimeout(resolve, 150))]);
+  } else {
+    await imageReady;
+  }
+  if (transitionId !== imageTransitionId) return;
+
+  main.src = image.url;
+  main.alt = image.alt_text || currentProduct.name;
+  dialogImage.src = image.url;
+  dialogImage.alt = image.alt_text || currentProduct.name;
+  main.getAnimations?.().forEach(animation => { try { animation.finish(); } catch {} });
+  if (shouldAnimate) {
+    main.animate([
+      { opacity: .12, transform: "scale(.975)", filter: "blur(3px)" },
+      { opacity: 1, transform: "scale(1)", filter: "blur(0)" },
+    ], { duration: 380, easing: "cubic-bezier(.2, .75, .25, 1)", fill: "both" });
+  } else if (useCssTransition) {
+    requestAnimationFrame(() => main.classList.remove("is-changing"));
+  }
 }
 
 function renderGallery(product) {
@@ -97,7 +142,7 @@ function renderGallery(product) {
   thumbs.querySelectorAll("[data-gallery-index]").forEach(button => button.addEventListener("click", () => setImage(Number(button.dataset.galleryIndex))));
   prev.hidden = currentImages.length < 2;
   next.hidden = currentImages.length < 2;
-  setImage(0);
+  setImage(0, { animate: false });
 }
 
 function renderSummary(product, config) {
@@ -111,9 +156,11 @@ function renderSummary(product, config) {
   badge.hidden = !badgeText;
 
   const rating = document.querySelector("[data-product-rating]");
-  rating.innerHTML = product.rating !== null
-    ? `${stars(product.rating)}<strong>${product.rating.toFixed(1)}</strong><a href="#reviews">(${product.reviewCount} recenzii)</a>`
-    : `${stars(0)}<span>Produs fără recenzii</span>`;
+  const hasReviews = product.rating !== null && Number(product.reviewCount || 0) > 0;
+  rating.hidden = !hasReviews;
+  rating.innerHTML = hasReviews
+    ? `${stars(product.rating)}<strong>${product.rating.toFixed(1)}</strong><a href="#reviews">${product.reviewCount} ${product.reviewCount === 1 ? "recenzie" : "recenzii"}</a>`
+    : "";
 
   document.querySelector("[data-product-price]").innerHTML = `<strong>${escapeHtml(money(product.price, product.currency))}</strong>${product.oldPrice ? `<del>${escapeHtml(money(product.oldPrice, product.currency))}</del>` : ""}`;
   const stock = document.querySelector("[data-product-stock]");
@@ -128,6 +175,7 @@ function renderSummary(product, config) {
     : `${icon("truck")}<div><strong>Livrarea se confirmă la checkout</strong><span>Nu există momentan o estimare publică pentru această comandă.</span></div>`;
 
   const add = document.querySelector("[data-main-add]");
+  add.querySelector("[data-main-add-icon]").innerHTML = icon("cart");
   add.disabled = !product.inStock;
   add.querySelector("strong").textContent = product.inStock ? "Adaugă în coș" : "Indisponibil";
   add.addEventListener("click", () => {
@@ -141,17 +189,17 @@ function renderSummary(product, config) {
     favorite.classList.toggle("is-active", active);
     favorite.setAttribute("aria-pressed", String(active));
     favorite.setAttribute("aria-label", active ? "Elimină din favorite" : "Adaugă la favorite");
-    favorite.textContent = active ? "♥" : "♡";
+    favorite.innerHTML = icon("heart");
   };
   favorite.addEventListener("click", () => { commerce.toggleFavorite(product.id); syncFavorite(); });
   commerce.addEventListener("change", syncFavorite);
   syncFavorite();
 
   const benefits = [
-    ["lock", config.payments?.stripe_test_mode ? "Plată online TEST" : "Plată securizată", config.payments?.card_enabled ? "card online disponibil" : "metode active la checkout"],
-    ["rotate", "Retur verificat", "conform eligibilității comenzii"],
-    ["truck", "Livrare configurată", shipping?.eta_label || "confirmată la checkout"],
-    ["headset", "Suport dedicat", "pentru compatibilitate"],
+    ["lock", "Plată securizată", config.payments?.card_enabled ? "Tranzacție protejată" : "Metode la checkout"],
+    ["rotate", "Retur simplu", "Conform politicii de retur"],
+    ["truck", "Livrare rapidă", shipping?.eta_label || "Confirmată la checkout"],
+    ["headset", "Suport dedicat", "Ajutor înainte de comandă"],
   ];
   document.querySelector("[data-product-benefits]").innerHTML = benefits.map(([name, title, detail]) => `<span>${icon(name)}<b>${title}</b><small>${escapeHtml(detail)}</small></span>`).join("");
 }
@@ -208,29 +256,55 @@ async function reviewsMarkup(product) {
 
 async function renderPanels(product, config) {
   const description = safeRichText(product.description_html || "") || `<p>${escapeHtml(product.short_description || "Descrierea detaliată nu este încă publicată.")}</p>`;
-  document.querySelector('[data-product-panel="description"]').innerHTML = `<div class="cs-description-layout"><div class="cs-rich-text"><h2>${escapeHtml(product.description_title || "Descriere produs")}</h2>${description}</div><aside><span>${icon("shield")}</span><h3>Informații din catalogul oficial</h3><p>Prețul, stocul și atributele afișate sunt încărcate direct din API-ul magazinului.</p></aside></div>`;
+  document.querySelector('[data-product-panel="description"]').innerHTML = `<div class="cs-description-layout"><div class="cs-rich-text"><h2>${escapeHtml(product.description_title || "Descriere produs")}</h2>${description}</div><aside class="cs-catalog-note"><span>${icon("shield")}</span><div><small>DETALII VERIFICATE</small><h3>Informații din catalogul oficial</h3></div></aside></div>`;
   document.querySelector('[data-product-panel="specifications"]').innerHTML = specsMarkup(product);
   document.querySelector('[data-product-panel="compatibility"]').innerHTML = compatibilityMarkup(product);
   document.querySelector('[data-product-panel="reviews"]').innerHTML = `<div class="cs-panel-loading">Se încarcă recenziile…</div>`;
   document.querySelector('[data-product-panel="reviews"]').innerHTML = await reviewsMarkup(product);
   const shipping = (config.shipping_methods || []).find(method => method.is_active !== false);
-  document.querySelector('[data-product-panel="delivery"]').innerHTML = `<div class="cs-delivery-details"><article>${icon("truck")}<div><h3>Livrare</h3><p>${shipping ? `${escapeHtml(shipping.eta_label || "Termen confirmat la checkout")}; cost ${escapeHtml(money(shipping.cost, product.currency))}.` : "Opțiunile sunt confirmate la checkout."}</p></div></article><article>${icon("rotate")}<div><h3>Retur</h3><p>Eligibilitatea și costul returului sunt verificate conform politicii magazinului și datelor comenzii.</p></div></article><article>${icon("lock")}<div><h3>Plată</h3><p>${config.payments?.stripe_test_mode ? "Plata online este configurată în mod TEST." : "Metodele active sunt afișate la checkout."}</p></div></article></div>`;
+  document.querySelector('[data-product-panel="delivery"]').innerHTML = `<div class="cs-delivery-details"><article>${icon("truck")}<div><h3>Livrare</h3><p>${shipping ? `${escapeHtml(shipping.eta_label || "Termen confirmat la checkout")}; cost ${escapeHtml(money(shipping.cost, product.currency))}.` : "Opțiunile sunt confirmate la checkout."}</p></div></article><article>${icon("rotate")}<div><h3>Retur</h3><p>Eligibilitatea și costul returului sunt verificate conform politicii magazinului și datelor comenzii.</p></div></article><article>${icon("lock")}<div><h3>Plată</h3><p>Metodele active și sigure sunt afișate la checkout.</p></div></article></div>`;
 }
 
 function bindTabs() {
   const tabs = [...document.querySelectorAll("[data-product-tab]")];
+  const rail = document.querySelector("[data-product-tabs]");
+  const back = document.querySelector("[data-product-tabs-back]");
+  const more = document.querySelector("[data-product-tabs-more]");
   tabs.forEach(tab => tab.addEventListener("click", () => {
     tabs.forEach(button => button.setAttribute("aria-selected", String(button === tab)));
     document.querySelectorAll("[data-product-panel]").forEach(panel => { panel.hidden = panel.dataset.productPanel !== tab.dataset.productTab; });
   }));
+  back.innerHTML = icon("chevron");
+  more.innerHTML = icon("chevron");
+  syncProductTabs = () => {
+    const canScroll = rail.scrollWidth > rail.clientWidth + 3;
+    const atStart = rail.scrollLeft <= 3;
+    const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 3;
+    back.hidden = !canScroll || atStart;
+    more.hidden = !canScroll || atEnd;
+  };
+  back.addEventListener("click", () => rail.scrollBy({ left: -Math.max(150, rail.clientWidth * .62), behavior: "smooth" }));
+  more.addEventListener("click", () => rail.scrollBy({ left: Math.max(150, rail.clientWidth * .62), behavior: "smooth" }));
+  rail.addEventListener("scroll", syncProductTabs, { passive: true });
+  addEventListener("resize", syncProductTabs, { passive: true });
 }
 
 function bindControls() {
   const quantity = document.querySelector("[data-quantity]");
-  document.querySelector("[data-quantity-minus]").addEventListener("click", () => { quantity.value = String(Math.max(1, Number(quantity.value || 1) - 1)); });
-  document.querySelector("[data-quantity-plus]").addEventListener("click", () => { quantity.value = String(Math.min(99, Number(quantity.value || 1) + 1)); });
-  document.querySelector("[data-gallery-prev]").addEventListener("click", () => setImage(currentImageIndex - 1));
-  document.querySelector("[data-gallery-next]").addEventListener("click", () => setImage(currentImageIndex + 1));
+  const minus = document.querySelector("[data-quantity-minus]");
+  const plus = document.querySelector("[data-quantity-plus]");
+  const previous = document.querySelector("[data-gallery-prev]");
+  const next = document.querySelector("[data-gallery-next]");
+  const zoomLabel = document.querySelector("[data-product-zoom-label]");
+  minus.innerHTML = icon("minus");
+  plus.innerHTML = icon("plus");
+  previous.innerHTML = icon("chevron");
+  next.innerHTML = icon("chevron");
+  zoomLabel.innerHTML = `${icon("zoom")}<span>Mărește</span>`;
+  minus.addEventListener("click", () => { quantity.value = String(Math.max(1, Number(quantity.value || 1) - 1)); });
+  plus.addEventListener("click", () => { quantity.value = String(Math.min(99, Number(quantity.value || 1) + 1)); });
+  previous.addEventListener("click", () => setImage(currentImageIndex - 1));
+  next.addEventListener("click", () => setImage(currentImageIndex + 1));
   const dialog = document.querySelector("[data-gallery-dialog]");
   const open = () => { if (currentImages.length) dialog.showModal(); };
   document.querySelector("[data-product-zoom]").addEventListener("click", open);
@@ -266,6 +340,165 @@ function updateMetadata(product) {
   document.head.append(script);
 }
 
+function bindRelatedCarousel(section) {
+  if (section.dataset.carouselBound === "true") return;
+  const rail = section.querySelector("[data-related-grid]");
+  const controls = section.querySelector(".cs-carousel-controls");
+  const previous = section.querySelector("[data-related-carousel-prev]");
+  const next = section.querySelector("[data-related-carousel-next]");
+  const count = section.querySelector("[data-related-carousel-count]");
+  const progress = section.querySelector("[data-related-carousel-progress]");
+  const cards = [...rail.querySelectorAll(":scope > .cs-product-card")];
+  const cardCount = cards.length;
+  if (!cardCount) {
+    controls.hidden = true;
+    return;
+  }
+  section.dataset.carouselBound = "true";
+  previous.innerHTML = icon("chevron");
+  next.innerHTML = icon("chevron");
+  cards.forEach(card => {
+    const clone = card.cloneNode(true);
+    clone.classList.add("is-carousel-clone");
+    clone.setAttribute("aria-hidden", "true");
+    clone.inert = true;
+    clone.querySelectorAll("a, button, input, select, textarea, [tabindex]").forEach(control => control.setAttribute("tabindex", "-1"));
+    rail.append(clone);
+  });
+
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const paused = new Set();
+  let autoTimer = 0;
+  let resumeTimer = 0;
+  let normalizeTimer = 0;
+  let animationFrame = 0;
+  let animationVersion = 0;
+  const gap = () => parseFloat(getComputedStyle(rail).gap || 0);
+  const step = () => cards[0]?.getBoundingClientRect().width + gap() || rail.clientWidth;
+  const cycleWidth = () => cardCount * step();
+  const logicalIndex = () => {
+    const unit = step();
+    return unit ? ((Math.round(rail.scrollLeft / unit) % cardCount) + cardCount) % cardCount : 0;
+  };
+  const hasOverflow = () => cardCount * step() - gap() > rail.clientWidth + 2;
+  const update = () => {
+    const overflowing = hasOverflow();
+    const index = logicalIndex();
+    controls.hidden = !overflowing;
+    count.textContent = `${String(index + 1).padStart(2, "0")} / ${String(cardCount).padStart(2, "0")}`;
+    previous.disabled = !overflowing;
+    next.disabled = !overflowing;
+    progress.style.transform = `scaleX(${(index + 1) / cardCount})`;
+  };
+  const normalizeLoop = () => {
+    const cycle = cycleWidth();
+    if (cycle && rail.scrollLeft >= cycle - 1) rail.scrollLeft %= cycle;
+    update();
+  };
+  const stopAnimation = () => {
+    animationVersion += 1;
+    animationFrame = 0;
+    rail.classList.remove("is-carousel-animating");
+  };
+  const animateTo = (target, duration) => {
+    stopAnimation();
+    const version = animationVersion;
+    const start = rail.scrollLeft;
+    const distance = target - start;
+    if (!distance || reducedMotion.matches) {
+      rail.scrollLeft = target;
+      update();
+      return Promise.resolve(true);
+    }
+    const startedAt = performance.now();
+    rail.classList.add("is-carousel-animating");
+    return new Promise(resolve => {
+      const frame = now => {
+        if (version !== animationVersion) return resolve(false);
+        const elapsed = Math.min(1, (now - startedAt) / duration);
+        rail.scrollLeft = start + distance * (1 - (1 - elapsed) ** 3);
+        if (elapsed < 1) animationFrame = requestAnimationFrame(frame);
+        else {
+          animationFrame = 0;
+          rail.classList.remove("is-carousel-animating");
+          resolve(true);
+        }
+      };
+      animationFrame = requestAnimationFrame(frame);
+    });
+  };
+  const move = async (direction, duration = 900) => {
+    if (!hasOverflow()) return;
+    const unit = step();
+    const cycle = cycleWidth();
+    let rawIndex = Math.round(rail.scrollLeft / unit);
+    if (direction < 0 && rawIndex <= 0) {
+      rail.scrollLeft = cycle;
+      rawIndex = cardCount;
+    } else if (rawIndex >= cardCount) {
+      rail.scrollLeft %= cycle;
+      rawIndex = Math.round(rail.scrollLeft / unit);
+    }
+    if (await animateTo((rawIndex + direction) * unit, duration)) normalizeLoop();
+  };
+  const schedule = (delay = 1100) => {
+    clearTimeout(autoTimer);
+    if (reducedMotion.matches || paused.size || document.hidden || !hasOverflow()) return;
+    autoTimer = setTimeout(async () => {
+      if (paused.size || document.hidden) return;
+      await move(1);
+      schedule();
+    }, delay);
+  };
+  const pause = reason => {
+    paused.add(reason);
+    clearTimeout(autoTimer);
+    clearTimeout(resumeTimer);
+    if (reason !== "visibility") stopAnimation();
+  };
+  const resume = (reason, delay = 1100) => {
+    paused.delete(reason);
+    clearTimeout(resumeTimer);
+    if (!paused.size) resumeTimer = setTimeout(() => schedule(delay), 220);
+  };
+  const manualMove = direction => {
+    pause("manual");
+    void move(direction, 450).finally(() => resume("manual"));
+  };
+  previous.addEventListener("click", () => manualMove(-1));
+  next.addEventListener("click", () => manualMove(1));
+  rail.addEventListener("scroll", () => {
+    update();
+    clearTimeout(normalizeTimer);
+    normalizeTimer = setTimeout(normalizeLoop, 150);
+  }, { passive: true });
+  rail.addEventListener("keydown", event => {
+    if (event.target !== rail || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    manualMove(event.key === "ArrowRight" ? 1 : -1);
+  });
+  rail.addEventListener("touchstart", () => pause("touch"), { passive: true });
+  rail.addEventListener("touchend", () => resume("touch"), { passive: true });
+  rail.addEventListener("mouseenter", () => pause("hover"));
+  rail.addEventListener("mouseleave", () => resume("hover"));
+  rail.addEventListener("wheel", () => {
+    pause("wheel");
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => resume("wheel"), 1400);
+  }, { passive: true });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) pause("visibility");
+    else resume("visibility", 1000);
+  });
+  reducedMotion.addEventListener("change", () => {
+    if (reducedMotion.matches) pause("motion");
+    else resume("motion", 1000);
+  });
+  new ResizeObserver(update).observe(rail);
+  update();
+  schedule(1000);
+}
+
 async function renderRelated(product, allProducts) {
   const matched = allProducts.filter(candidate => candidate.id !== product.id && (
     (product.category_id && String(candidate.category_id) === String(product.category_id))
@@ -278,20 +511,14 @@ async function renderRelated(product, allProducts) {
   if (rows.length) {
     document.querySelector("[data-related-grid]").innerHTML = rows.map(item => productCard(item)).join("");
     commerce.registerProducts(rows);
+    bindRelatedCarousel(section);
   }
 }
 
-function bindNewsletter() {
+function initializeNewsletter() {
   const iconHost = document.querySelector("[data-newsletter-icon]");
-  const form = document.querySelector("[data-newsletter-form]");
-  const message = document.querySelector("[data-newsletter-message]");
   if (iconHost) iconHost.innerHTML = icon("mail");
-  form?.addEventListener("submit", event => {
-    event.preventDefault();
-    message.hidden = false;
-    message.textContent = "Abonarea separată nu este încă activată în API. Poți selecta consimțământul pentru newsletter, nebifat implicit, la finalizarea unei comenzi.";
-    message.focus?.();
-  });
+  bindNewsletter({ previewDemo: PREVIEW_DEMO });
 }
 
 async function loadProduct() {
@@ -321,6 +548,7 @@ async function loadProduct() {
     document.querySelector("[data-product-info]").hidden = false;
     loading.hidden = true;
     detail.hidden = false;
+    requestAnimationFrame(syncProductTabs);
   } catch (failure) {
     loading.hidden = true;
     error.hidden = false;
@@ -330,6 +558,6 @@ async function loadProduct() {
 
 bindTabs();
 bindControls();
-bindNewsletter();
+initializeNewsletter();
 document.querySelector("[data-product-retry]").addEventListener("click", loadProduct);
 await Promise.allSettled([shellPromise, loadProduct()]);

@@ -193,6 +193,7 @@ class CleanUrlHandler(SimpleHTTPRequestHandler):
             html_candidate = WEBSITE_ROOT / f"{request_path.lstrip('/')}.html"
             if html_candidate.is_file():
                 self.path = urlunsplit((parsed.scheme, parsed.netloc, f"{parsed.path}.html", parsed.query, parsed.fragment))
+                return super().send_head()
 
         local_candidate = WEBSITE_ROOT / request_path.lstrip("/")
         if request_path != "/" and Path(request_path).suffix in {"", ".html"} and not local_candidate.exists():

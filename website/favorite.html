@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073a69">
+  <meta name="description" content="Produsele tale favorite din Cubis Shop, pregătite pentru comparare și adăugare rapidă în coș.">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://cubisshop.ro/favorite">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-cover">
+  <link rel="stylesheet" href="/cubis-favorites.css?v=20261012-actions">
+  <title>Produsele mele favorite | Cubis Shop</title>
+</head>
+<body class="cs-page cs-favorites-page">
+  <div data-site-header class="cs-shell-placeholder"></div>
+
+  <main id="main" class="cs-favorites-main">
+    <div class="cs-container">
+      <nav class="cs-breadcrumb" aria-label="Breadcrumb"><a href="/">Acasă</a><span>›</span><a href="/cont">Contul meu</a><span>›</span><span aria-current="page">Produse favorite</span></nav>
+
+      <section class="cs-favorites-hero" aria-labelledby="favorites-title">
+        <div class="cs-favorites-hero__title"><span data-favorites-heart aria-hidden="true"></span><div><h1 id="favorites-title">Produsele mele favorite</h1><p data-favorites-summary>Încărcăm lista ta de favorite…</p></div></div>
+        <button class="cs-favorites-share" type="button" data-share-favorites><span data-share-icon></span><span>Distribuie lista</span></button>
+      </section>
+
+      <button class="cs-favorites-mobile-add-all" type="button" data-add-all-favorites><span data-add-all-icon></span><span>Adaugă toate în coș</span></button>
+
+      <section class="cs-favorites-content" data-favorites-content aria-label="Lista produselor favorite">
+        <div class="cs-favorites-toolbar">
+          <label class="cs-favorites-select-all"><input type="checkbox" data-select-all><span aria-hidden="true"></span><b>Selectează toate</b></label>
+          <div><button class="cs-favorites-delete-selected" type="button" data-delete-selected disabled><span data-delete-selected-icon></span><span>Elimină selecția</span></button><button class="cs-favorites-add-selected" type="button" data-add-selected disabled><span data-add-selected-icon></span><span>Adaugă în coș</span><b data-selected-count>0</b></button></div>
+        </div>
+        <div class="cs-favorites-grid" data-favorites-grid aria-live="polite"><div class="cs-favorites-loading"><span class="cs-spinner"></span><strong>Încărcăm produsele favorite…</strong></div></div>
+      </section>
+
+      <section class="cs-favorites-empty" data-favorites-empty hidden aria-labelledby="favorites-empty-title">
+        <span data-empty-heart></span><h2 id="favorites-empty-title">Lista ta de favorite este goală</h2><p>Salvează produsele care îți plac și le vei găsi rapid aici, pe orice pagină a magazinului.</p><a class="cs-button cs-button--primary" href="/magazin#catalog">Descoperă produsele <span aria-hidden="true">→</span></a>
+      </section>
+    </div>
+
+    <section class="cs-favorites-recommendations" data-recommendations-section hidden aria-labelledby="recommendations-title">
+      <div class="cs-container">
+        <div class="cs-favorites-recommendations__head"><div><span data-sparkle-icon></span><h2 id="recommendations-title">S-ar putea să îți mai placă și</h2></div><a href="/magazin#catalog">Vezi toate recomandările <span aria-hidden="true">→</span></a></div>
+        <div class="cs-favorites-recommendations__viewport">
+          <button class="cs-favorites-carousel-control is-prev" type="button" data-recommendations-prev aria-label="Recomandările anterioare"><span data-recommendations-prev-icon></span></button>
+          <div class="cs-favorites-recommendations__rail" data-recommendations-rail></div>
+          <button class="cs-favorites-carousel-control is-next" type="button" data-recommendations-next aria-label="Următoarele recomandări"><span data-recommendations-next-icon></span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="cs-favorites-benefits" aria-label="Beneficiile cumpărăturilor Cubis Shop"><div class="cs-container"><span><i data-benefit-icon="truck"></i><b>Livrare rapidă</b><small>1–2 zile lucrătoare</small></span><span><i data-benefit-icon="shield"></i><b>Plată securizată</b><small>100% în siguranță</small></span><span><i data-benefit-icon="rotate"></i><b>Retur ușor</b><small>în 14 zile</small></span><span><i data-benefit-icon="headset"></i><b>Suport clienți</b><small>Luni–Vineri 09:00–18:00</small></span></div></section>
+  </main>
+
+  <div class="cs-favorites-toast" data-favorites-toast role="status" aria-live="polite" aria-atomic="true" hidden></div>
+  <div data-site-footer class="cs-footer-placeholder"></div>
+  <script type="module" src="/cubis-favorites.mjs?v=20261012-actions"></script>
+</body>
+</html>

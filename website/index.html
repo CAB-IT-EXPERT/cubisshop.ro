@@ -7,11 +7,12 @@
   <meta name="description" content="Cubis Shop — produse, piese și accesorii compatibile, selectate din catalogul real al magazinului.">
   <meta name="color-scheme" content="light">
   <link rel="canonical" href="https://cubisshop.ro/">
-  <link rel="icon" href="/assets/cubis-favicon.png" type="image/png">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/cubis-storefront.css?v=20261011-phase-c1">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-cover">
   <title>Cubis Shop — produse și accesorii compatibile</title>
 </head>
 <body class="cs-page cs-home-page">
@@ -23,111 +24,99 @@
         <div class="cs-hero__copy">
           <p class="cs-eyebrow">CUBIS SHOP</p>
           <h1 id="home-title">Tot ce ai nevoie pentru<br><span>accesoriile și piesele tale.</span></h1>
-          <p class="cs-hero__lead">Descoperă produsele disponibile în catalogul Cubis Shop și verifică rapid compatibilitatea înainte să comanzi.</p>
+          <p class="cs-hero__lead">Piese și accesorii compatibile pentru trotinete electrice, GoPro / Insta360, camere foto-video, ceasuri și PC / Laptop.</p>
           <div class="cs-hero__actions">
             <a class="cs-button cs-button--primary" href="/magazin">Vezi produsele <span aria-hidden="true">→</span></a>
-            <a class="cs-button cs-button--secondary" href="#compatibilitate">Caută compatibilitatea</a>
           </div>
-          <div class="cs-hero__benefits" data-home-benefits aria-label="Avantajele magazinului"></div>
         </div>
-        <div class="cs-hero__visual" data-hero-products aria-live="polite">
-          <div class="cs-hero__orb"></div>
-          <div class="cs-hero__loading">Se încarcă produsele din catalog…</div>
-          <p class="cs-hero__note">Piese mici.<br><strong>Posibilități mari.</strong></p>
-        </div>
-      </div>
-    </section>
-
-    <section class="cs-section cs-categories" aria-labelledby="categories-title">
-      <div class="cs-container">
-        <div class="cs-section-heading is-compact">
-          <div><p class="cs-eyebrow">EXPLOREAZĂ CATALOGUL</p><h2 id="categories-title">Categorii</h2></div>
-          <a href="/magazin">Vezi toate produsele <span>→</span></a>
-        </div>
-        <div class="cs-category-grid" data-home-categories>
-          <div class="cs-loading-card">Se încarcă categoriile disponibile…</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="cs-section cs-compatibility" id="compatibilitate" aria-labelledby="compatibility-title">
-      <div class="cs-container">
-        <form class="cs-compatibility-panel" data-compatibility-form>
-          <div class="cs-compatibility-panel__intro">
-            <span class="cs-compatibility-icon" aria-hidden="true">a<small>⌕</small></span>
-            <div><h2 id="compatibility-title">Găsește produsul compatibil</h2><p>Selectează opțiunile disponibile în catalog pentru a restrânge rezultatele.</p></div>
-          </div>
-          <label><span>1. Alege categoria</span><select name="category"><option value="">Selectează categoria</option></select></label>
-          <label><span>2. Alege marca</span><select name="brand" disabled><option value="">Selectează marca</option></select></label>
-          <label><span>3. Alege producătorul</span><select name="manufacturer" disabled><option value="">Selectează producătorul</option></select></label>
-          <button class="cs-button cs-button--primary" type="submit">Caută produse</button>
-        </form>
+        <div class="cs-hero__visual" data-hero-products aria-live="polite"></div>
+        <div class="cs-hero__benefits" data-home-benefits aria-label="Avantajele magazinului"></div>
       </div>
     </section>
 
     <section class="cs-section cs-products-section" aria-labelledby="featured-title">
       <div class="cs-container">
-        <div class="cs-section-heading"><h2 id="featured-title" data-featured-title>Produse recomandate</h2><a href="/magazin">Vezi toate produsele <span>→</span></a></div>
-        <div class="cs-product-grid cs-product-grid--six" data-home-featured><div class="cs-loading-card">Se încarcă produsele…</div></div>
+        <div class="cs-section-heading cs-collection-heading"><div><p class="cs-collection-heading__eyebrow">CELE MAI VIZUALIZATE</p><h2 id="featured-title" data-featured-title>Produse recomandate<span aria-hidden="true">.</span></h2></div><a href="/magazin">Vezi toate produsele <span aria-hidden="true">↗</span></a></div>
+        <div class="cs-product-carousel" data-product-carousel="featured">
+          <div class="cs-product-grid cs-product-grid--carousel" data-home-featured tabindex="0" role="region" aria-label="Produse recomandate"><div class="cs-loading-card">Se încarcă produsele…</div></div>
+          <div class="cs-carousel-controls"><span data-carousel-count aria-live="off"></span><div class="cs-carousel-progress" aria-hidden="true"><span data-carousel-progress></span></div><button type="button" data-carousel-prev aria-label="Produsele recomandate anterioare">‹</button><button type="button" data-carousel-next aria-label="Produsele recomandate următoare">›</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cs-section cs-trust-section" aria-labelledby="why-title">
+      <div class="cs-container cs-trust-section__panel">
+        <div class="cs-trust-section__heading">
+          <div><p class="cs-trust-section__eyebrow">ÎN FIECARE DETALIU</p><h2 id="why-title">De ce Cubis Shop<span aria-hidden="true">.</span></h2></div>
+          <p class="cs-trust-section__intro">Mai multă claritate.<br><strong>Mai puține griji.</strong></p>
+        </div>
+        <div class="cs-trust-grid">
+          <article class="cs-trust-card is-verified"><span class="cs-trust-card__motif" data-icon="shield" aria-hidden="true"></span><span class="cs-trust-card__icon" data-icon="shield" aria-hidden="true"></span><div><h3>Date comerciale verificate</h3><p>Prețul și disponibilitatea sunt citite din catalogul magazinului.</p></div></article>
+          <article class="cs-trust-card is-compatible"><span class="cs-trust-card__motif" data-icon="package" aria-hidden="true"></span><span class="cs-trust-card__icon" data-icon="package" aria-hidden="true"></span><div><h3>Compatibilitate clară</h3><p>Afișăm numai informațiile de compatibilitate existente pentru produs.</p></div></article>
+          <article class="cs-trust-card is-delivery"><span class="cs-trust-card__motif" data-icon="truck" aria-hidden="true"></span><span class="cs-trust-card__icon" data-icon="truck" aria-hidden="true"></span><div><h3>Livrare rapidă</h3><p>Metodele și costurile active sunt confirmate la checkout.</p></div></article>
+          <article class="cs-trust-card is-support"><span class="cs-trust-card__motif" data-icon="headset" aria-hidden="true"></span><span class="cs-trust-card__icon" data-icon="headset" aria-hidden="true"></span><div><h3>Suport dedicat</h3><p>Poți cere ajutor înainte de a alege produsul.</p></div></article>
+        </div>
       </div>
     </section>
 
     <section class="cs-section cs-products-section cs-section--tight" aria-labelledby="new-title">
       <div class="cs-container">
-        <div class="cs-section-heading"><h2 id="new-title">Produse recent listate</h2><a href="/magazin?sort=newest">Vezi catalogul <span>→</span></a></div>
-        <div class="cs-product-grid cs-product-grid--four is-compact-row" data-home-new><div class="cs-loading-card">Se încarcă produsele…</div></div>
+        <div class="cs-section-heading cs-collection-heading"><div><p class="cs-collection-heading__eyebrow">NOU ÎN CUBIS SHOP</p><h2 id="new-title">Produse recent listate<span aria-hidden="true">.</span></h2></div><a href="/magazin?sort=newest">Vezi catalogul <span aria-hidden="true">↗</span></a></div>
+        <div class="cs-product-carousel" data-product-carousel="new">
+          <div class="cs-product-grid cs-product-grid--carousel" data-home-new tabindex="0" role="region" aria-label="Produse recent listate"><div class="cs-loading-card">Se încarcă produsele…</div></div>
+          <div class="cs-carousel-controls"><span data-carousel-count aria-live="off"></span><div class="cs-carousel-progress" aria-hidden="true"><span data-carousel-progress></span></div><button type="button" data-carousel-prev aria-label="Produsele recent listate anterioare">‹</button><button type="button" data-carousel-next aria-label="Produsele recent listate următoare">›</button></div>
+        </div>
       </div>
     </section>
 
     <section class="cs-section cs-brands-section" aria-labelledby="brands-title">
       <div class="cs-container">
         <div class="cs-section-heading is-compact"><h2 id="brands-title">Branduri populare</h2></div>
-        <div class="cs-brand-strip" data-home-brands><div class="cs-loading-card">Se încarcă datele catalogului…</div></div>
-      </div>
-    </section>
-
-    <section class="cs-section cs-section--tight" aria-labelledby="discover-title">
-      <div class="cs-container">
-        <h2 class="sr-only" id="discover-title">Descoperă Cubis Shop</h2>
-        <div class="cs-promo-grid" data-home-banners></div>
-      </div>
-    </section>
-
-    <section class="cs-section cs-trust-section" aria-labelledby="why-title">
-      <div class="cs-container">
-        <div class="cs-section-heading is-compact"><h2 id="why-title">De ce Cubis Shop</h2></div>
-        <div class="cs-trust-grid">
-          <article><span data-icon="shield"></span><div><h3>Date comerciale verificate</h3><p>Prețul și disponibilitatea sunt citite din catalogul magazinului.</p></div></article>
-          <article><span data-icon="package"></span><div><h3>Compatibilitate clară</h3><p>Afișăm numai informațiile de compatibilitate existente pentru produs.</p></div></article>
-          <article><span data-icon="truck"></span><div><h3>Livrare configurată</h3><p>Metodele și costurile active sunt confirmate la checkout.</p></div></article>
-          <article><span data-icon="headset"></span><div><h3>Suport dedicat</h3><p>Poți cere ajutor înainte de a alege produsul.</p></div></article>
-        </div>
+        <div class="cs-brand-strip" data-home-brands role="img" aria-label="Xiaomi, Ninebot, Kugoo, KuKirin, GoPro, Insta360, Samsung, Garmin, UGREEN și ANKER"></div>
       </div>
     </section>
 
     <section class="cs-section cs-guides-section" aria-labelledby="guides-title">
       <div class="cs-container">
-        <div class="cs-section-heading is-compact"><h2 id="guides-title">Instrumente utile</h2></div>
+        <div class="cs-guides-section__heading">
+          <div><p class="cs-guides-section__eyebrow">LA UN CLICK DISTANȚĂ</p><h2 id="guides-title">Instrumente utile<span aria-hidden="true">.</span></h2></div>
+          <p class="cs-guides-section__intro">Găsește. Urmărește. <strong>Întreabă.</strong></p>
+        </div>
         <div class="cs-guide-grid">
-          <a href="#compatibilitate"><span class="cs-guide-grid__art is-blue" data-guide-icon="search"></span><div><h3>Cum găsești produsul potrivit?</h3><p>Folosește selectorul construit din datele catalogului.</p><b>Verifică compatibilitatea →</b></div></a>
-          <a href="/urmarire-comanda"><span class="cs-guide-grid__art is-navy" data-guide-icon="truck"></span><div><h3>Unde este comanda mea?</h3><p>Verifică statusul cu datele primite după comandă.</p><b>Urmărește comanda →</b></div></a>
-          <a href="/contact"><span class="cs-guide-grid__art is-cyan" data-guide-icon="headset"></span><div><h3>Ai nevoie de ajutor?</h3><p>Trimite-ne detaliile produsului și ale dispozitivului tău.</p><b>Contactează-ne →</b></div></a>
+          <a class="cs-guide-card is-discover" href="/magazin">
+            <span class="cs-guide-card__scene" aria-hidden="true"><svg viewBox="0 0 180 130" fill="none" focusable="false"><rect x="30" y="24" width="98" height="78" rx="14" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-opacity=".4"/><rect x="42" y="36" width="27" height="22" rx="5" fill="currentColor" fill-opacity=".2"/><rect x="77" y="36" width="36" height="5" rx="2.5" fill="currentColor" fill-opacity=".6"/><rect x="77" y="48" width="24" height="4" rx="2" fill="currentColor" fill-opacity=".3"/><path d="M43 74h46m-46 12h32" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-opacity=".3"/><circle cx="119" cy="79" r="25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="3"/><path d="m137 98 17 17" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><path d="M151 22v12m-6-6h12M18 64v8m-4-4h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="157" cy="67" r="3" fill="currentColor"/></svg></span>
+            <span class="cs-guide-grid__art is-blue" data-guide-icon="search" aria-hidden="true"></span><span class="cs-guide-card__arrow" aria-hidden="true">↗</span><div><h3>Cum găsești produsul potrivit?</h3><p>Folosește filtrele construite din datele catalogului.</p><b>Deschide catalogul <span aria-hidden="true">→</span></b></div>
+          </a>
+          <a class="cs-guide-card is-track" href="/urmarire-comanda">
+            <span class="cs-guide-card__scene" aria-hidden="true"><svg viewBox="0 0 180 130" fill="none" focusable="false"><path d="M20 99h45c24 0 8-36 32-36h59" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 7" stroke-opacity=".5"/><circle cx="22" cy="99" r="6" fill="currentColor"/><circle cx="156" cy="63" r="13" fill="currentColor" fill-opacity=".12"/><path d="m150 63 4 4 8-9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="m56 39 31-16 31 16v36L87 92 56 75V39Z" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="m57 39 30 16 30-16M87 55v36M71 31l31 16v14" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M137 20v12m-6-6h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="38" cy="37" r="3" fill="currentColor" fill-opacity=".6"/></svg></span>
+            <span class="cs-guide-grid__art is-navy" data-guide-icon="truck" aria-hidden="true"></span><span class="cs-guide-card__arrow" aria-hidden="true">↗</span><div><h3>Unde este comanda mea?</h3><p>Verifică statusul cu datele primite după comandă.</p><b>Urmărește comanda <span aria-hidden="true">→</span></b></div>
+          </a>
+          <a class="cs-guide-card is-help" href="/contact">
+            <span class="cs-guide-card__scene" aria-hidden="true"><svg viewBox="0 0 180 130" fill="none" focusable="false"><path d="M49 23h78a13 13 0 0 1 13 13v39a13 13 0 0 1-13 13h-29l-21 16V88H49a13 13 0 0 1-13-13V36a13 13 0 0 1 13-13Z" fill="currentColor" fill-opacity=".09" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M66 59v-5a22 22 0 0 1 44 0v5m-43-3h-3a5 5 0 0 0-5 5v10a5 5 0 0 0 5 5h6V56h-3Zm43 0h3a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5h-6V56h3Zm0 21c0 9-8 10-18 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M153 97v12m-6-6h12M22 44v8m-4-4h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="155" cy="35" r="3" fill="currentColor"/></svg></span>
+            <span class="cs-guide-grid__art is-cyan" data-guide-icon="headset" aria-hidden="true"></span><span class="cs-guide-card__arrow" aria-hidden="true">↗</span><div><h3>Ai nevoie de ajutor?</h3><p>Trimite-ne detaliile produsului și ale dispozitivului tău.</p><b>Contactează-ne <span aria-hidden="true">→</span></b></div>
+          </a>
         </div>
       </div>
     </section>
 
     <section class="cs-newsletter" aria-labelledby="newsletter-title">
       <div class="cs-container cs-newsletter__inner">
-        <span class="cs-newsletter__icon" data-newsletter-icon></span>
-        <div><h2 id="newsletter-title">Abonează-te la newsletter</h2><p>Consimțământul pentru noutăți rămâne separat și opțional.</p></div>
-        <form data-newsletter-form><label class="sr-only" for="newsletter-email">Adresa de email</label><input id="newsletter-email" type="email" placeholder="Adresa ta de email…" required><button type="submit">Continuă</button></form>
-        <ul><li>Noutăți despre produse</li><li>Opțiune separată la checkout</li><li>Poți renunța oricând</li></ul>
-        <p class="cs-newsletter__message" data-newsletter-message hidden tabindex="-1"></p>
+        <div class="cs-newsletter__intro"><span class="cs-newsletter__icon" data-newsletter-icon aria-hidden="true"></span><div><h2 id="newsletter-title">Abonează-te la newsletter</h2><p>Primești noutăți, oferte și lansări de produse.</p></div></div>
+        <div class="cs-newsletter__signup">
+          <form data-newsletter-form>
+            <label class="cs-newsletter__field" for="newsletter-email"><span data-icon="mail" aria-hidden="true"></span><span class="sr-only">Adresa de email</span><input id="newsletter-email" name="email" type="email" autocomplete="email" maxlength="180" aria-describedby="newsletter-consent" placeholder="Adresa ta de email…" required></label>
+            <label class="cs-newsletter__trap" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+            <button type="submit"><span data-newsletter-label>Mă abonez</span><span data-icon="arrow" aria-hidden="true"></span></button>
+          </form>
+          <p id="newsletter-consent" class="cs-newsletter__consent">Prin apăsarea „Mă abonez”, accepți să primești noutăți și oferte prin email. Te poți dezabona oricând. <a href="/politica-de-confidentialitate">Confidențialitate</a></p>
+        </div>
+        <ul><li><span data-icon="check" aria-hidden="true"></span>Noutăți despre produse</li><li><span data-icon="check" aria-hidden="true"></span>Oferte exclusive</li><li><span data-icon="check" aria-hidden="true"></span>Te poți dezabona oricând</li></ul>
+        <p class="cs-newsletter__message" data-newsletter-message role="status" aria-live="polite" aria-atomic="true" hidden tabindex="-1"></p>
       </div>
     </section>
   </main>
 
   <div data-site-footer class="cs-footer-placeholder"></div>
-  <script type="module" src="/cubis-home.mjs?v=20261011-phase-c1"></script>
+  <script type="module" src="/cubis-home.mjs?v=20261012-carousel-fast"></script>
 </body>
 </html>

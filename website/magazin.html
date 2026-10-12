@@ -7,11 +7,13 @@
   <meta name="description" content="Toate produsele Cubis Shop, cu filtre după categorie, brand, producător, preț și disponibilitate.">
   <meta name="color-scheme" content="light">
   <link rel="canonical" href="https://cubisshop.ro/magazin">
-  <link rel="icon" href="/assets/cubis-favicon.png" type="image/png">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/cubis-storefront.css?v=20261011-phase-c1">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-cover">
+  <link rel="stylesheet" href="/cubis-catalog.css?v=20261012-page-size-25">
   <title>Toate produsele | Cubis Shop</title>
 </head>
 <body class="cs-page cs-catalog-page">
@@ -19,34 +21,48 @@
   <main id="main" class="cs-catalog-main">
     <div class="cs-container">
       <nav class="cs-breadcrumb" aria-label="Breadcrumb"><a href="/">Acasă</a><span>›</span><span aria-current="page">Magazin</span></nav>
-      <div class="cs-catalog-hero">
-        <div><h1>Toate produsele</h1><p>Descoperă gama publicată în catalogul Cubis Shop și folosește filtrele pentru a găsi rapid produsul potrivit.</p></div>
-        <a class="cs-assistance-card" href="/contact"><span data-assistance-icon></span><div><strong>Nu ești sigur ce produs ți se potrivește?</strong><small>Folosește filtrele sau cere ajutor pentru verificare.</small></div><b>Contactează-ne →</b></a>
-      </div>
-      <div class="cs-category-tabs" data-catalog-categories aria-label="Categorii principale"><div class="cs-loading-card">Se încarcă categoriile…</div></div>
+      <section class="cs-catalog-intro" aria-labelledby="catalog-page-title">
+        <div class="cs-catalog-hero">
+          <div class="cs-catalog-hero__copy">
+            <span class="cs-catalog-hero__eyebrow">Catalog Cubis Shop</span>
+            <h1 id="catalog-page-title">Magazin</h1>
+            <p>Descoperă toate produsele și folosește filtrele pentru a găsi rapid ceea ce ți se potrivește.</p>
+          </div>
+          <a class="cs-assistance-card" href="/contact"><span class="cs-assistance-card__icon" data-assistance-icon></span><div><strong>Ai nevoie de ajutor?</strong><small>Te ajutăm să alegi produsul potrivit.</small></div><b><span>Contactează-ne</span><i aria-hidden="true">→</i></b></a>
+        </div>
+        <div class="cs-category-carousel" data-category-carousel>
+          <button class="cs-category-carousel__control is-prev" type="button" data-category-prev aria-label="Categoriile anterioare" hidden><span aria-hidden="true">‹</span></button>
+          <div class="cs-category-tabs" data-catalog-categories aria-label="Categorii principale"><div class="cs-loading-card">Se încarcă categoriile…</div></div>
+          <button class="cs-category-carousel__control is-next" type="button" data-category-next aria-label="Următoarele categorii" hidden><span aria-hidden="true">›</span></button>
+        </div>
+      </section>
 
       <div class="cs-catalog-layout" id="catalog">
-        <button class="cs-mobile-filter-trigger" type="button" data-filter-open><span data-filter-icon></span>Filtrează produsele <b data-mobile-filter-count hidden>0</b></button>
-        <aside class="cs-filter-panel" data-filter-panel aria-label="Filtre produse">
-          <div class="cs-filter-panel__mobile-head"><strong>Filtrează produsele</strong><button type="button" data-filter-close aria-label="Închide filtrele">×</button></div>
-          <div class="cs-filter-panel__head"><strong>Filtrează produsele</strong><button type="button" data-reset-filters>Resetează filtrele ↻</button></div>
-          <fieldset class="cs-filter-group"><legend>Categorie</legend><div class="cs-filter-options" data-filter-categories></div></fieldset>
-          <fieldset class="cs-filter-group"><legend>Brand</legend><div class="cs-filter-options" data-filter-brands></div></fieldset>
-          <fieldset class="cs-filter-group"><legend>Producător</legend><div class="cs-filter-options" data-filter-manufacturers></div></fieldset>
-          <fieldset class="cs-filter-group"><legend>Preț</legend><div class="cs-price-filter"><div><label><span>Minim</span><input name="price_min" type="number" min="0" step="1"></label><label><span>Maxim</span><input name="price_max" type="number" min="0" step="1"></label></div><input class="cs-price-range" name="price_range" type="range" min="0" max="1000" step="1" aria-label="Preț maxim"></div></fieldset>
-          <fieldset class="cs-filter-group"><legend>Disponibilitate</legend><div class="cs-filter-options"><label><input type="checkbox" name="availability" value="in_stock"><span>În stoc</span><b data-count-in-stock>0</b></label><label><input type="checkbox" name="availability" value="out_of_stock"><span>Stoc epuizat</span><b data-count-out-stock>0</b></label></div></fieldset>
-          <div class="cs-filter-help"><span>?</span><div><strong>Ai nevoie de ajutor?</strong><p>Trimite-ne SKU-ul sau detaliile produsului.</p><a href="/contact">Cere ajutor →</a></div></div>
+        <div class="cs-mobile-catalog-controls">
+          <button class="cs-mobile-filter-trigger" type="button" data-filter-open aria-expanded="false" aria-controls="catalog-filter-panel"><span data-filter-icon></span><span>Filtrează</span><b data-mobile-filter-count hidden>0</b></button>
+          <label class="cs-mobile-sort"><span class="cs-mobile-sort__icon" aria-hidden="true">⇅</span><span><b>Sortează</b><small data-mobile-sort-label>Recomandate</small></span><select data-catalog-sort aria-label="Sortează produsele"><option value="recommended">Recomandate</option><option value="price_asc">Preț crescător</option><option value="price_desc">Preț descrescător</option><option value="name_asc">Nume A–Z</option><option value="rating_desc">Rating</option></select><span class="cs-mobile-sort__chevron" aria-hidden="true">⌄</span></label>
+        </div>
+        <aside class="cs-filter-panel" id="catalog-filter-panel" data-filter-panel aria-label="Filtre produse">
+          <div class="cs-filter-panel__mobile-head"><strong>Filtrează produsele</strong><div><button class="cs-filter-panel__mobile-reset" type="button" data-reset-filters><span data-reset-filter-icon></span><span>Resetează</span></button><button class="cs-filter-panel__mobile-close" type="button" data-filter-close aria-label="Închide filtrele"><span data-filter-close-icon aria-hidden="true"></span></button></div></div>
+          <div class="cs-filter-panel__head"><div><strong>Filtre produse</strong><small>Alege rapid ce ți se potrivește</small></div><button type="button" data-reset-filters><span data-reset-filter-icon></span><span>Resetează</span></button></div>
+          <fieldset class="cs-filter-group is-collapsed"><legend><button type="button" data-filter-group-toggle aria-expanded="false"><span data-filter-group-icon="grid"></span><span>Categorie</span><span class="cs-filter-group__chevron" data-filter-chevron aria-hidden="true"></span></button></legend><div class="cs-filter-group__body"><div class="cs-filter-options" data-filter-categories></div></div></fieldset>
+          <fieldset class="cs-filter-group is-collapsed"><legend><button type="button" data-filter-group-toggle aria-expanded="false"><span data-filter-group-icon="tag"></span><span>Brand</span><span class="cs-filter-group__chevron" data-filter-chevron aria-hidden="true"></span></button></legend><div class="cs-filter-group__body"><label class="cs-filter-search"><span data-brand-search-icon></span><input type="search" data-brand-filter-search placeholder="Caută brand…" autocomplete="off" aria-label="Caută în lista de branduri"></label><div class="cs-filter-options" data-filter-brands></div><p class="cs-filter-search-empty" data-brand-search-empty hidden>Niciun brand găsit.</p></div></fieldset>
+          <fieldset class="cs-filter-group is-collapsed"><legend><button type="button" data-filter-group-toggle aria-expanded="false"><span data-filter-group-icon="document"></span><span>Producător</span><span class="cs-filter-group__chevron" data-filter-chevron aria-hidden="true"></span></button></legend><div class="cs-filter-group__body"><div class="cs-filter-options" data-filter-manufacturers></div></div></fieldset>
+          <fieldset class="cs-filter-group is-collapsed"><legend><button type="button" data-filter-group-toggle aria-expanded="false"><span data-filter-group-icon="card"></span><span>Preț (RON)</span><span class="cs-filter-group__chevron" data-filter-chevron aria-hidden="true"></span></button></legend><div class="cs-filter-group__body"><div class="cs-price-filter"><div><label><span>De la</span><input name="price_min" type="number" min="0" step="1"></label><label><span>Până la</span><input name="price_max" type="number" min="0" step="1"></label></div><div class="cs-price-range-wrap"><input class="cs-price-range cs-price-range--min" name="price_range_min" type="range" min="0" max="1000" step="1" aria-label="Preț minim"><input class="cs-price-range cs-price-range--max" name="price_range" type="range" min="0" max="1000" step="1" aria-label="Preț maxim"></div><div class="cs-price-presets" aria-label="Intervale rapide de preț"><button type="button" data-price-preset="0:100">0–100</button><button type="button" data-price-preset="100:500">100–500</button><button type="button" data-price-preset="500:1000">500–1.000</button><button type="button" data-price-preset="1000:">1.000+</button></div></div></div></fieldset>
+          <fieldset class="cs-filter-group is-collapsed"><legend><button type="button" data-filter-group-toggle aria-expanded="false"><span data-filter-group-icon="package"></span><span>Disponibilitate</span><span class="cs-filter-group__chevron" data-filter-chevron aria-hidden="true"></span></button></legend><div class="cs-filter-group__body"><div class="cs-filter-options"><label><input type="checkbox" name="availability" value="in_stock"><span>În stoc</span><b data-count-in-stock>0</b></label><label><input type="checkbox" name="availability" value="out_of_stock"><span>Stoc epuizat</span><b data-count-out-stock>0</b></label></div></div></fieldset>
+          <div class="cs-filter-help"><span>?</span><div><strong>Ai nevoie de ajutor?</strong><p>Trimite-ne SKU-ul sau detaliile produsului.</p><a href="/contact">Cere ajutor <span aria-hidden="true">→</span></a></div><i data-filter-help-icon aria-hidden="true"></i></div>
           <button class="cs-button cs-button--primary cs-filter-apply" type="button" data-filter-close>Vezi rezultatele</button>
         </aside>
-        <button class="cs-filter-scrim" type="button" data-filter-close aria-label="Închide filtrele" hidden></button>
+        <button class="cs-filter-scrim" type="button" data-filter-scrim data-filter-close aria-label="Închide filtrele" hidden></button>
 
         <section class="cs-catalog-results" aria-labelledby="catalog-results-title">
           <form class="cs-compatibility-panel is-catalog" data-catalog-compatibility>
-            <div class="cs-compatibility-panel__intro"><span class="cs-compatibility-icon" aria-hidden="true">a<small>⌕</small></span><div><h2>Găsește rapid produsul compatibil</h2><p>Alege numai dintre opțiunile existente în catalog.</p></div></div>
-            <label><span>1. Alege categoria</span><select name="category"><option value="">Selectează categoria</option></select></label>
-            <label><span>2. Alege marca</span><select name="brand" disabled><option value="">Selectează marca</option></select></label>
-            <label><span>3. Alege producătorul</span><select name="manufacturer" disabled><option value="">Selectează producătorul</option></select></label>
-            <button type="submit" class="cs-button cs-button--primary">Caută produse</button>
+            <button class="cs-compatibility-mobile-summary" type="button" data-compatibility-mobile-toggle aria-expanded="false"><span data-compatibility-mobile-icon></span><span><strong>Găsește produsul potrivit</strong><small>Alege categoria, marca și producătorul.</small></span><span aria-hidden="true">›</span></button>
+            <div class="cs-compatibility-panel__intro"><span class="cs-compatibility-icon" data-compatibility-icon aria-hidden="true"></span><div><h2>Găsește produsul potrivit</h2><p>Alege categoria, marca și producătorul.</p></div></div>
+            <label><span><b>1</b>Alege categoria</span><select name="category"><option value="">Selectează categoria</option></select></label>
+            <label><span><b>2</b>Alege marca</span><select name="brand" disabled><option value="">Selectează marca</option></select></label>
+            <label><span><b>3</b>Alege producătorul</span><select name="manufacturer" disabled><option value="">Selectează producătorul</option></select></label>
+            <button type="submit" class="cs-button cs-button--primary"><span data-compatibility-search-icon></span>Caută produse</button>
           </form>
 
           <div class="cs-catalog-toolbar">
@@ -55,20 +71,21 @@
           </div>
 
           <div class="cs-product-grid cs-product-grid--catalog" data-catalog-grid aria-live="polite"><div class="cs-loading-card">Se încarcă produsele din API…</div></div>
-          <div class="cs-pagination-row"><nav class="cs-pagination" data-catalog-pagination aria-label="Paginare catalog"></nav><label>Produse pe pagină:<select data-page-size><option value="12">12</option><option value="24">24</option><option value="48">48</option></select></label></div>
+          <button class="cs-mobile-load-more" type="button" data-mobile-load-more hidden><span class="cs-mobile-load-more__label">Încarcă mai multe produse</span><span class="cs-mobile-load-more__icon" data-mobile-load-more-icon aria-hidden="true"></span></button>
+          <div class="cs-pagination-row"><nav class="cs-pagination" data-catalog-pagination aria-label="Paginare catalog"></nav><label>Produse pe pagină:<select data-page-size><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option></select></label></div>
         </section>
       </div>
 
       <div class="cs-catalog-trust">
-        <span><i data-catalog-trust="shield"></i><b>Date verificate</b><small>din catalogul API</small></span>
-        <span><i data-catalog-trust="truck"></i><b>Livrare configurată</b><small>confirmată la checkout</small></span>
-        <span><i data-catalog-trust="rotate"></i><b>Retur verificat</b><small>după eligibilitatea comenzii</small></span>
-        <span><i data-catalog-trust="lock"></i><b>Plată securizată</b><small>prin metodele active</small></span>
-        <span><i data-catalog-trust="headset"></i><b>Suport dedicat</b><small>pentru alegerea produsului</small></span>
+        <span><i data-catalog-trust="shield"></i><b>Produse verificate</b><small>Informații clare și produse atent selectate.</small></span>
+        <span><i data-catalog-trust="truck"></i><b>Livrare rapidă</b><small>Expediere promptă, cu urmărirea coletului.</small></span>
+        <span><i data-catalog-trust="rotate"></i><b>Retur ușor</b><small>Ai la dispoziție 14 zile pentru retur.</small></span>
+        <span><i data-catalog-trust="lock"></i><b>Plată securizată</b><small>Datele și tranzacțiile tale sunt protejate.</small></span>
+        <span><i data-catalog-trust="headset"></i><b>Suport dedicat</b><small>Suntem aici să te ajutăm să alegi corect.</small></span>
       </div>
     </div>
   </main>
   <div data-site-footer class="cs-footer-placeholder"></div>
-  <script type="module" src="/cubis-catalog.mjs?v=20261011-phase-c1"></script>
+  <script type="module" src="/cubis-catalog.mjs?v=20261012-page-size-25"></script>
 </body>
 </html>

@@ -89,6 +89,109 @@ function shopNewsletterSubscribeFromOrder(PDO $db, array $data): void {
     $stmt->execute([$id, $email, $email, $fullName, $phone, $orderId ?: null, $token]);
 }
 
+const SHOP_NEWSLETTER_CONSENT_VERSION = '2026-10-12';
+
+final class ShopNewsletterRateLimitException extends RuntimeException {
+    public function __construct(public readonly int $retryAfterSeconds) {
+        parent::__construct('Prea multe încercări de abonare. Încearcă din nou mai târziu.');
+    }
+}
+
+function shopNewsletterPublicEmail(array $data): string {
+    if (($data['consent'] ?? null) !== true
+        || ($data['consent_version'] ?? null) !== SHOP_NEWSLETTER_CONSENT_VERSION) {
+        throw new InvalidArgumentException('Confirmă acordul pentru primirea newsletterului.');
+    }
+    if (!is_string($data['email'] ?? null) || !is_string($data['website'] ?? '')) {
+        throw new InvalidArgumentException('Introdu o adresă de email validă.');
+    }
+    if (trim($data['website'] ?? '') !== '') {
+        throw new InvalidArgumentException('Cererea de abonare nu este validă.');
+    }
+    $raw = $data['email'];
+    $email = strtolower(trim($raw));
+    if (strlen($email) > 180 || preg_match('/[\r\n]/', $raw) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new InvalidArgumentException('Introdu o adresă de email validă (maximum 180 de caractere).');
+    }
+    return $email;
+}
+
+/** Atomic, bounded rate limit outside the web root; never stores plain email/IP. */
+function shopNewsletterPublicRateLimit(string $email, array $config, string $remoteIp, ?string $file = null, ?int $now = null): void {
+    $secret = trim((string)($config['api_key'] ?? ''));
+    if ($secret === '') throw new RuntimeException('Newsletter rate-limit secret is unavailable.');
+    $now ??= time();
+    if ($file === null) {
+        $directory = sys_get_temp_dir() . '/cubis-newsletter-' . substr(hash_hmac('sha256', 'rate-limit-directory', $secret), 0, 20);
+        if (is_link($directory) || (!is_dir($directory) && !@mkdir($directory, 0700, true) && !is_dir($directory))) {
+            throw new RuntimeException('Newsletter rate-limit directory is unavailable.');
+        }
+        $file = $directory . '/requests.json';
+    }
+    if (is_link($file)) throw new RuntimeException('Newsletter rate-limit storage is invalid.');
+    $handle = @fopen($file, 'c+');
+    if ($handle === false) throw new RuntimeException('Newsletter rate-limit storage is unavailable.');
+    @chmod($file, 0600);
+    try {
+        if (!flock($handle, LOCK_EX)) throw new RuntimeException('Newsletter rate-limit lock is unavailable.');
+        $raw = stream_get_contents($handle, 262145);
+        if ($raw === false || strlen($raw) > 262144) throw new RuntimeException('Newsletter rate-limit storage is invalid.');
+        $entries = $raw === '' ? [] : json_decode($raw, true, 8, JSON_THROW_ON_ERROR);
+        if (!is_array($entries) || count($entries) > 2048) throw new RuntimeException('Newsletter rate-limit storage is invalid.');
+        foreach ($entries as $key => $entry) {
+            if (!preg_match('/^[a-f0-9]{64}$/', (string)$key) || !is_array($entry)
+                || !is_int($entry['expires'] ?? null) || !is_int($entry['count'] ?? null) || $entry['count'] < 1) {
+                throw new RuntimeException('Newsletter rate-limit storage is invalid.');
+            }
+            if ($entry['expires'] <= $now) unset($entries[$key]);
+        }
+        $buckets = [
+            [hash_hmac('sha256', 'newsletter-ip|' . $remoteIp, $secret), 10, 900],
+            [hash_hmac('sha256', 'newsletter-email|' . $email, $secret), 3, 3600],
+        ];
+        $retryAfter = 0;
+        foreach ($buckets as [$key, $limit, $window]) {
+            if (($entries[$key]['count'] ?? 0) >= $limit) $retryAfter = max($retryAfter, $entries[$key]['expires'] - $now);
+        }
+        if ($retryAfter > 0) throw new ShopNewsletterRateLimitException($retryAfter);
+        foreach ($buckets as [$key, $limit, $window]) {
+            $entries[$key] ??= ['count' => 0, 'expires' => $now + $window];
+            $entries[$key]['count']++;
+        }
+        if (count($entries) > 2048) throw new RuntimeException('Newsletter rate-limit capacity reached.');
+        $encoded = json_encode($entries, JSON_THROW_ON_ERROR);
+        rewind($handle);
+        if (fwrite($handle, $encoded) !== strlen($encoded) || !ftruncate($handle, strlen($encoded)) || !fflush($handle)) {
+            throw new RuntimeException('Newsletter rate-limit storage could not be saved.');
+        }
+    } finally {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+    }
+}
+
+function shopNewsletterSubscribePublic(PDO $db, string $email): array {
+    $id = function_exists('uuidV4') ? uuidV4() : bin2hex(random_bytes(16));
+    $token = bin2hex(random_bytes(32));
+    $stmt = $db->prepare(
+        "INSERT INTO shop_newsletter_subscribers
+            (id, email, email_normalized, status, consent_source, consent_at, unsubscribe_token)
+         VALUES (?, ?, ?, 'subscribed', ?, NOW(), ?)
+         ON DUPLICATE KEY UPDATE
+            consent_source = CASE WHEN status <> 'subscribed' THEN VALUES(consent_source) ELSE consent_source END,
+            consent_at = CASE WHEN status <> 'subscribed' THEN NOW() ELSE consent_at END,
+            unsubscribe_token = CASE WHEN status <> 'subscribed' THEN VALUES(unsubscribe_token) ELSE unsubscribe_token END,
+            unsubscribed_at = NULL,
+            last_error = CASE WHEN status <> 'subscribed' THEN NULL ELSE last_error END,
+            status = 'subscribed'"
+    );
+    if (!$stmt->execute([$id, $email, $email, 'website_newsletter:' . SHOP_NEWSLETTER_CONSENT_VERSION, $token])) {
+        throw new RuntimeException('Newsletter subscription could not be saved.');
+    }
+    // Identical response for new, existing and explicitly resubscribed addresses.
+    return ['success' => true, 'message' => 'Abonarea ta este activă. Mulțumim! Te poți dezabona oricând din emailurile primite.'];
+}
+
 function shopNewsletterList(PDO $db): array {
     $rows = $db->query(
         "SELECT id, email, full_name, phone, status, consent_source, consent_at,

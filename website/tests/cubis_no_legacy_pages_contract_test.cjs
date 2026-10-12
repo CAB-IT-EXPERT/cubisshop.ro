@@ -17,14 +17,30 @@ function relative(absolute) {
 
 const files = walk(websiteRoot);
 const htmlFiles = files.filter((file) => path.extname(file) === ".html").map(relative).sort();
-assert.deepEqual(htmlFiles, ["404.html", "index.html", "magazin.html", "produs.html"]);
+assert.deepEqual(htmlFiles, ["404.html", "contact.html", "cos.html", "favorite.html", "index.html", "magazin.html", "produs.html"]);
 
 const assetFiles = files
   .filter((file) => relative(file).startsWith("assets/"))
   .map(relative)
   .sort();
 assert.deepEqual(assetFiles, [
+  "assets/anpc-sal.png",
+  "assets/brands/anker.svg",
+  "assets/brands/garmin.svg",
+  "assets/brands/gopro.svg",
+  "assets/brands/insta360.svg",
+  "assets/brands/kugoo.svg",
+  "assets/brands/kukirin.webp",
+  "assets/brands/ninebot.png",
+  "assets/brands/samsung.svg",
+  "assets/brands/ugreen.png",
+  "assets/brands/xiaomi.svg",
+  "assets/cab-it-original.png",
   "assets/cubis-favicon.png",
+  "assets/cubis-home-hero-background.png",
+  "assets/cubis-home-hero-desktop.png",
+  "assets/cubis-home-hero-mobile.png",
+  "assets/cubis-popular-brands-strip.png",
   "assets/cubis-shop-icon.png",
   "assets/cubis-shop-logo.png",
 ]);

@@ -36,6 +36,14 @@ const dateTime = (value?: string | null, fallback = '—') => value
   ? new Intl.DateTimeFormat('ro-RO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value.replace(' ', 'T')))
   : fallback;
 
+const consentSourceLabel = (source?: string | null) => {
+  const value = String(source || '').toLowerCase();
+  if (value.startsWith('website_newsletter')) return 'Newsletter website';
+  if (value === 'checkout_historical') return 'Checkout · istoric';
+  if (value === 'checkout') return 'Checkout';
+  return 'Consimțământ';
+};
+
 function initials(name: string, email: string) {
   const source = String(name || '').trim() || email.split('@')[0] || 'A';
   return source.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'A';
@@ -130,12 +138,12 @@ export default function ShopNewsletterSubscribersManager({ onSearchFocus }: { on
         </View>
         <View style={styles.cardDetails}>
           <Contact Icon={Phone} label="Telefon" value={item.phone || 'Necompletat'} />
-          <Contact Icon={CalendarDays} label={item.consent_source === 'checkout_historical' ? 'Checkout · istoric' : 'Consimțământ'} value={dateTime(item.consent_at)} />
+          <Contact Icon={CalendarDays} label={consentSourceLabel(item.consent_source)} value={dateTime(item.consent_at)} />
         </View>
         <View style={[styles.activity, !item.is_subscribed && styles.activityOff]}>{item.is_subscribed ? <BellRing size={15} color="#9B6100" /> : <MailX size={15} color="#C43650" />}<View style={styles.activityCopy}><Text style={styles.activityLabel}>{item.is_subscribed ? 'Ultima notificare' : 'Dezabonare'}</Text><Text style={styles.activityValue}>{item.is_subscribed ? dateTime(item.last_notified_at, 'Nicio notificare trimisă') : dateTime(item.unsubscribed_at)}</Text></View></View>
         {item.last_error ? <View style={styles.error}><View style={styles.errorIcon}><X size={13} color="#C43650" /></View><Text numberOfLines={3} style={styles.errorText}>{item.last_error}</Text></View> : null}
       </View>)}
-      {!visible.length ? <View style={styles.empty}><MailCheck size={30} color="#087FF5" /><Text style={styles.emptyTitle}>Nicio înregistrare aici</Text><Text style={styles.emptyText}>{query ? 'Schimbă termenul de căutare.' : 'Abonații vor apărea automat după ce bifează opțiunea la checkout.'}</Text></View> : null}
+      {!visible.length ? <View style={styles.empty}><MailCheck size={30} color="#087FF5" /><Text style={styles.emptyTitle}>Nicio înregistrare aici</Text><Text style={styles.emptyText}>{query ? 'Schimbă termenul de căutare.' : 'Abonații vor apărea automat după abonarea din website sau din checkout.'}</Text></View> : null}
     </Animated.View>
 
     {filtered.length ? <View style={styles.pagination}><TouchableOpacity disabled={safePage === 1} style={[styles.pageButton, safePage === 1 && styles.disabled]} onPress={() => setPage((current) => Math.max(1, current - 1))}><Text style={styles.pageButtonText}>‹</Text></TouchableOpacity><View style={styles.pageStatus}><Text style={styles.pageStatusText}>{safePage} / {totalPages}</Text></View><TouchableOpacity disabled={safePage === totalPages} style={[styles.pageButton, safePage === totalPages && styles.disabled]} onPress={() => setPage((current) => Math.min(totalPages, current + 1))}><Text style={styles.pageButtonText}>›</Text></TouchableOpacity></View> : null}

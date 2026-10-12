@@ -32,8 +32,10 @@ Sistemul este implementat central în `website/cubis-storefront.css`; cele trei 
 - panou de compatibilitate dependent de opțiunile realmente disponibile;
 - filtre desktop și drawer mobil;
 - galerie, cumpărare, specificații, compatibilitate și recenzii pentru produs;
-- newsletter prezentat fără a simula o înscriere, deoarece API-ul nu expune un endpoint public separat;
+- newsletter conectat prin modulul comun `cubis-newsletter.mjs` la `subscribePublicNewsletter`: consimțământ informat, validare email, stare de trimitere și confirmare numai după salvare; scrierile sunt blocate în DEMO;
 - footer Cubis cu linkurile comerciale existente.
+
+Endpointul standalone a fost implementat local la 12 octombrie 2026, cu aprobarea utilizatorului. Nu a fost publicat: serverul local proxy către API-ul live nu poate salva încă prin această acțiune și formularul afișează indisponibilitatea, fără succes simulat.
 
 ## Responsive
 

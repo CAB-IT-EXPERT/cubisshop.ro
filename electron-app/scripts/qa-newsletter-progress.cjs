@@ -152,12 +152,23 @@ app.whenReady().then(async () => {
     title: document.getElementById('shop-product-save-title').textContent,
     percent: document.getElementById('shop-product-save-percent').textContent,
     stage: document.getElementById('shop-product-save-stage').textContent,
-    steps: document.querySelectorAll('#shop-product-save-steps span').length
+    steps: document.querySelectorAll('#shop-product-save-steps span').length,
+    stepLabels: document.querySelectorAll('#shop-product-save-steps span small').length,
+    palette: (() => {
+      const card = getComputedStyle(document.querySelector('.shop-product-save-card'));
+      const title = getComputedStyle(document.getElementById('shop-product-save-title'));
+      const track = getComputedStyle(document.querySelector('.shop-product-save-track'));
+      return { cardColor: card.color, titleColor: title.color, trackBackground: track.backgroundColor };
+    })()
   }))()`);
   await wait(2200);
   const after = await win.webContents.executeJavaScript(`({ hidden: document.getElementById('shop-product-save-progress').hidden })`);
   const passed = during.visible
     && during.steps === 5
+    && during.stepLabels === 5
+    && during.palette.cardColor === 'rgb(23, 43, 64)'
+    && during.palette.titleColor === 'rgb(23, 43, 64)'
+    && during.palette.trackBackground !== 'rgb(12, 11, 11)'
     && after.hidden
     && newsletterLayout.subscriberCards === 12
     && !newsletterLayout.hasHorizontalOverflow

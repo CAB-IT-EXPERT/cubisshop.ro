@@ -282,16 +282,17 @@
 
   function productSaveProgressOverlay() {
     return `<div class="shop-product-save-overlay" id="shop-product-save-progress" hidden role="dialog" aria-modal="true" aria-labelledby="shop-product-save-title">
-      <section class="shop-product-save-card">
+      <section class="shop-product-save-card" aria-live="polite">
         <span class="shop-product-save-glow glow-a" aria-hidden="true"></span><span class="shop-product-save-glow glow-b" aria-hidden="true"></span>
         <div class="shop-product-save-visual" aria-hidden="true"><span class="shop-product-save-orbit"><i></i></span><span class="shop-product-save-core"><svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5V3Z"/><path d="M8 3v6h8V3M8 21v-8h8v8"/></svg></span></div>
-        <small id="shop-product-save-kicker">PRODUS NOU</small>
+        <div class="shop-product-save-eyebrow"><small id="shop-product-save-kicker">Produs nou</small><span id="shop-product-save-status"><i></i>Se salvează</span></div>
         <h2 id="shop-product-save-title">Îl pregătim pentru magazin.</h2>
         <p id="shop-product-save-stage">Validăm datele și imaginile</p>
-        <div class="shop-product-save-track"><span id="shop-product-save-fill"><i></i></span></div>
-        <div class="shop-product-save-meta"><strong id="shop-product-save-percent">5%</strong><span id="shop-product-save-eta">aprox. 24 sec.</span></div>
-        <div class="shop-product-save-steps" id="shop-product-save-steps" aria-hidden="true"></div>
-        <em>Poți lăsa ecranul deschis. Fereastra se închide automat când salvarea este completă.</em>
+        <div class="shop-product-save-progress-label"><span>Progres</span><strong id="shop-product-save-percent">5%</strong></div>
+        <div class="shop-product-save-track" id="shop-product-save-track" role="progressbar" aria-label="Progres salvare produs" aria-valuemin="0" aria-valuemax="100" aria-valuenow="5"><span id="shop-product-save-fill"><i></i></span></div>
+        <div class="shop-product-save-meta"><span id="shop-product-save-eta">aprox. 24 sec.</span></div>
+        <div class="shop-product-save-steps" id="shop-product-save-steps" aria-label="Etapele salvării"></div>
+        <em><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2"/><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M12 14v3"/></svg><span>Poți continua fără griji. Fereastra se închide automat după salvare.</span></em>
       </section>
     </div>`;
   }
@@ -1979,19 +1980,26 @@
     const stages = mode === 'create'
       ? ['Validăm datele și imaginile', 'Salvăm produsul în catalog', 'Sincronizăm canalele de vânzare', 'Generăm pagina publică și SEO', 'Pregătim noutatea pentru abonați']
       : ['Validăm modificările', 'Actualizăm produsul în catalog', 'Sincronizăm prețul și stocul', 'Regenerăm pagina publică', 'Reîmprospătăm lista de produse'];
+    const stepLabels = mode === 'create'
+      ? ['Validare', 'Catalog', 'Sincronizare', 'Pagină', 'Finalizare']
+      : ['Validare', 'Catalog', 'Sincronizare', 'Pagină', 'Actualizare'];
     const stageIndex = Math.min(stages.length - 1, Math.floor(progress / 20));
     $('shop-product-save-fill').style.width = `${progress}%`;
     $('shop-product-save-percent').textContent = `${progress}%`;
+    $('shop-product-save-track').setAttribute('aria-valuenow', String(progress));
     $('shop-product-save-eta').textContent = remaining > 0 ? `aprox. ${remaining} sec.` : 'ultimele verificări…';
     $('shop-product-save-stage').textContent = stages[stageIndex];
-    $('shop-product-save-steps').innerHTML = stages.map((stage, index) => `<span class="${index <= stageIndex ? 'active' : ''} ${index < stageIndex ? 'done' : ''}" title="${esc(stage)}">${index < stageIndex ? '✓' : index + 1}</span>`).join('');
+    $('shop-product-save-steps').innerHTML = stages.map((stage, index) => `<span class="${index <= stageIndex ? 'active' : ''} ${index < stageIndex ? 'done' : ''}" aria-label="${esc(stage)}" ${index === stageIndex ? 'aria-current="step"' : ''}><i>${index < stageIndex ? '✓' : index + 1}</i><small>${esc(stepLabels[index])}</small></span>`).join('');
   }
 
   function startProductSaveProgress(mode) {
     const overlay = $('shop-product-save-progress');
     if (!overlay) return;
     clearInterval(state.productSaveProgressTimer);
-    $('shop-product-save-kicker').textContent = mode === 'create' ? 'PRODUS NOU' : 'ACTUALIZARE PRODUS';
+    overlay.dataset.state = 'saving';
+    overlay.dataset.mode = mode;
+    $('shop-product-save-kicker').textContent = mode === 'create' ? 'Produs nou' : 'Actualizare produs';
+    $('shop-product-save-status').innerHTML = '<i></i>Se salvează';
     $('shop-product-save-title').textContent = mode === 'create' ? 'Îl pregătim pentru magazin.' : 'Salvăm toate modificările.';
     overlay.hidden = false;
     const startedAt = Date.now();
@@ -1999,19 +2007,31 @@
     state.productSaveProgressTimer = setInterval(() => updateProductSaveProgress(mode, Date.now() - startedAt), 300);
   }
 
-  function stopProductSaveProgress() {
+  function stopProductSaveProgress(success = true) {
     clearInterval(state.productSaveProgressTimer);
     state.productSaveProgressTimer = null;
     const overlay = $('shop-product-save-progress');
-    if (!overlay) return;
+    if (!overlay || overlay.hidden) return;
+    if (!success) {
+      overlay.hidden = true;
+      overlay.dataset.state = '';
+      return;
+    }
+    overlay.dataset.state = 'complete';
     $('shop-product-save-fill').style.width = '100%';
     $('shop-product-save-percent').textContent = '100%';
-    $('shop-product-save-eta').textContent = 'salvat complet';
-    window.setTimeout(() => { overlay.hidden = true; }, 260);
+    $('shop-product-save-track').setAttribute('aria-valuenow', '100');
+    $('shop-product-save-status').innerHTML = '<i></i>Salvat';
+    $('shop-product-save-stage').textContent = 'Toate actualizările sunt în regulă.';
+    $('shop-product-save-title').textContent = overlay.dataset.mode === 'create' ? 'Produsul este pregătit.' : 'Modificările au fost salvate.';
+    $('shop-product-save-eta').textContent = 'finalizat';
+    $('shop-product-save-steps').querySelectorAll('span').forEach(step => { step.className = 'active done'; step.removeAttribute('aria-current'); });
+    window.setTimeout(() => { overlay.hidden = true; overlay.dataset.state = ''; }, 520);
   }
 
   async function saveProduct(event) {
     event.preventDefault(); const button = $('shop-product-save'); button.disabled = true;
+    let saveSucceeded = false;
     try {
       if (!validateProductName()) { $('shop-product-name').focus(); throw new Error('Acest nume de produs exista deja.'); }
       const price = Number($('shop-product-price').value); const costPrice = Number(state.editingProduct?.cost_price || 0); const discount = Number($('shop-product-discount-value').value || 0); const discountType = $('shop-product-discount-type').value; const source = state.sources.find(item => item.id === $('shop-product-source').value);
@@ -2035,9 +2055,10 @@
       if (saved.stripe_sync_status === 'error') warnings.push(`Stripe: ${saved.stripe_sync_error || 'sincronizarea trebuie reincercata.'}`);
       if (saved.seo_page && !saved.seo_page.success) warnings.push(`Pagina Google: ${saved.seo_page.error || 'generarea trebuie reincercata.'}`);
       if (saved.newsletter_notification?.failed) warnings.push(`Newsletter: ${saved.newsletter_notification.failed} e-mailuri nu au putut fi trimise. Detaliile apar în Abonați newsletter.`);
+      saveSucceeded = true;
       toast(warnings.length ? `Produs salvat. ${warnings.join(' · ')}` : 'Produsul, pagina SEO si sincronizarea au fost salvate.', warnings.length ? 'error' : 'success');
       await loadProducts();
-    } catch (error) { toast(error.message || 'Produsul nu a putut fi salvat.', 'error'); } finally { stopProductSaveProgress(); button.disabled = false; }
+    } catch (error) { toast(error.message || 'Produsul nu a putut fi salvat.', 'error'); } finally { stopProductSaveProgress(saveSucceeded); button.disabled = false; }
   }
   async function deleteProduct(id) { const product = state.products.find(item => item.id === id); if (!product || !confirm(`Stergi definitiv produsul „${product.name}”? Toate pozele lui vor fi sterse de pe server.`)) return; try { const result = await window.SHOP_API.deleteProduct(id); if (!result?.success || result.deleted_id !== id) throw new Error('Serverul nu a confirmat stergerea produsului.'); state.products = state.products.filter(item => item.id !== id); renderProducts(); await loadProducts(); if (state.products.some(item => item.id === id)) throw new Error('Produsul apare inca in catalog dupa stergere. Reincarca si incearca din nou.'); toast(`Produsul a fost sters definitiv${result.deleted_files ? ` impreuna cu ${result.deleted_files} fisiere` : ''}.`); } catch (error) { toast(error.message, 'error'); } }
 
@@ -3636,6 +3657,14 @@
     });
   }
 
+  function newsletterConsentSourceLabel(source) {
+    const value = String(source || '').toLowerCase();
+    if (value.startsWith('website_newsletter')) return 'Newsletter website';
+    if (value === 'checkout_historical') return 'Checkout · istoric';
+    if (value === 'checkout') return 'Checkout';
+    return 'Consimțământ';
+  }
+
   function renderNewsletterResults() {
     const host = $('shop-newsletter-results');
     if (!host) return;
@@ -3661,7 +3690,7 @@
             : `Dezabonat la ${dateTime(subscriber.unsubscribed_at)}`;
       return `<article class="shop-newsletter-card ${subscribed ? 'subscribed' : 'unsubscribed'}" style="--newsletter-index:${index}">
         <div class="shop-newsletter-person"><span class="shop-newsletter-avatar">${esc(initial)}<i></i></span><div class="shop-newsletter-copy"><strong>${esc(subscriber.full_name || 'Client fără nume')}</strong><a href="mailto:${esc(subscriber.email)}" data-newsletter-link>${esc(subscriber.email)}</a><span>${subscriber.phone ? esc(subscriber.phone) : 'Telefon necompletat'}</span><em class="${subscriber.last_error ? 'error' : ''}">${esc(activityLabel)}</em></div></div>
-        <div class="shop-newsletter-consent"><small>Sursă consimțământ</small><strong>${esc(subscriber.consent_source === 'checkout_historical' ? 'Checkout · istoric' : 'Checkout')}</strong><span>${esc(dateTime(subscriber.consent_at || subscriber.created_at))}</span></div>
+        <div class="shop-newsletter-consent"><small>Sursă consimțământ</small><strong>${esc(newsletterConsentSourceLabel(subscriber.consent_source))}</strong><span>${esc(dateTime(subscriber.consent_at || subscriber.created_at))}</span></div>
         <b class="shop-newsletter-status ${subscribed ? 'subscribed' : 'unsubscribed'}">${statusIcon}<span>${subscribed ? 'Abonat' : 'Dezabonat'}</span></b>
       </article>`;
     }).join('');

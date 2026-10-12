@@ -8,11 +8,12 @@
   <meta name="color-scheme" content="light">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://cubisshop.ro/magazin">
-  <link rel="icon" href="/assets/cubis-favicon.png" type="image/png">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/cubis-storefront.css?v=20261011-phase-c1">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-product-modern-6">
   <title>Produs | Cubis Shop</title>
 </head>
 <body class="cs-page cs-product-page">
@@ -62,7 +63,7 @@
           <div class="cs-delivery-card" data-delivery-card></div>
           <div class="cs-product-actions">
             <label class="cs-quantity" aria-label="Cantitate"><button type="button" data-quantity-minus aria-label="Scade cantitatea">−</button><input data-quantity type="number" min="1" max="99" value="1" inputmode="numeric"><button type="button" data-quantity-plus aria-label="Crește cantitatea">+</button></label>
-            <button class="cs-product-add" type="button" data-main-add><span aria-hidden="true">🛒</span><strong>Adaugă în coș</strong></button>
+            <button class="cs-product-add" type="button" data-main-add><span data-main-add-icon aria-hidden="true"></span><strong>Adaugă în coș</strong></button>
             <button class="cs-product-favorite" type="button" data-main-favorite aria-label="Adaugă la favorite" aria-pressed="false">♡</button>
           </div>
           <div class="cs-product-mini-benefits" data-product-benefits></div>
@@ -79,6 +80,8 @@
           <button type="button" role="tab" aria-selected="false" data-product-tab="reviews">Recenzii <span data-product-review-count></span></button>
           <button type="button" role="tab" aria-selected="false" data-product-tab="delivery">Livrare și retur</button>
         </div>
+        <button class="cs-product-tabs-back" type="button" data-product-tabs-back aria-label="Vezi secțiunile anterioare" hidden></button>
+        <button class="cs-product-tabs-more" type="button" data-product-tabs-more aria-label="Vezi următoarele secțiuni" hidden></button>
         <div class="cs-product-panels">
           <section role="tabpanel" data-product-panel="description"></section>
           <section role="tabpanel" data-product-panel="specifications" hidden></section>
@@ -88,9 +91,12 @@
         </div>
       </section>
 
-      <section class="cs-related cs-section" data-related-section hidden aria-labelledby="related-title">
-        <div class="cs-section-heading"><h2 id="related-title">Produse similare</h2><a href="/magazin">Vezi toate produsele <span>→</span></a></div>
-        <div class="cs-product-grid cs-product-grid--six" data-related-grid></div>
+      <section class="cs-related cs-section cs-products-section" data-related-section hidden aria-labelledby="related-title">
+        <div class="cs-section-heading cs-related-heading"><div><p>DESCOPERĂ ȘI ALTE OPȚIUNI</p><h2 id="related-title">Produse similare<span aria-hidden="true">.</span></h2></div><a href="/magazin">Vezi toate produsele <span aria-hidden="true">↗</span></a></div>
+        <div class="cs-product-carousel" data-related-carousel>
+          <div class="cs-product-grid cs-product-grid--carousel" data-related-grid tabindex="0" role="region" aria-label="Produse similare"></div>
+          <div class="cs-carousel-controls"><span data-related-carousel-count aria-live="off"></span><div class="cs-carousel-progress" aria-hidden="true"><span data-related-carousel-progress></span></div><button type="button" data-related-carousel-prev aria-label="Produsele similare anterioare"></button><button type="button" data-related-carousel-next aria-label="Produsele similare următoare"></button></div>
+        </div>
       </section>
     </div>
   </main>
@@ -102,15 +108,21 @@
 
   <section class="cs-newsletter" aria-labelledby="product-newsletter-title">
     <div class="cs-container cs-newsletter__inner">
-      <span class="cs-newsletter__icon" data-newsletter-icon></span>
-      <div><h2 id="product-newsletter-title">Abonează-te la newsletter</h2><p>Consimțământul pentru noutăți rămâne separat și opțional.</p></div>
-      <form data-newsletter-form><label class="sr-only" for="product-newsletter-email">Adresa de email</label><input id="product-newsletter-email" type="email" placeholder="Adresa ta de email…" required><button type="submit">Continuă</button></form>
-      <ul><li>Noutăți despre produse</li><li>Opțiune separată la checkout</li><li>Poți renunța oricând</li></ul>
-      <p class="cs-newsletter__message" data-newsletter-message hidden tabindex="-1"></p>
+      <div class="cs-newsletter__intro"><span class="cs-newsletter__icon" data-newsletter-icon aria-hidden="true"></span><div><h2 id="product-newsletter-title">Abonează-te la newsletter</h2><p>Primești noutăți, oferte și lansări de produse.</p></div></div>
+      <div class="cs-newsletter__signup">
+        <form data-newsletter-form>
+          <label class="cs-newsletter__field" for="product-newsletter-email"><span class="sr-only">Adresa de email</span><input id="product-newsletter-email" name="email" type="email" autocomplete="email" maxlength="180" aria-describedby="product-newsletter-consent" placeholder="Adresa ta de email…" required></label>
+          <label class="cs-newsletter__trap" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+          <button type="submit"><span data-newsletter-label>Mă abonez</span></button>
+        </form>
+        <p id="product-newsletter-consent" class="cs-newsletter__consent">Prin apăsarea „Mă abonez”, accepți să primești noutăți și oferte prin email. Te poți dezabona oricând. <a href="/politica-de-confidentialitate">Confidențialitate</a></p>
+      </div>
+      <ul><li>Noutăți despre produse</li><li>Oferte exclusive</li><li>Poți renunța oricând</li></ul>
+      <p class="cs-newsletter__message" data-newsletter-message role="status" aria-live="polite" aria-atomic="true" hidden tabindex="-1"></p>
     </div>
   </section>
 
   <div data-site-footer class="cs-footer-placeholder"></div>
-  <script type="module" src="/cubis-product.mjs?v=20261011-phase-c1"></script>
+  <script type="module" src="/cubis-product.mjs?v=20261012-product-modern-6"></script>
 </body>
 </html>

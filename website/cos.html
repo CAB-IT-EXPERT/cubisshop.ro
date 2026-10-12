@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073a69">
+  <meta name="description" content="Verifică produsele din coșul tău Cubis Shop, modifică rapid cantitățile și pregătește comanda.">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://cubisshop.ro/cos">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-scroll">
+  <link rel="stylesheet" href="/cubis-cart.css?v=20261012-cart-1">
+  <title>Coșul meu | Cubis Shop</title>
+</head>
+<body class="cs-page cs-cart-page">
+  <div data-site-header class="cs-shell-placeholder"></div>
+
+  <main id="main" class="cs-cart-main">
+    <div class="cs-container">
+      <nav class="cs-breadcrumb cs-cart-breadcrumb" aria-label="Breadcrumb"><a href="/">Acasă</a><span aria-hidden="true">›</span><span aria-current="page">Coșul meu</span></nav>
+
+      <section class="cs-cart-hero" aria-labelledby="cart-page-title">
+        <div class="cs-cart-hero__content">
+          <span class="cs-cart-eyebrow"><i aria-hidden="true"></i> Coșul tău Cubis Shop</span>
+          <h1 id="cart-page-title">Coșul tău<br><em>de cumpărături.</em></h1>
+          <p>Produsele alese sunt pregătite aici pentru o ultimă verificare înainte de comandă.</p>
+        </div>
+        <div class="cs-cart-hero__visual" aria-hidden="true">
+          <span class="cs-cart-hero__orbit is-one"></span><span class="cs-cart-hero__orbit is-two"></span>
+          <div class="cs-cart-hero__icon" data-cart-hero-icon></div>
+          <strong data-cart-hero-count>0 produse</strong>
+        </div>
+      </section>
+
+      <div class="cs-cart-loading" data-cart-loading role="status"><span class="cs-spinner"></span><strong>Pregătim coșul tău…</strong></div>
+
+      <section class="cs-cart-empty" data-cart-empty hidden aria-labelledby="cart-empty-title">
+        <span data-cart-empty-icon aria-hidden="true"></span>
+        <h2 id="cart-empty-title">Coșul tău așteaptă primul produs</h2>
+        <p>Descoperă catalogul Cubis Shop și adaugă produsele care ți se potrivesc.</p>
+        <a href="/magazin#catalog">Descoperă produsele <span aria-hidden="true">→</span></a>
+      </section>
+
+      <section class="cs-cart-layout" data-cart-content hidden aria-label="Produsele și rezumatul coșului">
+        <div class="cs-cart-products-card">
+          <header class="cs-cart-section-head">
+            <div><span>Produsele tale</span><h2>Coș de cumpărături</h2></div>
+            <strong data-cart-list-count>0 produse</strong>
+          </header>
+          <div class="cs-cart-items" data-cart-items aria-live="polite"></div>
+          <a class="cs-cart-continue" href="/magazin#catalog"><span aria-hidden="true">←</span> Continuă cumpărăturile</a>
+        </div>
+
+        <aside class="cs-cart-summary" aria-labelledby="cart-summary-title">
+          <span class="cs-cart-summary__glow" aria-hidden="true"></span>
+          <div class="cs-cart-summary__eyebrow">Rezumat comandă</div>
+          <h2 id="cart-summary-title">Totalul tău</h2>
+
+          <dl class="cs-cart-totals">
+            <div><dt>Subtotal</dt><dd data-cart-subtotal>0,00 RON</dd></div>
+            <div data-cart-savings-row hidden><dt>Economisești</dt><dd data-cart-savings>0,00 RON</dd></div>
+            <div><dt>Livrare</dt><dd>Se calculează la checkout</dd></div>
+          </dl>
+
+          <div class="cs-cart-grand-total">
+            <span>Total produse<small>Costul livrării nu este inclus</small></span>
+            <strong data-cart-total>0,00 RON</strong>
+          </div>
+
+          <button class="cs-cart-checkout" type="button" data-cart-checkout>
+            <span data-cart-checkout-icon aria-hidden="true"></span>
+            <b>Finalizează comanda</b>
+            <i data-cart-checkout-arrow aria-hidden="true"></i>
+          </button>
+          <p class="cs-cart-checkout-note">Livrarea și metoda de plată se aleg în pasul următor, înainte de trimiterea comenzii.</p>
+
+          <div class="cs-cart-assurances" aria-label="Avantajele comenzii Cubis Shop">
+            <article><span data-assurance-icon="shield"></span><p><strong>Produse verificate</strong><small>Informații clare înainte de comandă.</small></p></article>
+            <article><span data-assurance-icon="headset"></span><p><strong>Suport dedicat</strong><small>Primești ajutor când ai nevoie.</small></p></article>
+            <article><span data-assurance-icon="lock"></span><p><strong>Comandă în siguranță</strong><small>Datele tale rămân protejate.</small></p></article>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <div class="cs-cart-toast" data-cart-toast role="status" aria-live="polite" aria-atomic="true" hidden></div>
+  <div data-site-footer class="cs-footer-placeholder"></div>
+  <script type="module" src="/cubis-cart.mjs?v=20261012-cart-1"></script>
+</body>
+</html>

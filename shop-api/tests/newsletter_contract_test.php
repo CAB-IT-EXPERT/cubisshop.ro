@@ -65,11 +65,13 @@ newsletterAssert($updateStart !== false && $deleteStart !== false && !str_contai
 newsletterAssert(str_contains($api, "if (\$action === 'listNewsletterSubscribers'"), 'Endpointul pentru tabul abonaților lipsește.');
 newsletterAssert(is_string($emails) && str_contains($emails, 'List-Unsubscribe-Post'), 'Headerul standard de dezabonare lipsește.');
 newsletterAssert(is_string($module) && str_contains($module, "'newsletter'"), 'Tabul newsletter nu este în navigarea aplicației.');
-newsletterAssert(is_string($manager) && str_contains($manager, 'Abonați') && str_contains($manager, 'DEZABONAT'), 'Managerul nu afișează ambele stări.');
+newsletterAssert(is_string($manager) && str_contains($manager, 'Abonați') && str_contains($manager, 'DEZABONAȚI'), 'Managerul nu afișează ambele stări.');
 newsletterAssert(is_string($products) && str_contains($products, 'saving ? <ProductSaveProgress'), 'Ecranul de progres la salvare lipsește.');
 newsletterAssert(is_string($desktopHtml) && str_contains($desktopHtml, 'data-tab="shop-newsletter"'), 'Tabul newsletter lipsește din aplicația desktop.');
 newsletterAssert(is_string($desktopApi) && str_contains($desktopApi, 'listNewsletterSubscribers'), 'Clientul API desktop nu poate încărca abonații.');
 newsletterAssert(is_string($desktopCommerce) && str_contains($desktopCommerce, 'loadNewsletterSubscribers') && str_contains($desktopCommerce, 'startProductSaveProgress'), 'Managerul desktop sau progresul salvării lipsește.');
+newsletterAssert(str_contains($desktopCommerce, "startsWith('website_newsletter')") && str_contains($desktopCommerce, 'Newsletter website'), 'Aplicația desktop trebuie să distingă formularul website de checkout.');
+newsletterAssert(str_contains($manager, "startsWith('website_newsletter')") && str_contains($manager, 'Newsletter website'), 'Aplicația mobilă trebuie să distingă formularul website de checkout.');
 newsletterAssert(is_string($desktopStyles) && str_contains($desktopStyles, '.shop-product-save-overlay') && str_contains($desktopStyles, '.shop-newsletter-card'), 'Designul desktop pentru newsletter sau progres lipsește.');
 
 echo "Newsletter contract tests passed.\n";

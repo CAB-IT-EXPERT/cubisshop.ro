@@ -2998,6 +2998,8 @@ function publicCatalogProductRow(array $row): array {
         'commercial_warranty_months' => $row['commercial_warranty_months'] === null ? null : (int)$row['commercial_warranty_months'],
         'review_count' => max(0, (int)($row['review_count'] ?? 0)),
         'review_average' => $row['review_average'] === null ? null : round((float)$row['review_average'], 2),
+        'view_count' => max(0, (int)($row['view_count'] ?? 0)),
+        'created_at' => (string)($row['created_at'] ?? ''),
         'discovery_enrichment_enabled' => (bool)($row['discovery_enrichment_enabled'] ?? false),
         'is_boomag_source' => mb_strtolower(trim((string)($row['source_domain'] ?? '')), 'UTF-8') === 'boomag.ro',
         'is_accessory_category' => (string)($row['catalog_section'] ?? '') === 'accessories',
@@ -3059,6 +3061,8 @@ function compactPublicCatalogPayload(array $products): array {
                 (bool)($product['is_accessory_category'] ?? false),
                 (int)($product['review_count'] ?? 0),
                 $product['review_average'] === null ? null : (float)$product['review_average'],
+                max(0, (int)($product['view_count'] ?? 0)),
+                (string)($product['created_at'] ?? ''),
             ];
         }, $products),
     ];
@@ -3071,7 +3075,7 @@ function publicCatalogProductSelectSql(): string {
                    p.legal_warranty_months, p.commercial_warranty_months,
                    p.price, p.supplier_base_price, p.sale_price, p.discount_type, p.discount_value, p.currency, p.unit_of_measure,
                    p.stock_mode, p.stock_quantity, p.low_stock_threshold,
-                   p.is_featured, p.featured_rank,
+                   p.is_featured, p.featured_rank, p.view_count, p.created_at,
                    c.name AS category_name, c.slug AS category_slug,
                    m.name AS manufacturer_name, m.slug AS manufacturer_slug
             FROM shop_products p
@@ -5435,6 +5439,25 @@ try {
 
     if ($action === 'customerAuthConfig' && $method === 'GET') {
         jsonResponse(['google_client_id' => trim((string)($config['google_client_id'] ?? ''))]);
+    }
+
+    if ($action === 'subscribePublicNewsletter') {
+        if ($method !== 'POST') {
+            header('Allow: POST');
+            jsonResponse(['error' => 'Abonarea la newsletter necesită o cerere POST.'], 405);
+        }
+        $email = shopNewsletterPublicEmail($body);
+        try {
+            shopNewsletterPublicRateLimit($email, $config, (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            jsonResponse(shopNewsletterSubscribePublic($db, $email));
+        } catch (ShopNewsletterRateLimitException $error) {
+            header('Retry-After: ' . $error->retryAfterSeconds);
+            jsonResponse(['error' => $error->getMessage(), 'code' => 'newsletter_rate_limited'], 429);
+        } catch (Throwable $error) {
+            // Do not log email addresses or expose database errors in this public route.
+            error_log('[Cubis newsletter] Subscription service unavailable (' . get_class($error) . ').');
+            jsonResponse(['error' => 'Abonarea nu a putut fi salvată momentan. Încearcă din nou mai târziu.', 'code' => 'newsletter_unavailable'], 503);
+        }
     }
 
     if ($action === 'publicActivePromotions' && $method === 'GET') {

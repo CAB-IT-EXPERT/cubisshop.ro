@@ -79,6 +79,7 @@ web_modules/
 .bolt/
 .codex/
 .codex-tmp/
+*.codex-tmpdeploy-backups_*
 .codex-sdk57-web-check/
 .expo/
 tmp/
