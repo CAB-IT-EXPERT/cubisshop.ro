@@ -76,7 +76,7 @@ return [
     'order_email_from' => $env('CUBIS_ORDER_EMAIL_FROM'),
     'order_email_from_name' => $env('CUBIS_ORDER_EMAIL_FROM_NAME', 'Cubis Shop'),
     'order_email_reply_to' => $env('CUBIS_ORDER_EMAIL_REPLY_TO'),
-    'order_email_logo_url' => $env('CUBIS_ORDER_EMAIL_LOGO_URL', 'https://cubisshop.ro/assets/logo.png'),
+    'order_email_logo_url' => $env('CUBIS_ORDER_EMAIL_LOGO_URL', 'https://cubisshop.ro/assets/cubis-shop-logo.png'),
     'smtp_host' => $env('CUBIS_SMTP_HOST'),
     'smtp_port' => (int)$env('CUBIS_SMTP_PORT', '465'),
     'smtp_encryption' => $env('CUBIS_SMTP_ENCRYPTION', 'ssl'),

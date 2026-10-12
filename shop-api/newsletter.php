@@ -234,13 +234,13 @@ function shopNewsletterProductUrl(array $config, array $product): string {
 }
 
 function shopNewsletterProductEmail(array $config, array $subscriber, array $product): array {
-    $title = trim((string)($product['name'] ?? 'Produs nou G-Trots'));
+    $title = trim((string)($product['name'] ?? 'Produs nou Cubis Shop'));
     $productUrl = shopNewsletterProductUrl($config, $product);
     $unsubscribeUrl = shopNewsletterUnsubscribeUrl($config, (string)($subscriber['unsubscribe_token'] ?? ''));
     $images = is_array($product['images'] ?? null) ? $product['images'] : [];
     $imageUrl = trim((string)($images[0]['url'] ?? ''));
     $description = trim(preg_replace('/\s+/u', ' ', strip_tags((string)($product['short_description'] ?? ''))) ?? '');
-    if ($description === '') $description = 'O apariție nouă în magazinul G-Trots, pregătită pentru alegerea potrivită și o comandă simplă.';
+    if ($description === '') $description = 'O apariție nouă în Cubis Shop, pregătită pentru alegerea potrivită și o comandă simplă.';
     $description = mb_substr($description, 0, 240);
     $price = (float)(($product['sale_price'] ?? null) !== null ? $product['sale_price'] : ($product['price'] ?? 0));
     $priceLabel = number_format($price, 2, ',', '.') . ' lei';
@@ -250,29 +250,29 @@ function shopNewsletterProductEmail(array $config, array $subscriber, array $pro
     $safeDescription = gtEmailEscape($description);
     $safeProductUrl = gtEmailEscape($productUrl);
     $safeUnsubscribeUrl = gtEmailEscape($unsubscribeUrl);
-    $safeLogo = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png'));
+    $safeLogo = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $imageBlock = $imageUrl !== ''
         ? '<img src="' . gtEmailEscape($imageUrl) . '" width="520" alt="' . $safeTitle . '" style="display:block;width:100%;height:auto;max-height:410px;object-fit:contain;background:#f8f5f1;border-radius:26px">'
         : '<div style="padding:72px 20px;text-align:center;border-radius:26px;background:#211d1a;color:#ff9a2f;font-size:52px">GT</div>';
     $html = <<<HTML
 <!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;background:#0b0a0a;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">A apărut ceva nou în magazinul G-Trots: {$safeTitle}.</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">A apărut ceva nou în Cubis Shop: {$safeTitle}.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0a0a"><tr><td style="padding:28px 12px" align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:620px;background:#181615;border:1px solid #3b3028;border-radius:34px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.5)">
 <tr><td style="height:7px;background:#ff8500"></td></tr>
-<tr><td style="padding:27px 27px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:56px"><img src="{$safeLogo}" width="52" height="52" alt="G-Trots" style="display:block;width:52px;height:52px;border-radius:17px"></td><td style="padding-left:12px"><strong style="display:block;color:#fff8f3;font-size:17px">G-Trots România</strong><span style="display:block;margin-top:4px;color:#ff9a2f;font-size:9px;font-weight:900;letter-spacing:.13em">NOU ÎN MAGAZIN</span></td></tr></table></td></tr>
+<tr><td style="padding:27px 27px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:56px"><img src="{$safeLogo}" width="52" height="52" alt="Cubis Shop" style="display:block;width:52px;height:52px;border-radius:17px"></td><td style="padding-left:12px"><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#ff9a2f;font-size:9px;font-weight:900;letter-spacing:.13em">NOU ÎN MAGAZIN</span></td></tr></table></td></tr>
 <tr><td style="padding:18px 27px 28px"><p style="margin:0;color:#c4bbb4;font-size:14px;line-height:1.6">{$greeting} Am adăugat un produs nou care s-ar putea să-ți fie util.</p>
 <div style="margin-top:21px;padding:9px;border:1px solid #40362f;border-radius:31px;background:#100f0e">{$imageBlock}</div>
 <h1 style="margin:23px 0 0;color:#fff8f3;font-size:29px;line-height:1.12;letter-spacing:-.035em">{$safeTitle}</h1>
 <p style="margin:12px 0 0;color:#aaa09a;font-size:14px;line-height:1.65">{$safeDescription}</p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:21px"><tr><td style="padding:16px 18px;border:1px solid #4b3828;border-radius:19px;background:#251a12"><span style="display:block;color:#a89d95;font-size:9px;font-weight:900;letter-spacing:.12em">PREȚ G-TROTS</span><strong style="display:block;margin-top:5px;color:#ff9a2f;font-size:24px">{$priceLabel}</strong></td></tr></table>
 <div style="padding:23px 0 8px;text-align:center"><a href="{$safeProductUrl}" style="display:inline-block;min-width:210px;padding:17px 27px;border-radius:18px;background:#ff8500;color:#ffffff;text-decoration:none;font-size:14px;font-weight:900;box-shadow:0 13px 32px rgba(255,133,0,.25)">Vezi produsul&nbsp;&nbsp;→</a></div>
-<p style="margin:18px 0 0;padding-top:18px;border-top:1px solid #302b28;color:#77706b;font-size:10px;line-height:1.6;text-align:center">Primești acest mesaj deoarece ai ales noutăți și oferte G-Trots la checkout.<br><a href="{$safeUnsubscribeUrl}" style="display:inline-block;margin-top:7px;color:#ff5d63;text-decoration:underline;font-weight:800">Dezabonare</a></p>
+<p style="margin:18px 0 0;padding-top:18px;border-top:1px solid #302b28;color:#77706b;font-size:10px;line-height:1.6;text-align:center">Primești acest mesaj deoarece ai ales noutăți și oferte Cubis Shop la checkout.<br><a href="{$safeUnsubscribeUrl}" style="display:inline-block;margin-top:7px;color:#ff5d63;text-decoration:underline;font-weight:800">Dezabonare</a></p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return [
-        'subject' => 'Nou la G-Trots: ' . $title,
+        'subject' => 'Nou la Cubis Shop: ' . $title,
         'html' => gtEmailLightDocument($html),
         'product_url' => $productUrl,
         'unsubscribe_url' => $unsubscribeUrl,
@@ -316,7 +316,7 @@ function shopNewsletterNotifyNewProduct(PDO $db, array $config, array $product):
             $failed->execute([$message, (string)$subscriber['id'], (string)$product['id']]);
             $subscriberFailed->execute([$message, (string)$subscriber['id']]);
             $summary['failed']++;
-            error_log('[G-Trots newsletter product] ' . $message);
+            error_log('[Cubis Shop newsletter product] ' . $message);
         }
     }
     return $summary;
@@ -327,14 +327,14 @@ function shopNewsletterUnsubscribePage(array $result): string {
     $success = in_array($state, ['unsubscribed', 'already_unsubscribed'], true);
     $title = $state === 'unsubscribed' ? 'Te-ai dezabonat cu succes.' : ($state === 'already_unsubscribed' ? 'Ești deja dezabonat.' : 'Linkul nu este valid.');
     $message = $success
-        ? 'Nu vei mai primi e-mailuri despre produsele noi G-Trots. Preferința ta a fost salvată imediat.'
+        ? 'Nu vei mai primi e-mailuri despre produsele noi Cubis Shop. Preferința ta a fost salvată imediat.'
         : 'Linkul de dezabonare este incomplet sau nu mai poate fi folosit. Ne poți scrie și rezolvăm imediat.';
     $safeTitle = htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $safeMessage = htmlspecialchars($message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     $mark = $success ? '✓' : '!';
     return <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>{$safeTitle} | G-Trots</title><style>
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>{$safeTitle} | Cubis Shop</title><style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#080808;color:#fff8f2;font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif;overflow:hidden}.glow{position:fixed;width:55vw;height:55vw;border-radius:50%;filter:blur(90px);opacity:.16;background:#ff7900;animation:float 7s ease-in-out infinite}.g1{left:-24vw;top:-24vw}.g2{right:-30vw;bottom:-30vw;animation-delay:-3.5s}.card{position:relative;width:min(590px,100%);padding:clamp(26px,6vw,52px);border:1px solid #493324;border-radius:36px;background:linear-gradient(145deg,rgba(33,27,23,.96),rgba(15,14,14,.98));box-shadow:0 38px 120px #000;text-align:center}.logo{width:58px;height:58px;border-radius:19px;box-shadow:0 12px 34px rgba(255,121,0,.25)}.eyebrow{margin-top:24px;color:#ff982f;font-size:11px;font-weight:900;letter-spacing:.16em}.mark{width:74px;height:74px;margin:22px auto 0;display:grid;place-items:center;border:1px solid rgba(255,147,48,.35);border-radius:25px;background:rgba(255,126,0,.12);color:#ff982f;font-size:35px;font-weight:900;animation:pop .55s cubic-bezier(.2,.9,.2,1.2)}h1{margin:22px 0 0;font-size:clamp(29px,7vw,48px);line-height:1.03;letter-spacing:-.05em}p{max-width:455px;margin:17px auto 0;color:#ada39d;font-size:15px;line-height:1.7}.home{display:inline-block;margin-top:29px;padding:16px 24px;border-radius:17px;background:#ff8500;color:#fff;text-decoration:none;font-size:14px;font-weight:900;box-shadow:0 13px 34px rgba(255,133,0,.24)}.note{margin-top:23px;color:#6f6864;font-size:10px}@keyframes pop{from{opacity:0;transform:scale(.55) rotate(-9deg)}to{opacity:1;transform:none}}@keyframes float{50%{transform:translate(8vw,5vw) scale(1.12)}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}
-</style></head><body><div class="glow g1"></div><div class="glow g2"></div><main class="card"><img class="logo" src="https://cubisshop.ro/assets/logo.png" alt="G-Trots"><div class="eyebrow">PREFERINȚE NEWSLETTER</div><div class="mark">{$mark}</div><h1>{$safeTitle}</h1><p>{$safeMessage}</p><a class="home" href="https://cubisshop.ro/magazin">Vezi magazinul G-Trots&nbsp; →</a><div class="note">Nu este necesară nicio altă confirmare.</div></main></body></html>
+</style></head><body><div class="glow g1"></div><div class="glow g2"></div><main class="card"><img class="logo" src="https://cubisshop.ro/assets/cubis-shop-logo.png" alt="Cubis Shop"><div class="eyebrow">PREFERINȚE NEWSLETTER</div><div class="mark">{$mark}</div><h1>{$safeTitle}</h1><p>{$safeMessage}</p><a class="home" href="https://cubisshop.ro/magazin">Vezi Cubis Shop&nbsp; →</a><div class="note">Nu este necesară nicio altă confirmare.</div></main></body></html>
 HTML;
 }

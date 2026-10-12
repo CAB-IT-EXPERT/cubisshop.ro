@@ -47,7 +47,7 @@ function gtOrderStatuses(): array {
         'completed' => [
             'label' => 'Livrată',
             'title' => 'Comanda a fost livrată',
-            'message' => 'Comanda a ajuns la destinație. Îți mulțumim că ai ales G-Trots România.',
+            'message' => 'Comanda a ajuns la destinație. Îți mulțumim că ai ales Cubis Shop.',
             'color' => '#22c55e',
             'eyebrow' => 'LIVRARE FINALIZATĂ',
             'symbol' => '✓',
@@ -112,7 +112,7 @@ function gtOrderStatuses(): array {
             'eyebrow' => 'COMANDĂ OPRITĂ',
             'symbol' => '×',
             'next_title' => 'Ai nevoie de ajutor?',
-            'next_message' => 'Răspunde direct la acest mesaj și echipa G-Trots îți va oferi toate detaliile.',
+            'next_message' => 'Răspunde direct la acest mesaj și echipa Cubis Shop îți va oferi toate detaliile.',
         ],
     ];
 }
@@ -245,7 +245,7 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
     }
     $currency = (string)($order['currency'] ?? 'RON');
     $trackingUrl = gtEmailTrackingUrl($order, $config);
-    $logoUrl = (string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png');
+    $logoUrl = (string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png');
     $contactName = gtOrderCustomerContactName($order);
     $firstName = trim(explode(' ', $contactName, 2)[0] ?? '');
     $greeting = $firstName !== '' ? 'Salut, ' . gtEmailEscape($firstName) . '!' : 'Salut!';
@@ -275,7 +275,7 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
             . '</table></td></tr>';
     }
     $paymentLabel = ($order['payment_method'] ?? '') === 'card' ? 'Card online' : 'Ramburs la curier';
-    $subject = (string)$meta['title'] . ' · ' . (string)($order['order_number'] ?? 'G-Trots');
+    $subject = (string)$meta['title'] . ' · ' . (string)($order['order_number'] ?? 'Cubis Shop');
     $preheader = gtEmailEscape((string)$meta['message']);
     $statusColor = gtEmailEscape((string)$meta['color']);
     $statusLabel = gtEmailEscape((string)$meta['label']);
@@ -329,7 +329,7 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
             $slug = trim((string)($item['product_slug'] ?? ''));
             if ($slug === '' || isset($reviewLinks[$slug])) continue;
             $reviewUrl = gtEmailEscape($websiteBaseUrl . '/magazin/produs/' . rawurlencode($slug) . '/#recenzii');
-            $productName = gtEmailEscape((string)($item['product_name'] ?? 'Produs G-Trots'));
+            $productName = gtEmailEscape((string)($item['product_name'] ?? 'Produs Cubis Shop'));
             $reviewLinks[$slug] = '<a href="' . $reviewUrl . '" style="display:block;margin-top:9px;padding:12px 14px;border:1px solid #5a4937;border-radius:15px;background:#2b2118;color:#ffb77a;text-decoration:none;font-size:12px;font-weight:900">Evaluează ' . $productName . '&nbsp;&nbsp;→</a>';
         }
         if ($reviewLinks) {
@@ -354,7 +354,7 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="gt-shell" style="width:100%;max-width:700px;background:#1d1b20;border:1px solid #3a363e;border-radius:38px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45)">
 <tr><td style="height:8px;background:{$statusColor}"></td></tr>
 <tr><td class="gt-body" style="padding:30px 34px 34px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:58px"><img src="{$safeLogoUrl}" width="54" height="54" alt="G-Trots România" style="display:block;width:54px;height:54px;border-radius:18px"></td><td style="padding-left:12px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0;color:#fff8f3;font-size:17px;line-height:21px;font-weight:900;mso-line-height-rule:exactly">G-Trots România</td></tr><tr><td style="padding:4px 0 0;color:#9f979f;font-size:9px;line-height:12px;font-weight:800;letter-spacing:.1em;mso-line-height-rule:exactly">SERVICE &amp; MAGAZIN</td></tr></table></td><td class="gt-status" align="right"><span style="display:inline-block;padding:10px 14px;border:1px solid {$statusColor}55;border-radius:999px;background:{$statusColor}18;color:{$statusColor};font-size:11px;font-weight:900">●&nbsp;&nbsp;{$statusLabel}</span></td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:58px"><img src="{$safeLogoUrl}" width="54" height="54" alt="Cubis Shop" style="display:block;width:54px;height:54px;border-radius:18px"></td><td style="padding-left:12px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0;color:#fff8f3;font-size:17px;line-height:21px;font-weight:900;mso-line-height-rule:exactly">Cubis Shop</td></tr><tr><td style="padding:4px 0 0;color:#9f979f;font-size:9px;line-height:12px;font-weight:800;letter-spacing:.1em;mso-line-height-rule:exactly">MAGAZIN ONLINE</td></tr></table></td><td class="gt-status" align="right"><span style="display:inline-block;padding:10px 14px;border:1px solid {$statusColor}55;border-radius:999px;background:{$statusColor}18;color:{$statusColor};font-size:11px;font-weight:900">●&nbsp;&nbsp;{$statusLabel}</span></td></tr></table>
 <div style="padding:34px 0 24px"><span style="color:{$statusColor};font-size:10px;font-weight:900;letter-spacing:.14em">{$statusEyebrow}</span><h1 class="gt-title" style="margin:10px 0 13px;color:#fff8f3;font-size:44px;line-height:1.02;letter-spacing:-.055em">{$statusTitle}</h1><p style="margin:0;color:#b1a9b2;font-size:15px;line-height:1.65">{$greeting} {$statusMessage}</p></div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;border:1px solid {$statusColor}55;border-radius:24px;background:{$statusColor}12"><tr><td class="gt-next-icon" style="width:64px;padding:15px 0 15px 15px"><span style="display:block;width:48px;height:48px;line-height:48px;text-align:center;border-radius:17px;background:{$statusColor};color:#151116;font-size:15px;font-weight:1000">{$statusSymbol}</span></td><td class="gt-next-copy" style="padding:15px"><span style="display:block;color:{$statusColor};font-size:8px;font-weight:900;letter-spacing:.12em">CE URMEAZĂ</span><strong style="display:block;margin-top:4px;color:#fff8f3;font-size:14px">{$nextTitle}</strong><span style="display:block;margin-top:4px;color:#9d959f;font-size:11px;line-height:1.45">{$nextMessage}</span></td></tr></table>
 <div class="gt-summary" style="padding:24px;border:1px solid #403b43;border-radius:28px;background:#151318">
@@ -369,7 +369,7 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
 <div style="padding:22px 0 6px;text-align:center">{$trackingButton}</div>
 <div style="margin-top:15px;padding:15px 17px;border:1px solid #4a4035;border-radius:20px;background:#272018;color:#a9a1a9;font-size:11px;line-height:1.55"><strong style="display:block;margin-bottom:4px;color:#fff8f3">Acces direct și securizat</strong>Butonul deschide direct comanda, fără formular. Dacă intri manual pe pagina de urmărire, folosește codul <strong style="color:#ffb77a">{$orderNumber}</strong> și adresa de e-mail din comandă.</div>
 {$customerActionFooter}
-<p style="margin:25px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.65">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">G-Trots România</strong> · cubisshop.ro</p>
+<p style="margin:25px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.65">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return ['subject' => $subject, 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
@@ -405,7 +405,7 @@ function gtSmtpSend(array $config, string $recipient, string $subject, string $h
     $username = trim((string)($config['smtp_username'] ?? ''));
     $password = (string)($config['smtp_password'] ?? '');
     $from = trim((string)($config['order_email_from'] ?? $username));
-    $fromName = trim((string)($config['order_email_from_name'] ?? 'G-Trots România'));
+    $fromName = trim((string)($config['order_email_from_name'] ?? 'Cubis Shop'));
     $replyTo = trim((string)($config['order_email_reply_to'] ?? $from));
     if ($host === '' || $username === '' || $password === '' || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
         throw new RuntimeException('Configurația SMTP nu este completă.');
@@ -451,7 +451,7 @@ function gtSmtpSend(array $config, string $recipient, string $subject, string $h
             $headers[] = $name . ': ' . $value;
         }
         if ($attachments) {
-            $boundary = '=_gtrots_' . bin2hex(random_bytes(18));
+            $boundary = '=_cubis_' . bin2hex(random_bytes(18));
             $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
             $parts = ['--' . $boundary, 'Content-Type: text/html; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', rtrim(chunk_split(base64_encode($html), 76, "\r\n"))];
             foreach ($attachments as $attachment) {
@@ -486,27 +486,28 @@ function gtBuildPasswordResetEmail(array $customer, array $config, string $token
         throw new RuntimeException('Datele pentru resetarea parolei nu sunt valide.');
     }
     $base = rtrim((string)($config['website_base_url'] ?? 'https://cubisshop.ro'), '/');
-    $resetUrl = $base . '/resetare-parola.html?token=' . rawurlencode($token) . '&email=' . rawurlencode($recipient);
-    $resetButton = gtEmailTableButton($resetUrl, 'Resetează parola');
-    $safeLogo = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png'));
+    $resetUrl = $base . '/resetare-parola?token=' . rawurlencode($token) . '&email=' . rawurlencode($recipient);
+    $safeResetUrl = gtEmailEscape($resetUrl);
+    $safeLogo = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $firstName = trim(explode(' ', trim((string)($customer['full_name'] ?? '')), 2)[0] ?? '');
     $greeting = $firstName === '' ? 'Salut!' : 'Salut, ' . gtEmailEscape($firstName) . '!';
     $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">Link securizat pentru resetarea parolei contului tău G-Trots.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:34px 16px" align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#1d1b20;border:1px solid #3a363e;border-radius:34px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45)">
-<tr><td style="height:8px;background:linear-gradient(90deg,#ff7900,#ffb14d)"></td></tr>
-<tr><td style="padding:30px 32px 34px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:58px"><img src="{$safeLogo}" width="54" height="54" alt="G-Trots România" style="display:block;width:54px;height:54px;border-radius:18px"></td><td style="padding-left:12px"><strong style="display:block;color:#fff8f3;font-size:17px">G-Trots România</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">SECURITATEA CONTULUI</span></td></tr></table>
-<div style="padding:32px 0 20px"><span style="color:#ff9a2f;font-size:10px;font-weight:900;letter-spacing:.14em">RESETARE PAROLĂ</span><h1 style="margin:10px 0 13px;color:#fff8f3;font-size:40px;line-height:1.04;letter-spacing:-.05em">Alege o parolă nouă.</h1><p style="margin:0;color:#b1a9b2;font-size:15px;line-height:1.65">{$greeting} Am primit o solicitare de resetare a parolei pentru contul asociat acestei adrese.</p></div>
-<div style="padding:20px;border:1px solid #4a4035;border-radius:24px;background:#272018"><strong style="display:block;color:#fff8f3;font-size:14px">Link unic, valabil 30 de minute</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">Butonul poate fi folosit o singură dată. După schimbarea parolei, sesiunile existente vor fi închise automat.</p></div>
-<div style="padding:24px 0 8px;text-align:center">{$resetButton}</div>
-<p style="margin:18px 0 0;color:#817981;font-size:11px;line-height:1.65">Dacă nu ai solicitat resetarea, ignoră acest e-mail. Parola ta actuală rămâne neschimbată.</p>
-<p style="margin:24px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.65"><strong style="color:#aaa2ac">G-Trots România</strong> · cubisshop.ro</p>
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table{border-collapse:separate!important;mso-table-lspace:0pt;mso-table-rspace:0pt}img{border:0;outline:none;text-decoration:none}@media(max-width:620px){.cs-wrap{padding:12px 8px!important}.cs-card{border-radius:24px!important}.cs-body{padding:26px 20px 28px!important}.cs-title{font-size:32px!important}.cs-info td{display:block!important;width:auto!important;padding:7px 0!important}.cs-button a{padding:17px 18px!important}}</style></head>
+<body data-gt-email="light-v1" bgcolor="#eff7ff" style="margin:0;background:#eff7ff;color:#0b2c5a;font-family:Arial,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Linkul tău securizat Cubis Shop este valabil 30 de minute.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eff7ff" style="width:100%;background:#eff7ff"><tr><td class="cs-wrap" align="center" style="padding:34px 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="cs-card" bgcolor="#ffffff" style="width:100%;max-width:640px;overflow:hidden;border:1px solid #cfe3f3;border-radius:32px;background:#ffffff;box-shadow:0 24px 70px rgba(4,55,103,.13)">
+<tr><td style="height:8px;background:#0589ef;background-image:linear-gradient(90deg,#0678ed,#08a8ed 58%,#12c9d8)"></td></tr>
+<tr><td class="cs-body" style="padding:30px 34px 34px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:172px"><img src="{$safeLogo}" width="158" alt="Cubis Shop" style="display:block;width:158px;max-width:100%;height:auto"></td><td align="right"><span style="display:inline-block;padding:9px 12px;border:1px solid #cce4f7;border-radius:999px;color:#0879da;background:#f0f8ff;font-size:11px;font-weight:800">Cont securizat</span></td></tr></table>
+<div style="padding:36px 0 22px"><span style="color:#0786ed;font-size:11px;font-weight:800;letter-spacing:.14em">RESETARE PAROLĂ</span><h1 class="cs-title" style="margin:10px 0 14px;color:#062556;font-size:42px;line-height:1.06;letter-spacing:-1.8px">Alege o parolă nouă.</h1><p style="margin:0;color:#58718e;font-size:15px;line-height:1.7">{$greeting} Am primit solicitarea de resetare pentru contul tău Cubis Shop.</p></div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f1f9ff" style="width:100%;border:1px solid #cfe5f6;border-radius:22px;background:#f1f9ff"><tr><td style="padding:20px"><strong style="display:block;color:#082d5e;font-size:15px">Link unic, valabil 30 de minute</strong><p style="margin:7px 0 0;color:#5b7591;font-size:12px;line-height:1.65">Poate fi folosit o singură dată. După schimbarea parolei, toate sesiunile existente vor fi închise automat.</p></td></tr></table>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cs-button" style="margin:25px auto 9px"><tr><td align="center" bgcolor="#0788f2" style="border-radius:17px;background:#0788f2;background-image:linear-gradient(100deg,#0677ed,#08a4ee 60%,#10bfd7)"><a href="{$safeResetUrl}" style="display:block;padding:18px 30px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:800">Alege parola nouă&nbsp;&nbsp;→</a></td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="cs-info" style="margin-top:25px;border-top:1px solid #dbe8f3"><tr><td width="50%" style="padding:18px 8px 0 0;color:#5f7690;font-size:11px;line-height:1.55"><strong style="display:block;color:#10365f;font-size:12px">Nu ai făcut solicitarea?</strong>Ignoră mesajul; parola actuală rămâne neschimbată.</td><td width="50%" style="padding:18px 0 0 8px;color:#5f7690;font-size:11px;line-height:1.55"><strong style="display:block;color:#10365f;font-size:12px">Butonul nu funcționează?</strong><a href="{$safeResetUrl}" style="color:#087bdc;overflow-wrap:anywhere">Deschide linkul securizat</a></td></tr></table>
+<p style="margin:27px 0 0;text-align:center;color:#71849a;font-size:10px;line-height:1.65">Mesaj automat de securitate trimis de <strong style="color:#173e68">Cubis Shop</strong><br><a href="https://cubisshop.ro" style="color:#087bdc;text-decoration:none">cubisshop.ro</a> · contact@cubisshop.ro</p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
-    return ['subject' => 'Resetează parola contului tău G-Trots', 'html' => gtEmailLightDocument($html)];
+    return ['subject' => 'Resetează parola contului tău Cubis Shop', 'html' => gtEmailLightDocument($html), 'reset_url' => $resetUrl];
 }
 
 function gtSendPasswordResetEmail(array $customer, array $config, string $token): void {
@@ -527,7 +528,7 @@ function gtSendOrderStatusEmail(array $order, array $config, string $status): ar
         gtSmtpSend($config, $recipient, (string)$email['subject'], (string)$email['html']);
         return ['sent' => true, 'recipient' => $recipient, 'tracking_url' => $email['tracking_url']];
     } catch (Throwable $error) {
-        error_log('[G-Trots order email] ' . $error->getMessage());
+        error_log('[Cubis Shop order email] ' . $error->getMessage());
         return ['sent' => false, 'recipient' => $recipient, 'error' => mb_substr($error->getMessage(), 0, 500)];
     }
 }
@@ -543,7 +544,7 @@ function gtSendOrderModifiedEmail(array $order, array $config): array {
         gtSmtpSend($config, $recipient, (string)$email['subject'], (string)$email['html']);
         return ['sent' => true, 'recipient' => $recipient, 'tracking_url' => $email['tracking_url']];
     } catch (Throwable $error) {
-        error_log('[G-Trots order modified email] ' . $error->getMessage());
+        error_log('[Cubis Shop order modified email] ' . $error->getMessage());
         return ['sent' => false, 'recipient' => $recipient, 'error' => mb_substr($error->getMessage(), 0, 500)];
     }
 }
@@ -570,7 +571,7 @@ function gtBuildOrderCancellationEmail(array $order, array $config, array $detai
     $reason = gtEmailEscape((string)($order['customer_cancellation_reason'] ?? 'Nespecificat'));
     $trackingUrl = gtEmailTrackingUrl($order, $config);
     $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi comanda anulată', '#fb7185', '#211217');
-    $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png'));
+    $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $isPaidCard = (string)($order['payment_method'] ?? '') === 'card' && (string)($order['refund_status'] ?? '') === 'pending';
     $refundMessage = $isPaidCard
         ? 'Rambursarea va fi efectuată în cel mult <strong style="color:#fff8f3">15 zile calendaristice</strong>, în aceeași metodă de plată confirmată în momentul achiziției.'
@@ -591,13 +592,13 @@ function gtBuildOrderCancellationEmail(array $order, array $config, array $detai
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:30px 14px" align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #49363b;border-radius:34px;background:#1d1b20">
 <tr><td style="height:7px;background:#fb7185"></td></tr><tr><td style="padding:28px 30px 32px">
-<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="G-Trots România" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">G-Trots România</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">CONFIRMARE ANULARE</span></td></tr></table>
+<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="Cubis Shop" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">CONFIRMARE ANULARE</span></td></tr></table>
 <div style="padding:30px 0 19px"><span style="color:#fb7185;font-size:10px;font-weight:900;letter-spacing:.13em">COMANDĂ ANULATĂ</span><h1 style="margin:9px 0 12px;font-size:38px;line-height:1.04;letter-spacing:-.045em">Am oprit comanda.</h1><p style="margin:0;color:#b5adb6;font-size:14px;line-height:1.65">Comanda <strong style="color:#ffb77a">{$number}</strong> a fost anulată și nu va mai fi pregătită sau predată curierului.</p></div>
 <div style="padding:17px;border:1px solid #52383f;border-radius:20px;background:#28191d"><span style="display:block;color:#fb7185;font-size:9px;font-weight:900;letter-spacing:.1em">MOTIVUL ANULĂRII</span><p style="margin:7px 0 0;color:#f1e8ed;font-size:13px;line-height:1.55">{$reason}</p></div>
 <div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#171519"><strong style="display:block;color:#fff8f3;font-size:13px">Plată și rambursare</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">{$refundMessage}</p></div>
 <div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#171519"><strong style="display:block;color:#fff8f3;font-size:13px">Documente fiscale</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">{$fiscalMessage}</p></div>
 <div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
-<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">G-Trots România</strong> · cubisshop.ro</p>
+<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return ['subject' => 'Comanda ' . (string)($order['order_number'] ?? '') . ' a fost anulată', 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
@@ -611,7 +612,7 @@ function gtSendOrderCancellationEmail(array $order, array $config, array $detail
         gtSmtpSend($config, $recipient, $email['subject'], $email['html']);
         return ['sent' => true, 'recipient' => $recipient, 'tracking_url' => gtEmailTrackingUrl($order, $config)];
     } catch (Throwable $error) {
-        error_log('[G-Trots cancellation email] ' . $error->getMessage());
+        error_log('[Cubis Shop cancellation email] ' . $error->getMessage());
         return ['sent' => false, 'recipient' => $recipient, 'error' => mb_substr($error->getMessage(), 0, 500)];
     }
 }
@@ -638,7 +639,7 @@ function gtBuildOrderReturnRequestEmail(array $order, array $config): array {
     $requestEvidenceTitle = $isWithdrawal ? 'CONFIRMAREA RETRAGERII' : 'CONFIRMAREA SOLICITĂRII';
     $trackingUrl = gtEmailTrackingUrl($order, $config);
     $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi solicitarea', '#f472b6', '#24131e');
-    $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png'));
+    $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $html = <<<HTML
 <!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
@@ -646,14 +647,14 @@ function gtBuildOrderReturnRequestEmail(array $order, array $config): array {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:30px 14px" align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #50394b;border-radius:34px;background:#1d1b20">
 <tr><td style="height:7px;background:#f472b6"></td></tr><tr><td style="padding:28px 30px 32px">
-<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="G-Trots România" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">G-Trots România</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">RETUR ÎN VERIFICARE</span></td></tr></table>
+<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="Cubis Shop" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">RETUR ÎN VERIFICARE</span></td></tr></table>
 <div style="padding:30px 0 19px"><span style="color:#f472b6;font-size:10px;font-weight:900;letter-spacing:.13em">SOLICITARE PRIMITĂ</span><h1 style="margin:9px 0 12px;font-size:38px;line-height:1.04;letter-spacing:-.045em">Am primit solicitarea ta de retur.</h1><p style="margin:0;color:#b5adb6;font-size:14px;line-height:1.65">{$greeting} Cererea pentru comanda <strong style="color:#ffb77a">{$orderNumber}</strong> a fost înregistrată și urmează să fie verificată de echipa noastră.</p></div>
 <div style="padding:17px;border:1px solid #56384f;border-radius:20px;background:#281923"><span style="display:block;color:#f472b6;font-size:9px;font-weight:900;letter-spacing:.1em">MOTIVUL RETURULUI</span><p style="margin:7px 0 0;color:#f1e8ed;font-size:13px;line-height:1.55">{$reason}</p></div>
 <div style="margin-top:13px;padding:17px;border:1px solid #56384f;border-radius:20px;background:#211f24"><span style="display:block;color:#f472b6;font-size:9px;font-weight:900;letter-spacing:.1em">{$requestEvidenceTitle}</span><p style="margin:7px 0 0;color:#f1e8ed;font-size:13px;line-height:1.55">{$statement}</p><p style="margin:8px 0 0;color:#aaa2ac;font-size:11px">Înregistrată la data și ora: <strong style="color:#fff8f3">{$submittedAt}</strong></p></div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:13px;border:1px solid #403b43;border-radius:20px;background:#171519;color:#aaa2ac;font-size:12px"><tr><td style="padding:17px 17px 6px">Titular cont</td><td align="right" style="padding:17px 17px 6px;color:#fff8f3;font-weight:800">{$holder}</td></tr><tr><td style="padding:6px 17px">IBAN</td><td align="right" style="padding:6px 17px;color:#d8d1d9;font-weight:700;overflow-wrap:anywhere">{$iban}</td></tr><tr><td style="padding:6px 17px">Cost retur curier</td><td align="right" style="padding:6px 17px;color:#fb7185;font-weight:800">−{$returnCost}</td></tr><tr><td style="padding:14px 17px 17px;border-top:1px solid #403b43;color:#fff8f3;font-weight:900">Sumă estimată de restituit</td><td align="right" style="padding:14px 17px 17px;border-top:1px solid #403b43;color:#6ee7b7;font-size:18px;font-weight:1000">{$refundAmount}</td></tr></table>
 <div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#211f24"><strong style="display:block;color:#fff8f3;font-size:13px">Ce urmează?</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">Verificăm solicitarea și îți comunicăm pașii de predare a produselor. Suma de mai sus este estimativă și include scăderea costului de retur prin curier configurat pentru comanda ta.</p></div>
 <div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
-<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">G-Trots România</strong> · cubisshop.ro</p>
+<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return ['subject' => 'Am primit solicitarea de retur · ' . (string)($order['order_number'] ?? ''), 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
@@ -667,7 +668,7 @@ function gtSendOrderReturnRequestEmail(array $order, array $config): array {
         gtSmtpSend($config, $recipient, $email['subject'], $email['html']);
         return ['sent' => true, 'recipient' => $recipient, 'tracking_url' => gtEmailTrackingUrl($order, $config)];
     } catch (Throwable $error) {
-        error_log('[G-Trots return request email] ' . $error->getMessage());
+        error_log('[Cubis Shop return request email] ' . $error->getMessage());
         return ['sent' => false, 'recipient' => $recipient, 'error' => mb_substr($error->getMessage(), 0, 500)];
     }
 }
@@ -684,7 +685,7 @@ function gtBuildOrderReturnConfirmedEmail(array $order, array $config): array {
     $refundAmount = gtEmailMoney($order['return_refund_amount'] ?? 0, (string)($order['currency'] ?? 'RON'));
     $trackingUrl = gtEmailTrackingUrl($order, $config);
     $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi comanda', '#2dd4bf', '#10201e');
-    $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/logo.png'));
+    $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $fiscalMessage = !empty($order['return_invoice_id'])
         ? 'Factura de retur este emisă automat și îți este trimisă separat pe e-mail, în format PDF.'
         : 'Comanda nu avea o factură pozitivă emisă, așadar confirmarea returului nu generează acum niciun document fiscal.';
@@ -696,13 +697,13 @@ function gtBuildOrderReturnConfirmedEmail(array $order, array $config): array {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:30px 14px" align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #315955;border-radius:34px;background:#1d1b20">
 <tr><td style="height:7px;background:#2dd4bf"></td></tr><tr><td style="padding:28px 30px 32px">
-<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="G-Trots România" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">G-Trots România</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">CONFIRMARE RETUR</span></td></tr></table>
+<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="Cubis Shop" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">CONFIRMARE RETUR</span></td></tr></table>
 <div style="padding:30px 0 19px"><span style="color:#5eead4;font-size:10px;font-weight:900;letter-spacing:.13em">RETUR CONFIRMAT</span><h1 style="margin:9px 0 12px;font-size:38px;line-height:1.04;letter-spacing:-.045em">Returul tău a fost aprobat.</h1><p style="margin:0;color:#b5adb6;font-size:14px;line-height:1.65">{$greeting} Am confirmat returul pentru comanda <strong style="color:#ffb77a">{$orderNumber}</strong>. Echipa noastră continuă verificarea produselor și procesarea restituirii.</p></div>
 {$returnDecisionSummary}
 <div style="padding:18px;border:1px solid #315955;border-radius:20px;background:#172421"><span style="display:block;color:#5eead4;font-size:9px;font-weight:900;letter-spacing:.1em">SUMĂ ESTIMATĂ DE RESTITUIT</span><strong style="display:block;margin-top:8px;color:#a7f3d0;font-size:24px">{$refundAmount}</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">Valoarea finală este procesată după verificarea returului. Acest mesaj confirmă aprobarea returului, nu finalizarea rambursării.</p></div>
 <div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#171519"><strong style="display:block;color:#fff8f3;font-size:13px">Documente fiscale</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">{$fiscalMessage}</p></div>
 <div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
-<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">G-Trots România</strong> · cubisshop.ro</p>
+<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return ['subject' => 'Retur confirmat · ' . (string)($order['order_number'] ?? ''), 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
@@ -716,7 +717,7 @@ function gtSendOrderReturnConfirmedEmail(array $order, array $config): array {
         gtSmtpSend($config, $recipient, $email['subject'], $email['html']);
         return ['sent' => true, 'recipient' => $recipient, 'tracking_url' => gtEmailTrackingUrl($order, $config)];
     } catch (Throwable $error) {
-        error_log('[G-Trots return confirmation email] ' . $error->getMessage());
+        error_log('[Cubis Shop return confirmation email] ' . $error->getMessage());
         return ['sent' => false, 'recipient' => $recipient, 'error' => mb_substr($error->getMessage(), 0, 500)];
     }
 }

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073a69">
+  <meta name="description" content="Alege în siguranță o parolă nouă pentru contul tău Cubis Shop.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="color-scheme" content="light">
+  <link rel="canonical" href="https://cubisshop.ro/resetare-parola">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-cover">
+  <link rel="stylesheet" href="/cubis-auth.css?v=20261012-reset-1">
+  <title>Resetează parola | Cubis Shop</title>
+</head>
+<body class="cs-page cs-auth-page cs-reset-page">
+  <div data-site-header class="cs-shell-placeholder"></div>
+
+  <main id="main" class="cs-auth-main">
+    <div class="cs-container">
+      <nav class="cs-breadcrumb cs-auth-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Acasă</a><span aria-hidden="true">›</span><a href="/login">Contul meu</a><span aria-hidden="true">›</span><span aria-current="page">Parolă nouă</span>
+      </nav>
+
+      <section class="cs-auth-shell cs-reset-shell" aria-labelledby="reset-title">
+        <aside class="cs-auth-story" aria-label="Protecția contului Cubis Shop">
+          <span class="cs-auth-story__orb is-one" aria-hidden="true"></span>
+          <span class="cs-auth-story__orb is-two" aria-hidden="true"></span>
+          <div class="cs-auth-story__content">
+            <span class="cs-auth-eyebrow"><i aria-hidden="true"></i> Securitatea contului</span>
+            <h1>O parolă nouă.<br><em>Același cont protejat.</em></h1>
+            <p>Confirmăm linkul primit prin e-mail înainte să permitem schimbarea parolei.</p>
+            <ol class="cs-auth-benefits">
+              <li><b>01</b><span><strong>Link unic</strong><small>Poate fi folosit o singură dată</small></span></li>
+              <li><b>02</b><span><strong>Valabil 30 de minute</strong><small>Expiră automat pentru siguranța ta</small></span></li>
+              <li><b>03</b><span><strong>Sesiuni închise</strong><small>Reconectare sigură pe toate dispozitivele</small></span></li>
+            </ol>
+          </div>
+        </aside>
+
+        <article class="cs-auth-panel cs-reset-panel">
+          <div class="cs-auth-panel__inner">
+            <div class="cs-reset-state is-active" data-reset-state="loading" aria-live="polite">
+              <div class="cs-reset-state__icon is-loading" aria-hidden="true"><span></span></div>
+              <span class="cs-reset-state__eyebrow">Verificare securizată</span>
+              <h2 id="reset-title">Verificăm linkul…</h2>
+              <p>Mai durează doar o clipă.</p>
+            </div>
+
+            <div class="cs-reset-state" data-reset-state="form" hidden>
+              <header class="cs-auth-heading">
+                <span>Link confirmat</span>
+                <h2>Alege parola nouă</h2>
+                <p>Folosește minimum 8 caractere, cel puțin o literă și o cifră.</p>
+              </header>
+              <div class="cs-reset-email" data-reset-email></div>
+              <form class="cs-auth-form cs-reset-form" data-reset-form novalidate>
+                <label class="cs-auth-field">
+                  <span>Parolă nouă <b>*</b></span>
+                  <div class="cs-auth-input"><i data-auth-icon="lock" aria-hidden="true"></i><input name="password" type="password" minlength="8" maxlength="200" autocomplete="new-password" placeholder="Minimum 8 caractere" required><button type="button" data-password-toggle aria-label="Arată parola"><span aria-hidden="true"></span></button></div>
+                  <em data-field-error></em>
+                </label>
+                <div class="cs-password-strength" data-password-strength data-score="0"><div aria-hidden="true"><i></i><i></i><i></i><i></i></div><small>Folosește minimum 8 caractere, litere și cifre.</small></div>
+                <label class="cs-auth-field">
+                  <span>Confirmă parola <b>*</b></span>
+                  <div class="cs-auth-input"><i data-auth-icon="lock" aria-hidden="true"></i><input name="password_confirm" type="password" minlength="8" maxlength="200" autocomplete="new-password" placeholder="Repetă parola nouă" required><button type="button" data-password-toggle aria-label="Arată parola"><span aria-hidden="true"></span></button></div>
+                  <em data-field-error></em>
+                </label>
+                <p class="cs-auth-status" data-reset-status role="alert" hidden></p>
+                <button class="cs-auth-submit" type="submit"><span data-submit-label>Salvează parola nouă</span><i data-auth-icon="arrow" aria-hidden="true"></i></button>
+              </form>
+              <a class="cs-auth-back" href="/login">← Înapoi la autentificare</a>
+            </div>
+
+            <div class="cs-reset-state" data-reset-state="success" hidden>
+              <div class="cs-reset-state__icon is-success" aria-hidden="true">✓</div>
+              <span class="cs-reset-state__eyebrow">Parolă actualizată</span>
+              <h2>Totul este gata.</h2>
+              <p>Parola a fost schimbată, iar sesiunile vechi au fost închise automat.</p>
+              <a class="cs-auth-submit cs-reset-link" data-login-link href="/login"><span>Intră în cont</span><i data-auth-icon="arrow" aria-hidden="true"></i></a>
+            </div>
+
+            <div class="cs-reset-state" data-reset-state="invalid" hidden>
+              <div class="cs-reset-state__icon is-invalid" aria-hidden="true">!</div>
+              <span class="cs-reset-state__eyebrow">Link indisponibil</span>
+              <h2>Linkul nu mai poate fi folosit.</h2>
+              <p data-invalid-message>Este posibil să fi expirat sau să fi fost deja utilizat. Solicită unul nou din pagina de autentificare.</p>
+              <a class="cs-auth-submit cs-reset-link" href="/login"><span>Solicită un link nou</span><i data-auth-icon="arrow" aria-hidden="true"></i></a>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <div data-site-footer></div>
+  <script type="module" src="/cubis-reset-password.mjs?v=20261012-reset-1"></script>
+</body>
+</html>

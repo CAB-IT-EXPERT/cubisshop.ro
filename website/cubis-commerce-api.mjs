@@ -135,6 +135,7 @@ export const customerApi = Object.freeze({
   googleLogin: credential => commerceApiRequest("customerGoogleLogin", { method: "POST", auth: false, body: { credential } }),
   register: body => commerceApiRequest("customerRegister", { method: "POST", auth: false, body }),
   forgotPassword: email => commerceApiRequest("customerForgotPassword", { method: "POST", auth: false, body: { email } }),
+  validateResetLink: body => commerceApiRequest("customerValidateResetLink", { method: "POST", auth: false, body }),
   resetPassword: body => commerceApiRequest("customerResetPassword", { method: "POST", auth: false, body }),
   me: () => commerceApiRequest("customerMe"),
   orders: () => commerceApiRequest("customerOrders"),

@@ -27,14 +27,14 @@ app.whenReady().then(async () => {
     }));
     const names = ['Andrei Popescu', 'Maria Ionescu', 'Darius Stoica', 'Ioana Marinescu', 'Radu Stan', 'Elena Dumitru', 'Mihai Georgescu', 'Sofia Matei', 'Victor Enache', 'Ana Preda', 'Paul Rusu', 'Bianca Pavel'];
     const customers = names.map((full_name, index) => ({
-      id: 'customer-' + (index + 1), full_name, email: full_name.toLocaleLowerCase('ro').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/ /g, '.') + '@example.ro',
+      id: 'customer-' + (index + 1), full_name, email: index === 0 ? 'alexie.popescu2007@gmail.com' : full_name.toLocaleLowerCase('ro').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/ /g, '.') + '@example.ro',
       phone: index % 3 ? '07' + String(22000111 + index) : '', is_active: index !== 3 && index !== 9,
       orders_count: index === 0 ? orders.length : index % 5, orders_total: index === 0 ? 2846 : index * 324.5,
       last_order_at: index % 4 ? '2026-10-08 14:20:00' : null, created_at: '2026-02-14 09:20:00', last_login_at: '2026-10-10 18:42:00',
     }));
     window.SHOP_API = {
       listCustomers: async () => customers,
-      getCustomer: async id => ({ ...customers.find(customer => customer.id === id), orders: id === 'customer-1' ? orders : orders.slice(0, 2) }),
+      getCustomer: async id => ({ ...customers.find(customer => customer.id === id), orders: id === 'customer-1' ? orders : id === 'customer-10' ? [] : orders.slice(0, 2) }),
       updateCustomerStatus: async (id, next) => { const customer = customers.find(item => item.id === id); if (customer) customer.is_active = next; return { success: true }; },
       getDashboardStats: async () => ({ revenue: 0, orders_count: 0, new_orders_count: 0, acquisitions: 0, profit: 0, products_count: 0, recent_orders: [] }),
     };
@@ -69,6 +69,8 @@ app.whenReady().then(async () => {
     visible: !document.getElementById('shop-customer-modal').hidden,
     contacts: document.querySelectorAll('.shop-customer-contact-grid article').length,
     orderCards: document.querySelectorAll('.shop-customer-order').length,
+    fullEmail: document.querySelector('.shop-customer-contact-grid article[data-tone="mail"] strong')?.textContent === 'alexie.popescu2007@gmail.com',
+    emailFits: (() => { const node = document.querySelector('.shop-customer-contact-grid article[data-tone="mail"] strong'); return !!node && node.scrollWidth <= node.clientWidth + 1; })(),
     modalHeight: Math.round(document.querySelector('.shop-customer-modal').getBoundingClientRect().height),
     viewportHeight: innerHeight,
   }))()`);
@@ -79,6 +81,17 @@ app.whenReady().then(async () => {
   fs.writeFileSync(confirmPath, (await win.webContents.capturePage()).toPNG());
   const confirmVisible = await win.webContents.executeJavaScript(`!document.getElementById('shop-customer-status-dialog').hidden`);
   await win.webContents.executeJavaScript(`document.getElementById('shop-customer-status-cancel').click(); document.querySelector('[data-commerce-close="shop-customer-modal"]').click()`);
+
+  await win.webContents.executeJavaScript(`document.querySelector('[data-customer-open="customer-10"]').click()`);
+  await wait(260);
+  const emptyOrdersPath = path.join(outputDir, 'customer-empty-orders.png');
+  fs.writeFileSync(emptyOrdersPath, (await win.webContents.capturePage()).toPNG());
+  const emptyOrders = await win.webContents.executeJavaScript(`(() => ({
+    visible: !!document.querySelector('.shop-customer-orders-empty'),
+    lightText: getComputedStyle(document.querySelector('.shop-customer-orders-empty strong')).color !== 'rgb(0, 0, 0)',
+    text: document.querySelector('.shop-customer-orders-empty strong')?.textContent || '',
+  }))()`);
+  await win.webContents.executeJavaScript(`document.querySelector('[data-commerce-close="shop-customer-modal"]').click()`);
 
   win.setSize(390, 844);
   await wait(350);
@@ -96,9 +109,10 @@ app.whenReady().then(async () => {
 
   const passed = desktop.metrics === 4 && desktop.cards === 10 && desktop.filters === 3
     && !desktop.horizontalOverflow && desktop.cardsInsideViewport
-    && detail.visible && detail.contacts === 4 && detail.orderCards === 5 && detail.modalHeight <= detail.viewportHeight
-    && confirmVisible && !narrow.horizontalOverflow && narrow.cardsInsideViewport && errors.length === 0;
-  console.log(JSON.stringify({ passed, desktop, detail, confirmVisible, narrow, errors, screenshots: { desktopPath, detailPath, confirmPath, mobilePath } }, null, 2));
+    && detail.visible && detail.contacts === 4 && detail.orderCards === 5 && detail.fullEmail && detail.emailFits && detail.modalHeight <= detail.viewportHeight
+    && confirmVisible && emptyOrders.visible && emptyOrders.text === 'Nicio comandă încă'
+    && !narrow.horizontalOverflow && narrow.cardsInsideViewport && errors.length === 0;
+  console.log(JSON.stringify({ passed, desktop, detail, confirmVisible, emptyOrders, narrow, errors, screenshots: { desktopPath, detailPath, confirmPath, emptyOrdersPath, mobilePath } }, null, 2));
   await win.destroy();
   app.exit(passed ? 0 : 1);
 }).catch(error => { console.error(error); app.exit(1); });
