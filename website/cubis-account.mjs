@@ -173,7 +173,12 @@ function renderCoupons() {
 
 function renderCounts() {
   const counts = { orders: state.orders.length, addresses: state.addresses.length, coupons: state.coupons.length };
-  Object.entries(counts).forEach(([name, value]) => { document.querySelector(`[data-account-count="${name}"]`).textContent = String(value); });
+  Object.entries(counts).forEach(([name, value]) => {
+    const badge = document.querySelector(`[data-account-count="${name}"]`);
+    if (!badge) return;
+    badge.textContent = value > 99 ? "99+" : String(value);
+    badge.hidden = value <= 0;
+  });
 }
 
 function toggleCompanyFields(type) {
