@@ -123,8 +123,10 @@ export const catalogApi = Object.freeze({
 
 export const checkoutApi = Object.freeze({
   products: ids => commerceApiRequest("publicCheckoutProducts", { method: "POST", auth: false, body: { ids } }),
-  promotionQuote: body => commerceApiRequest("publicPromotionQuote", { method: "POST", auth: false, body }),
-  createOrder: body => commerceApiRequest("createPublicOrder", { method: "POST", auth: false, body, timeout: 30000 }),
+  // Când există o sesiune de client, tokenul leagă promoția și comanda de cont.
+  // Pentru vizitatori cererile rămân publice deoarece headerul se omite automat.
+  promotionQuote: body => commerceApiRequest("publicPromotionQuote", { method: "POST", body }),
+  createOrder: body => commerceApiRequest("createPublicOrder", { method: "POST", body, timeout: 30000 }),
   stripeStatus: sessionId => commerceApiRequest("stripeCheckoutStatus", { method: "POST", auth: false, body: { session_id: sessionId } }),
   cancelStripe: (orderNumber, token) => commerceApiRequest("cancelStripeCheckout", { method: "POST", auth: false, body: { order_number: orderNumber, token } }),
 });

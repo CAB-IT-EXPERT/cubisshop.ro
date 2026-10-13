@@ -413,6 +413,13 @@ class CommerceStore extends EventTarget {
     return next;
   }
 
+  clearCart() {
+    const next = [];
+    writeJson(STORAGE.cart, next);
+    this.#changed("cart", next);
+    return next;
+  }
+
   #changed(type, detail) {
     this.dispatchEvent(new CustomEvent("change", { detail: { type, value: detail } }));
     document.dispatchEvent(new CustomEvent(`cubis:${type}-changed`, { detail }));

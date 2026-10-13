@@ -137,7 +137,7 @@ elements.items.addEventListener("click", event => {
 
 elements.checkout.addEventListener("click", () => {
   if (elements.checkout.disabled) return;
-  showToast("Coșul este pregătit. Fluxul securizat de checkout va fi disponibil în pasul următor.", "info");
+  location.href = "/checkout";
 });
 
 commerce.addEventListener("change", event => {

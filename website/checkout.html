@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073a69">
+  <meta name="description" content="Finalizează în siguranță comanda ta Cubis Shop, alege livrarea și metoda de plată.">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://cubisshop.ro/checkout">
+  <link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261012-drawer-scroll">
+  <link rel="stylesheet" href="/cubis-checkout.css?v=20261013-checkout-1">
+  <title>Finalizare comandă | Cubis Shop</title>
+</head>
+<body class="cs-page cs-checkout-page">
+  <div data-site-header class="cs-shell-placeholder"></div>
+
+  <main id="main" class="cs-checkout-main">
+    <div class="cs-container">
+      <nav class="cs-breadcrumb cs-checkout-breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Acasă</a><span aria-hidden="true">›</span><a href="/cos">Coșul meu</a><span aria-hidden="true">›</span><span aria-current="page">Finalizare comandă</span>
+      </nav>
+
+      <section class="cs-checkout-hero" aria-labelledby="checkout-title">
+        <div class="cs-checkout-hero__content">
+          <a class="cs-checkout-back" href="/cos"><span aria-hidden="true">←</span> Înapoi la coș</a>
+          <span class="cs-checkout-eyebrow"><i aria-hidden="true"></i> Comandă securizată</span>
+          <h1 id="checkout-title">Finalizarea<br><em>comenzii.</em></h1>
+          <p>Completează datele, alege livrarea și verifică totalul înainte să trimiți comanda.</p>
+        </div>
+        <div class="cs-checkout-progress" aria-label="Progresul comenzii">
+          <div class="cs-checkout-progress__brand">
+            <span data-checkout-hero-lock aria-hidden="true"></span>
+            <p><strong>Checkout protejat</strong><small>Datele sunt transmise în siguranță.</small></p>
+          </div>
+          <ol>
+            <li class="is-complete"><span data-progress-icon="check"></span><p><strong>Coș</strong><small>Produse verificate</small></p></li>
+            <li class="is-active" aria-current="step"><span>2</span><p><strong>Checkout</strong><small>Date și plată</small></p></li>
+            <li><span>3</span><p><strong>Confirmare</strong><small>Comandă trimisă</small></p></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="cs-checkout-loading" data-checkout-loading aria-live="polite">
+        <span class="cs-spinner"></span>
+        <strong>Pregătim checkout-ul tău…</strong>
+        <small>Verificăm produsele, metodele de livrare și plata.</small>
+      </section>
+
+      <section class="cs-checkout-empty" data-checkout-empty hidden aria-labelledby="checkout-empty-title">
+        <span data-checkout-empty-icon aria-hidden="true"></span>
+        <h2 id="checkout-empty-title">Nu există produse de comandat</h2>
+        <p>Adaugă produsele dorite în coș, apoi revino pentru finalizarea comenzii.</p>
+        <a href="/magazin#catalog">Descoperă produsele <span aria-hidden="true">→</span></a>
+      </section>
+
+      <form class="cs-checkout-layout" data-checkout-form hidden novalidate>
+        <div class="cs-checkout-forms">
+          <section class="cs-checkout-card" aria-labelledby="checkout-contact-title">
+            <header class="cs-checkout-card__head">
+              <span class="cs-checkout-card__number">01</span>
+              <div><small>Date de contact</small><h2 id="checkout-contact-title">Cine primește comanda?</h2></div>
+              <span class="cs-checkout-card__icon" data-section-icon="user" aria-hidden="true"></span>
+            </header>
+            <div class="cs-checkout-card__body">
+              <div class="cs-checkout-login-note" data-checkout-account-note>
+                <span data-inline-icon="user" aria-hidden="true"></span>
+                <p><strong>Ai deja cont?</strong><small>Autentifică-te pentru completarea automată a datelor.</small></p>
+                <a data-checkout-login href="/login?redirect=%2Fcheckout">Intră în cont</a>
+              </div>
+              <fieldset class="cs-checkout-segmented">
+                <legend>Comand ca</legend>
+                <label><input type="radio" name="customer_type" value="individual" checked><span><b>PF</b><em><strong>Persoană fizică</strong><small>Comandă pe numele tău</small></em></span></label>
+                <label><input type="radio" name="customer_type" value="company"><span><b>PJ</b><em><strong>Persoană juridică</strong><small>Facturare pe firmă</small></em></span></label>
+              </fieldset>
+              <div class="cs-checkout-grid is-three">
+                <label class="cs-field"><span>Nume complet <b>*</b></span><span class="cs-input"><i data-input-icon="user"></i><input name="customer_name" autocomplete="name" placeholder="Numele și prenumele" required maxlength="180"></span></label>
+                <label class="cs-field"><span>Telefon <b>*</b></span><span class="cs-input"><i data-input-icon="phone"></i><input name="customer_phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="07xx xxx xxx" required maxlength="50"></span></label>
+                <label class="cs-field"><span>E-mail <b>*</b></span><span class="cs-input"><i data-input-icon="mail"></i><input name="customer_email" type="email" autocomplete="email" placeholder="nume@exemplu.ro" required maxlength="180"></span></label>
+              </div>
+              <div class="cs-company-fields" data-company-fields hidden>
+                <div class="cs-checkout-grid is-two">
+                  <label class="cs-field"><span>Denumirea firmei <b>*</b></span><span class="cs-input"><input name="company_name" autocomplete="organization" placeholder="Denumire societate" maxlength="180"></span></label>
+                  <label class="cs-field"><span>CUI / CIF <b>*</b></span><span class="cs-input"><input name="company_cui" placeholder="RO12345678" maxlength="60"></span></label>
+                  <label class="cs-field"><span>Nr. Registrul Comerțului <b>*</b></span><span class="cs-input"><input name="company_registration_number" placeholder="J00/0000/2026" maxlength="80"></span></label>
+                  <label class="cs-field"><span>Sediul social <b>*</b></span><span class="cs-input"><input name="company_address" autocomplete="street-address" placeholder="Adresa completă a firmei" maxlength="255"></span></label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="cs-checkout-card" aria-labelledby="checkout-address-title">
+            <header class="cs-checkout-card__head">
+              <span class="cs-checkout-card__number">02</span>
+              <div><small>Destinația coletului</small><h2 id="checkout-address-title">Adresa de livrare</h2></div>
+              <span class="cs-checkout-card__icon" data-section-icon="home" aria-hidden="true"></span>
+            </header>
+            <div class="cs-checkout-card__body">
+              <div class="cs-saved-addresses" data-saved-addresses hidden></div>
+              <div class="cs-checkout-grid is-two">
+                <label class="cs-field is-wide"><span>Adresă <b>*</b></span><span class="cs-input"><i data-input-icon="home"></i><input name="address" autocomplete="street-address" placeholder="Stradă, număr, bloc, apartament" required maxlength="255"></span></label>
+                <label class="cs-field"><span>Localitate <b>*</b></span><span class="cs-input"><input name="city" autocomplete="address-level2" placeholder="Localitate" required maxlength="120"></span></label>
+                <label class="cs-field"><span>Județ / Sector</span><span class="cs-input"><input name="county" autocomplete="address-level1" placeholder="Județ sau sector" maxlength="120"></span></label>
+                <label class="cs-field"><span>Cod poștal</span><span class="cs-input"><input name="postal_code" autocomplete="postal-code" inputmode="numeric" placeholder="000000" maxlength="30"></span></label>
+                <label class="cs-field is-wide"><span>Observații pentru livrare <small>(opțional)</small></span><span class="cs-input is-textarea"><textarea name="customer_notes" rows="3" placeholder="Reper, interval preferat sau alte detalii utile curierului" maxlength="3000"></textarea></span></label>
+              </div>
+            </div>
+          </section>
+
+          <section class="cs-checkout-card" aria-labelledby="checkout-shipping-title">
+            <header class="cs-checkout-card__head">
+              <span class="cs-checkout-card__number">03</span>
+              <div><small>Cum ajunge la tine</small><h2 id="checkout-shipping-title">Metoda de livrare</h2></div>
+              <span class="cs-checkout-card__icon" data-section-icon="truck" aria-hidden="true"></span>
+            </header>
+            <div class="cs-checkout-card__body">
+              <div class="cs-checkout-choices" data-shipping-methods role="radiogroup" aria-label="Metoda de livrare"></div>
+            </div>
+          </section>
+
+          <section class="cs-checkout-card" aria-labelledby="checkout-payment-title">
+            <header class="cs-checkout-card__head">
+              <span class="cs-checkout-card__number">04</span>
+              <div><small>Plată simplă și sigură</small><h2 id="checkout-payment-title">Metoda de plată</h2></div>
+              <span class="cs-checkout-card__icon" data-section-icon="card" aria-hidden="true"></span>
+            </header>
+            <div class="cs-checkout-card__body">
+              <div class="cs-checkout-choices" data-payment-methods role="radiogroup" aria-label="Metoda de plată"></div>
+              <p class="cs-checkout-payment-note"><span data-inline-icon="lock" aria-hidden="true"></span> Nu stocăm datele cardului. Pentru plata online vei continua în pagina securizată a procesatorului.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="cs-checkout-summary" aria-labelledby="checkout-summary-title">
+          <span class="cs-checkout-summary__glow" aria-hidden="true"></span>
+          <header>
+            <div><small>Rezumat comandă</small><h2 id="checkout-summary-title">Comanda ta</h2></div>
+            <a href="/cos">Editează coșul</a>
+          </header>
+          <div class="cs-checkout-products" data-checkout-products></div>
+
+          <div class="cs-checkout-coupon">
+            <label for="checkout-coupon">Ai un cod de reducere?</label>
+            <div><input id="checkout-coupon" name="coupon_code" autocomplete="off" placeholder="Introdu codul" maxlength="80"><button type="button" data-coupon-apply>Aplică</button></div>
+            <p data-coupon-status hidden aria-live="polite"></p>
+          </div>
+
+          <dl class="cs-checkout-totals">
+            <div><dt>Subtotal</dt><dd data-checkout-subtotal>0,00 RON</dd></div>
+            <div data-checkout-discount-row hidden><dt>Reducere <small data-checkout-promotion></small></dt><dd data-checkout-discount>−0,00 RON</dd></div>
+            <div><dt>Livrare</dt><dd data-checkout-shipping>—</dd></div>
+          </dl>
+          <div class="cs-checkout-total"><span>Total de plată<small>Preț final, cu taxele incluse</small></span><strong data-checkout-total>0,00 RON</strong></div>
+
+          <div class="cs-checkout-consents">
+            <label><input type="checkbox" name="confirm_order" required><span><i></i></span><em>Confirm că datele comenzii sunt corecte.</em></label>
+            <label><input type="checkbox" name="accept_terms" required><span><i></i></span><em>Accept <a href="/termeni-si-conditii" target="_blank">Termenii și condițiile</a> și <a href="/politica-de-retur" target="_blank">Politica de retur</a>.</em></label>
+            <label><input type="checkbox" name="newsletter_opt_in"><span><i></i></span><em>Vreau să primesc noutăți și oferte Cubis Shop.</em></label>
+          </div>
+
+          <div class="cs-checkout-submit-error" data-checkout-error hidden role="alert"></div>
+          <button class="cs-checkout-submit" type="submit" data-checkout-submit>
+            <span data-submit-icon aria-hidden="true"></span><b data-submit-label>Trimite comanda</b><i data-submit-arrow aria-hidden="true"></i>
+          </button>
+          <p class="cs-checkout-submit-note">Comanda este verificată din nou pe server înainte de confirmare.</p>
+          <div class="cs-checkout-assurances">
+            <article><span data-assurance-icon="shield"></span><p><strong>Comandă protejată</strong><small>Date transmise în siguranță</small></p></article>
+            <article><span data-assurance-icon="truck"></span><p><strong>Livrare rapidă</strong><small>Informații clare despre transport</small></p></article>
+            <article><span data-assurance-icon="headset"></span><p><strong>Suport dedicat</strong><small>Ajutor când ai nevoie</small></p></article>
+          </div>
+        </aside>
+      </form>
+
+      <section class="cs-checkout-success" data-checkout-success hidden aria-live="polite"></section>
+    </div>
+  </main>
+
+  <div class="cs-checkout-toast" data-checkout-toast hidden role="status" aria-live="polite" aria-atomic="true"></div>
+  <div data-site-footer class="cs-footer-placeholder"></div>
+  <script type="module" src="/cubis-checkout.mjs?v=20261013-checkout-1"></script>
+</body>
+</html>

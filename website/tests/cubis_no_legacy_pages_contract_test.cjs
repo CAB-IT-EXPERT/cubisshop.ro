@@ -17,7 +17,7 @@ function relative(absolute) {
 
 const files = walk(websiteRoot);
 const htmlFiles = files.filter((file) => path.extname(file) === ".html").map(relative).sort();
-assert.deepEqual(htmlFiles, ["404.html", "cont-nou.html", "cont.html", "contact.html", "cos.html", "favorite.html", "index.html", "login.html", "magazin.html", "produs.html", "resetare-parola.html"]);
+assert.deepEqual(htmlFiles, ["404.html", "checkout.html", "cont-nou.html", "cont.html", "contact.html", "cos.html", "favorite.html", "index.html", "login.html", "magazin.html", "plata-esuata.html", "plata-finalizata.html", "produs.html", "resetare-parola.html"]);
 
 const assetFiles = files
   .filter((file) => relative(file).startsWith("assets/"))
