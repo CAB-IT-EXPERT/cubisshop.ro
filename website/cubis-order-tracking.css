@@ -136,9 +136,9 @@
 
 .cs-track-progress-card { padding: clamp(23px, 3vw, 38px); border: 1px solid #d8e7f4; border-radius: 26px; background: #fff; box-shadow: 0 18px 54px rgba(8, 54, 96, .08); }
 .cs-track-progress-card > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
-.cs-track-progress-card header small { color: #1181e5; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.cs-track-progress-card header small { color: #1181e5; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .cs-track-progress-card h2 { margin: 4px 0 0; color: #06275a; font-size: clamp(23px, 2.3vw, 31px); letter-spacing: -.04em; }
-.cs-track-progress-card > header > span { color: #7a90aa; font-size: 10px; }
+.cs-track-progress-card > header > span { color: #687f99; font-size: 12px; }
 .cs-track-progress-card > header > span b { color: #087cf0; font-size: 18px; }
 .cs-track-progress-bar { height: 6px; margin: 25px 0 22px; overflow: hidden; border-radius: 99px; background: #e9f1f8; }
 .cs-track-progress-bar i { display: block; width: var(--track-progress); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #087cf0, #12c8d8); box-shadow: 0 0 15px rgba(14, 174, 229, .45); transition: width .7s cubic-bezier(.2,.8,.2,1); }
@@ -150,11 +150,11 @@
 .cs-track-progress-card li.is-reached > span { border-color: #b9ddf7; color: #087cf0; background: #edf8ff; }
 .cs-track-progress-card li.is-current > span { border-color: transparent; color: #fff; background: linear-gradient(145deg, #087cf0, #10bddb); box-shadow: 0 10px 24px rgba(7, 127, 232, .25); transform: translateY(-2px); }
 .cs-track-progress-card li > div { display: grid; gap: 2px; }
-.cs-track-progress-card li small { color: #91a1b4; font-size: 7px; font-weight: 800; letter-spacing: .1em; }
+.cs-track-progress-card li small { color: #71879e; font-size: 9px; font-weight: 800; letter-spacing: .09em; }
 .cs-track-progress-card li.is-current small { color: #0783e9; }
-.cs-track-progress-card li strong { color: #435f7e; font-size: 10px; }
+.cs-track-progress-card li strong { color: #365675; font-size: 12px; }
 .cs-track-progress-card li.is-reached strong { color: #0a3566; }
-.cs-track-progress-card li time { color: #8094aa; font-size: 7px; }
+.cs-track-progress-card li time { color: #70869d; font-size: 9px; }
 
 .cs-track-special { display: grid; grid-template-columns: 48px 1fr; gap: 14px; margin-top: 24px; padding: 17px; border: 1px solid #f4bdc9; border-radius: 18px; background: #fff4f6; }
 .cs-track-special > span { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 14px; color: #fff; background: #ec4767; }
@@ -175,23 +175,23 @@
 .cs-track-help-card { border: 1px solid #d8e7f3; background: #fff; box-shadow: 0 17px 48px rgba(8, 53, 96, .07); }
 .cs-track-order-card { overflow: hidden; border-radius: 26px; }
 .cs-track-order-card > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 26px 20px; border-bottom: 1px solid #e4edf5; }
-.cs-track-order-card header small { color: #1082e6; font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-.cs-track-order-card h2 { margin: 4px 0 0; color: #06285a; font-size: 23px; letter-spacing: -.04em; }
-.cs-track-order-card > header > span { display: inline-flex; min-height: 32px; align-items: center; border-radius: 99px; padding: 0 12px; color: #437092; background: #edf6fd; font-size: 9px; font-weight: 800; }
+.cs-track-order-card header small { color: #1082e6; font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.cs-track-order-card h2 { margin: 4px 0 0; color: #06285a; font-size: 26px; letter-spacing: -.04em; }
+.cs-track-order-card > header > span { display: inline-flex; min-height: 34px; align-items: center; border-radius: 99px; padding: 0 13px; color: #356889; background: #edf6fd; font-size: 10px; font-weight: 800; }
 .cs-track-products { display: grid; gap: 0; padding: 3px 26px; }
 .cs-track-product { display: grid; grid-template-columns: 92px minmax(0,1fr) auto; align-items: center; gap: 16px; min-height: 125px; padding: 16px 0; border-bottom: 1px solid #e8eff5; }
 .cs-track-product__media { display: grid; width: 92px; height: 92px; place-items: center; overflow: hidden; border: 1px solid #dceaf5; border-radius: 17px; color: #1989e8; background: linear-gradient(145deg, #f7fbff, #eaf6ff); }
 .cs-track-product__media img { width: 100%; height: 100%; object-fit: contain; }
 .cs-track-product__media .cs-icon { width: 36px; height: 36px; }
 .cs-track-product > div { min-width: 0; }
-.cs-track-product > div > small { color: #7890aa; font-size: 8px; font-weight: 700; letter-spacing: .04em; }
-.cs-track-product h3 { margin: 5px 0 9px; color: #0a2b5c; font-size: 14px; line-height: 1.35; }
-.cs-track-product p { display: flex; align-items: center; gap: 8px; margin: 0; color: #6c829b; font-size: 9px; }
+.cs-track-product > div > small { color: #667f99; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+.cs-track-product h3 { margin: 5px 0 9px; color: #0a2b5c; font-size: 16px; line-height: 1.35; }
+.cs-track-product p { display: flex; align-items: center; gap: 8px; margin: 0; color: #5d7893; font-size: 11px; }
 .cs-track-product p b { display: inline-flex; min-height: 25px; align-items: center; border-radius: 8px; padding: 0 8px; color: #087cf0; background: #eaf6ff; }
-.cs-track-product > strong { color: #076ed3; font-size: 15px; white-space: nowrap; }
+.cs-track-product > strong { color: #076ed3; font-size: 17px; white-space: nowrap; }
 .cs-track-empty-products { margin: 24px 0; color: #7388a0; font-size: 12px; }
 .cs-track-totals { display: grid; gap: 11px; padding: 22px 26px 26px; background: #f8fbfe; }
-.cs-track-totals p { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0; color: #687f99; font-size: 10px; }
+.cs-track-totals p { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0; color: #5c7691; font-size: 12px; }
 .cs-track-totals p b { color: #173f6f; }
 .cs-track-totals p.is-discount b { color: #009b70; }
 .cs-track-totals p.is-total { margin-top: 5px; padding-top: 17px; border-top: 1px solid #d9e7f2; color: #0b2d5d; font-size: 13px; font-weight: 800; }
@@ -202,20 +202,20 @@
 .cs-track-info-card > header { display: flex; align-items: center; gap: 11px; margin-bottom: 17px; }
 .cs-track-info-card > header > span { display: grid; width: 43px; height: 43px; flex: 0 0 43px; place-items: center; border-radius: 13px; color: #087cf0; background: #eaf6ff; }
 .cs-track-info-card > header .cs-icon { width: 21px; height: 21px; }
-.cs-track-info-card header small { color: #1583e7; font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.cs-track-info-card h2 { margin: 2px 0 0; color: #092c5d; font-size: 15px; line-height: 1.25; }
+.cs-track-info-card header small { color: #1583e7; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.cs-track-info-card h2 { margin: 2px 0 0; color: #092c5d; font-size: 17px; line-height: 1.25; }
 .cs-track-info-card dl { display: grid; gap: 10px; margin: 0; }
 .cs-track-info-card dl div { display: grid; grid-template-columns: minmax(70px, .55fr) 1.4fr; gap: 12px; padding-top: 10px; border-top: 1px solid #e6eef5; }
-.cs-track-info-card dt { color: #8496aa; font-size: 8px; }
-.cs-track-info-card dd { margin: 0; color: #345577; font-size: 9px; font-weight: 700; line-height: 1.45; text-align: right; overflow-wrap: anywhere; }
-.cs-track-info-card .is-returnable { display: inline-flex; min-height: 30px; align-items: center; margin-top: 15px; border: 1px solid #afe8db; border-radius: 99px; padding: 0 10px; color: #00866a; background: #effffb; font-size: 8px; font-weight: 800; }
+.cs-track-info-card dt { color: #71869b; font-size: 10px; }
+.cs-track-info-card dd { margin: 0; color: #294f73; font-size: 11px; font-weight: 700; line-height: 1.5; text-align: right; overflow-wrap: anywhere; }
+.cs-track-info-card .is-returnable { display: inline-flex; min-height: 32px; align-items: center; margin-top: 15px; border: 1px solid #afe8db; border-radius: 99px; padding: 0 11px; color: #00866a; background: #effffb; font-size: 9px; font-weight: 800; }
 .cs-track-help-card { display: grid; grid-template-columns: 50px 1fr; gap: 13px; padding: 20px; overflow: hidden; border-color: rgba(255,255,255,.12); border-radius: 20px; color: #fff; background: radial-gradient(circle at 110% 0, rgba(18,208,222,.42), transparent 45%), linear-gradient(145deg, #062b5d, #086aab); }
 .cs-track-help-card > span { display: grid; width: 50px; height: 50px; place-items: center; border-radius: 15px; color: #b7efff; background: rgba(255,255,255,.1); }
 .cs-track-help-card > span .cs-icon { width: 25px; height: 25px; }
-.cs-track-help-card small { color: #9edbf9; font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.cs-track-help-card h2 { margin: 4px 0; color: #fff; font-size: 17px; letter-spacing: -.03em; }
-.cs-track-help-card p { margin: 0; color: #c0d7ea; font-size: 9px; line-height: 1.5; }
-.cs-track-help-card a { display: inline-flex; min-height: 36px; align-items: center; gap: 6px; margin-top: 12px; border-radius: 10px; padding: 0 11px; color: #075990; background: #fff; font-size: 9px; font-weight: 800; }
+.cs-track-help-card small { color: #9edbf9; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.cs-track-help-card h2 { margin: 4px 0; color: #fff; font-size: 19px; letter-spacing: -.03em; }
+.cs-track-help-card p { margin: 0; color: #d2e6f5; font-size: 11px; line-height: 1.55; }
+.cs-track-help-card a { display: inline-flex; min-height: 39px; align-items: center; gap: 6px; margin-top: 12px; border-radius: 10px; padding: 0 13px; color: #075990; background: #fff; font-size: 10px; font-weight: 800; }
 .cs-track-help-card a .cs-icon { width: 14px; height: 14px; }
 
 .cs-track-actions { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 24px 28px; border: 1px solid #d8e7f3; border-radius: 22px; background: rgba(255,255,255,.92); }
@@ -353,7 +353,9 @@
   .cs-track-progress-card li > span { width: 48px; height: 48px; border-radius: 15px; }
   .cs-track-progress-card li > div { grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 2px 9px; min-height: 62px; padding: 10px 12px; border: 1px solid #e1ebf3; border-radius: 14px; background: #fbfdff; }
   .cs-track-progress-card li small { grid-column: 1 / -1; }
-  .cs-track-progress-card li strong { font-size: 11px; }
+  .cs-track-progress-card li strong { font-size: 13px; }
+  .cs-track-progress-card li small,
+  .cs-track-progress-card li time { font-size: 9px; }
   .cs-track-progress-card li time { text-align: right; }
   .cs-track-special { margin-top: 15px; }
   .cs-track-content-grid { gap: 13px; }

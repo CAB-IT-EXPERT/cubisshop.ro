@@ -44,6 +44,7 @@ assert.deepEqual(htmlFiles, [
   "solicita-retur.html",
   "solutionarea-litigiilor.html",
   "termeni-si-conditii.html",
+  "urmarire-comanda.html",
 ]);
 
 const assetFiles = files
