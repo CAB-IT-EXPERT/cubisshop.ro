@@ -1,6 +1,7 @@
 import { normalize } from "./cubis-search-normalize.mjs";
 import { commerceApiRequest, migrateHistoricalStorage, STORAGE_KEYS } from "./cubis-commerce-api.mjs";
 import { bindNewsletter } from "./cubis-newsletter.mjs";
+import { initCookieConsent } from "./cubis-cookie-consent.mjs?v=20261013-legal-1";
 
 export const API_URL = "/shop-api/api-v2.php";
 const previewParams = new URLSearchParams(location.search);
@@ -285,7 +286,9 @@ class StorefrontData {
 
   config({ refresh = false } = {}) {
     if (refresh) this.#config = null;
-    this.#config ||= api("publicShopConfig", { auth: false, cache: refresh ? "no-store" : "default" });
+    // Configurația firmei, plăților și livrărilor este sursa live pentru
+    // checkout, footer și paginile juridice; nu o lăsăm în cache-ul HTTP.
+    this.#config ||= api("publicShopConfig", { auth: false, cache: "no-store" });
     return this.#config;
   }
 
@@ -656,8 +659,8 @@ function shellFooter(filters, config) {
       </div>
       <details class="cs-footer__section" data-footer-section open><summary>${icon("document")}<h2>Informații</h2>${icon("chevron", "cs-footer__chevron")}</summary><div class="cs-footer__links"><a href="/livrare-si-plata">Livrare și plată</a><a href="/politica-de-retur">Retururi</a><a href="/termeni-si-conditii">Termeni și condiții</a><a href="/politica-de-confidentialitate">Confidențialitate</a><a href="/contact">Contact</a></div></details>
       <details class="cs-footer__section" data-footer-section open><summary>${icon("grid")}<h2>Categorii</h2>${icon("chevron", "cs-footer__chevron")}</summary><div class="cs-footer__links">${categories.map(category => `<a href="/magazin?category=${encodeURIComponent(category.id || category.slug)}">${escapeHtml(category.name)}</a>`).join("") || `<a href="/magazin">Vezi catalogul</a>`}</div></details>
-      <details class="cs-footer__section" data-footer-section open><summary>${icon("headset")}<h2>Suport clienți</h2>${icon("chevron", "cs-footer__chevron")}</summary><div class="cs-footer__links"><a href="/urmarire-comanda">Urmărire comandă</a><a href="/solicita-retur">Solicită retur</a><a href="/garantii-si-reclamatii">Garanții și reclamații</a>${company.email ? `<a class="cs-footer__contact" href="mailto:${escapeHtml(company.email)}">${icon("mail")} ${escapeHtml(company.email)}</a>` : ""}${company.phone ? `<a class="cs-footer__contact" href="tel:${escapeHtml(company.phone.replace(/[^+\d]/g, ""))}">${icon("phone")} ${escapeHtml(company.phone)}</a>` : ""}</div></details>
-      <details class="cs-footer__section cs-footer__section--security" data-footer-section open><summary>${icon("shield")}<h2>Magazin online sigur</h2>${icon("chevron", "cs-footer__chevron")}</summary><div class="cs-footer__security"><div class="cs-footer__assurance"><span>${icon("card")}</span><div><h3>Plăți procesate securizat</h3><p>Tranzacții sigure, parteneri de încredere.</p></div></div><div class="cs-footer__assurance"><span>${icon("lock")}</span><div><h3>Date protejate</h3><p>Confidențialitatea ta este prioritatea noastră.</p></div></div><a href="/politica-cookies" data-cookie-settings>Preferințe cookie</a></div></details>
+      <details class="cs-footer__section" data-footer-section open><summary>${icon("headset")}<h2>Suport clienți</h2>${icon("chevron", "cs-footer__chevron")}</summary><div class="cs-footer__links"><a href="/urmarire-comanda">Urmărire comandă</a><a href="/solicita-retur">Solicită retur</a><a href="/garantii-si-reclamatii">Garanții și reclamații</a><a href="/plata-si-facturare">Plată și facturare</a><a href="/siguranta-produselor">Siguranța produselor</a>${company.email ? `<a class="cs-footer__contact" href="mailto:${escapeHtml(company.email)}">${icon("mail")} ${escapeHtml(company.email)}</a>` : ""}${company.phone ? `<a class="cs-footer__contact" href="tel:${escapeHtml(company.phone.replace(/[^+\d]/g, ""))}">${icon("phone")} ${escapeHtml(company.phone)}</a>` : ""}</div></details>
+      <details class="cs-footer__section cs-footer__section--security" data-footer-section open><summary>${icon("shield")}<h2>Magazin online sigur</h2>${icon("chevron", "cs-footer__chevron")}</summary><div class="cs-footer__security"><div class="cs-footer__assurance"><span>${icon("card")}</span><div><h3>Plăți procesate securizat</h3><p>Tranzacții sigure, parteneri de încredere.</p></div></div><div class="cs-footer__assurance"><span>${icon("lock")}</span><div><h3>Date protejate</h3><p>Confidențialitatea ta este prioritatea noastră.</p></div></div><nav class="cs-footer__legal-links" aria-label="Politici și informații legale"><strong>Politici și transparență</strong><a href="/politica-cookies"><span>Politica de cookie-uri</span>${icon("chevron")}</a><a href="/politica-cookies#preferinte" data-cookie-settings><span>Preferințe cookie</span>${icon("chevron")}</a><a href="/solutionarea-litigiilor"><span>Soluționarea litigiilor</span>${icon("chevron")}</a><a href="/conditii-b2b"><span>Condiții B2B</span>${icon("chevron")}</a><a href="/accesibilitate"><span>Accesibilitate</span>${icon("chevron")}</a></nav></div></details>
     </div>
     <div class="cs-footer__bottom"><div class="cs-container"><span>© ${new Date().getFullYear()} Cubis Shop. Toate drepturile rezervate.</span>${designer}</div></div>
   </footer>`;
@@ -920,6 +923,7 @@ function bindShellInteractions() {
 }
 
 export async function initShell({ active = "" } = {}) {
+  initCookieConsent();
   document.documentElement.dataset.theme = "light";
   document.documentElement.style.colorScheme = "light";
   document.body.classList.toggle("cs-demo-mode", PREVIEW_DEMO);

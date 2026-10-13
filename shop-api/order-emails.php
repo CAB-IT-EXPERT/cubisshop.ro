@@ -169,8 +169,8 @@ function gtEmailCompatibleImageUrl(string $imageUrl, array $config): string {
 }
 
 /** Buton bazat pe tabel, redat corect inclusiv de motorul Word din Outlook. */
-function gtEmailTableButton(string $url, string $label, string $background = '#ff8500', string $color = '#ffffff'): string {
-    return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="' . gtEmailEscape($background) . '" style="padding:16px 28px;border-radius:18px;background:' . gtEmailEscape($background) . '"><a href="' . gtEmailEscape($url) . '" style="display:block;color:' . gtEmailEscape($color) . ';text-decoration:none;font-size:14px;font-weight:900;line-height:18px;mso-line-height-rule:exactly">' . gtEmailEscape($label) . '&nbsp;&nbsp;→</a></td></tr></table>';
+function gtEmailTableButton(string $url, string $label, string $background = '#087ff5', string $color = '#ffffff'): string {
+    return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="' . gtEmailEscape($background) . '" style="padding:17px 30px;border-radius:17px;background:' . gtEmailEscape($background) . ';box-shadow:0 12px 28px rgba(8,127,245,.22)"><a href="' . gtEmailEscape($url) . '" style="display:block;color:' . gtEmailEscape($color) . ';text-decoration:none;font-size:14px;font-weight:900;line-height:18px;mso-line-height-rule:exactly">' . gtEmailEscape($label) . '&nbsp;&nbsp;→</a></td></tr></table>';
 }
 
 function gtEmailStatusTimeline(string $status, string $paymentMethod = 'card'): string {
@@ -184,25 +184,25 @@ function gtEmailStatusTimeline(string $status, string $paymentMethod = 'card'): 
         $meta = gtOrderStatusMeta($value);
         $reached = $returnState || (!$terminal && $index <= $currentIndex);
         $current = !$terminal && !$returnState && $index === $currentIndex;
-        $tone = $current ? (string)$meta['color'] : ($reached ? '#ff9a2f' : '#68635d');
-        $surface = $current ? (string)$meta['color'] . '18' : ($reached ? '#211d18' : '#191817');
-        $border = $current ? (string)$meta['color'] . '55' : '#302d29';
+        $tone = $current ? (string)$meta['color'] : ($reached ? '#087ff5' : '#9bb2c9');
+        $surface = $current ? '#eef8ff' : ($reached ? '#f7fbff' : '#fbfdff');
+        $border = $current ? '#9bd4fb' : '#d8e8f5';
         $stateLabel = $current ? 'ACUM' : ($reached ? 'FINALIZAT' : 'URMEAZĂ');
         $rows .= '<tr><td style="padding:0 0 8px">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $surface . ';border:1px solid ' . $border . ';border-radius:18px">'
             . '<tr><td style="width:48px;padding:11px 0 11px 12px">'
-            . '<span style="display:block;width:36px;height:36px;line-height:36px;text-align:center;border-radius:13px;background:' . $tone . ';color:#10100f;font-size:11px;font-weight:900">' . ($reached ? '✓' : str_pad((string)($index + 1), 2, '0', STR_PAD_LEFT)) . '</span></td>'
-            . '<td style="padding:11px 8px"><strong style="display:block;color:' . ($current ? '#ffffff' : '#ddd6ce') . ';font-size:13px;line-height:1.3">' . gtEmailEscape($meta['label']) . '</strong>'
-            . '<span style="display:block;margin-top:3px;color:#827b74;font-size:10px;line-height:1.35">' . gtEmailEscape($meta['next_message'] ?? $meta['message']) . '</span></td>'
+            . '<span style="display:block;width:36px;height:36px;line-height:36px;text-align:center;border-radius:13px;background:' . $tone . ';color:#ffffff;font-size:11px;font-weight:900">' . ($reached ? '✓' : str_pad((string)($index + 1), 2, '0', STR_PAD_LEFT)) . '</span></td>'
+            . '<td style="padding:11px 8px"><strong style="display:block;color:#062b5b;font-size:13px;line-height:1.3">' . gtEmailEscape($meta['label']) . '</strong>'
+            . '<span style="display:block;margin-top:3px;color:#6b86a3;font-size:10px;line-height:1.35">' . gtEmailEscape($meta['next_message'] ?? $meta['message']) . '</span></td>'
             . '<td align="right" style="width:72px;padding:11px 12px 11px 4px"><span style="display:inline-block;color:' . $tone . ';font-size:8px;font-weight:900;letter-spacing:.08em">' . $stateLabel . '</span></td></tr></table>'
             . '</td></tr>';
     }
     if ($terminal || $returnState) {
         $terminalMeta = gtOrderStatusMeta($status);
         $terminalTone = (string)$terminalMeta['color'];
-        $rows .= '<tr><td style="padding:0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . $terminalTone . '18;border:1px solid ' . $terminalTone . '55;border-radius:18px">'
-            . '<tr><td style="width:48px;padding:11px 0 11px 12px"><span style="display:block;width:36px;height:36px;line-height:36px;text-align:center;border-radius:13px;background:' . $terminalTone . ';color:#160f10;font-size:17px;font-weight:900">' . gtEmailEscape($terminalMeta['symbol']) . '</span></td>'
-            . '<td style="padding:11px 8px"><strong style="display:block;color:#fff;font-size:13px">' . gtEmailEscape($terminalMeta['label']) . '</strong><span style="display:block;margin-top:3px;color:#aaa39c;font-size:10px">' . gtEmailEscape($terminalMeta['message']) . '</span></td>'
+        $rows .= '<tr><td style="padding:0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7fbff;border:1px solid #d8e8f5;border-radius:18px">'
+            . '<tr><td style="width:48px;padding:11px 0 11px 12px"><span style="display:block;width:36px;height:36px;line-height:36px;text-align:center;border-radius:13px;background:' . $terminalTone . ';color:#ffffff;font-size:17px;font-weight:900">' . gtEmailEscape($terminalMeta['symbol']) . '</span></td>'
+            . '<td style="padding:11px 8px"><strong style="display:block;color:#062b5b;font-size:13px">' . gtEmailEscape($terminalMeta['label']) . '</strong><span style="display:block;margin-top:3px;color:#6b86a3;font-size:10px">' . gtEmailEscape($terminalMeta['message']) . '</span></td>'
             . '<td align="right" style="width:72px;padding:11px 12px 11px 4px"><span style="color:' . $terminalTone . ';font-size:8px;font-weight:900;letter-spacing:.08em">ACUM</span></td></tr></table></td></tr>';
     }
     return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' . $rows . '</table>';
@@ -226,15 +226,44 @@ function gtEmailReturnDecisionSummary(array $order): string {
         $decisionColor = $refused > 0.00005 ? ($accepted > 0.00005 ? '#fbbf24' : '#fb7185') : '#5eead4';
         $decisionLabel = $refused > 0.00005 ? ($accepted > 0.00005 ? 'APROBAT PARȚIAL' : 'REFUZAT') : 'APROBAT INTEGRAL';
         $reasonHtml = $refused > 0.00005 && $reason !== ''
-            ? '<p style="margin:9px 0 0;padding:10px 12px;border-radius:12px;background:#25191e;color:#f5d7e0;font-size:11px;line-height:1.5"><strong style="color:#fb9aad">Motivul refuzului:</strong> ' . gtEmailEscape($reason) . '</p>'
+            ? '<p style="margin:9px 0 0;padding:10px 12px;border:1px solid #ffd1dc;border-radius:12px;background:#fff4f7;color:#8a3650;font-size:11px;line-height:1.5"><strong style="color:#d72e5e">Motivul refuzului:</strong> ' . gtEmailEscape($reason) . '</p>'
             : '';
-        $rows .= '<div style="margin-top:10px;padding:15px;border:1px solid #403b43;border-radius:18px;background:#171519">'
+        $rows .= '<div style="margin-top:10px;padding:15px;border:1px solid #d8e8f5;border-radius:18px;background:#ffffff">'
             . '<span style="display:block;color:' . $decisionColor . ';font-size:9px;font-weight:900;letter-spacing:.08em">' . $decisionLabel . '</span>'
-            . '<strong style="display:block;margin-top:6px;color:#fff8f3;font-size:13px;line-height:1.4;word-break:break-word;overflow-wrap:anywhere">' . gtEmailEscape($item['product_name'] ?? '') . '</strong><span style="display:block;margin-top:3px;color:#827b84;font-size:10px">' . gtEmailEscape($item['product_sku'] ?? 'Fără SKU') . '</span>'
-            . '<table role="presentation" width="100%" style="margin-top:12px;font-size:11px"><tr><td style="color:#aaa2ac">Solicitată <strong style="color:#fff8f3">' . gtEmailQuantity($requested) . '</strong></td><td align="center" style="color:#6ee7b7">Acceptată <strong>' . gtEmailQuantity($accepted) . '</strong></td><td align="right" style="color:#fb9aad">Refuzată <strong>' . gtEmailQuantity($refused) . '</strong></td></tr></table>'
+            . '<strong style="display:block;margin-top:6px;color:#062b5b;font-size:13px;line-height:1.4;word-break:break-word;overflow-wrap:anywhere">' . gtEmailEscape($item['product_name'] ?? '') . '</strong><span style="display:block;margin-top:3px;color:#7892ad;font-size:10px">' . gtEmailEscape($item['product_sku'] ?? 'Fără SKU') . '</span>'
+            . '<table role="presentation" width="100%" style="margin-top:12px;font-size:11px"><tr><td style="color:#607e9c">Solicitată <strong style="color:#062b5b">' . gtEmailQuantity($requested) . '</strong></td><td align="center" style="color:#07834c">Acceptată <strong>' . gtEmailQuantity($accepted) . '</strong></td><td align="right" style="color:#d72e5e">Refuzată <strong>' . gtEmailQuantity($refused) . '</strong></td></tr></table>'
             . $reasonHtml . '</div>';
     }
-    return '<div style="margin-top:18px;padding:18px;border:1px solid #4c414a;border-radius:24px;background:#211f24"><span style="display:block;color:#a49ca6;font-size:9px;font-weight:900;letter-spacing:.12em">DECIZIA PE FIECARE PRODUS</span>' . $rows . '</div>';
+    return '<div style="margin-top:18px;padding:18px;border:1px solid #cfe4f5;border-radius:24px;background:#f4faff"><span style="display:block;color:#5f82a4;font-size:9px;font-weight:900;letter-spacing:.12em">DECIZIA PE FIECARE PRODUS</span>' . $rows . '</div>';
+}
+
+/** Cadru comun pentru mesajele speciale de anulare și retur. */
+function gtEmailSpecialStatusDocument(
+    string $logoUrl,
+    string $preheader,
+    string $statusLabel,
+    string $eyebrow,
+    string $title,
+    string $message,
+    string $accent,
+    string $content,
+    string $button,
+    string $footer = ''
+): string {
+    return '<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">'
+        . '<style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table{border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt}img{border:0;outline:none}@media(max-width:600px){.gt-special-wrap{padding:10px 7px!important}.gt-special-shell{border-radius:24px!important}.gt-special-body{padding:23px 17px 27px!important}.gt-special-logo{width:145px!important}.gt-special-title{font-size:33px!important}.gt-special-status{display:none!important}}</style></head>'
+        . '<body data-gt-email="light-v1" bgcolor="#eaf5ff" style="margin:0;background:#eaf5ff;color:#062b5b;font-family:Arial,\'Segoe UI\',sans-serif;-webkit-font-smoothing:antialiased">'
+        . '<div style="display:none;max-height:0;overflow:hidden;opacity:0">' . $preheader . '</div>'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eaf5ff" style="width:100%;background:#eaf5ff"><tr><td class="gt-special-wrap" align="center" style="padding:34px 14px">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="gt-special-shell" bgcolor="#ffffff" style="width:100%;max-width:680px;overflow:hidden;border:1px solid #b9dcf7;border-radius:34px;background:#ffffff;box-shadow:0 24px 70px rgba(4,59,115,.14)">'
+        . '<tr><td style="height:7px;background:#0788f7;background-image:linear-gradient(90deg,#087ff5,#12c3df 72%,' . $accent . ')"></td></tr><tr><td class="gt-special-body" style="padding:30px 32px 34px">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td><img class="gt-special-logo" src="' . $logoUrl . '" width="165" alt="Cubis Shop" style="display:block;width:165px;max-width:100%;height:auto"></td><td class="gt-special-status" align="right"><span style="display:inline-block;padding:9px 13px;border:1px solid #acd9f8;border-radius:999px;background:#f0f8ff;color:#0874d9;font-size:11px;font-weight:900">' . $statusLabel . '</span></td></tr></table>'
+        . '<div style="padding:34px 0 22px"><span style="display:block;color:' . $accent . ';font-size:10px;font-weight:900;letter-spacing:.15em">' . $eyebrow . '</span><h1 class="gt-special-title" style="margin:9px 0 12px;color:#062b5b;font-size:42px;line-height:1.05;letter-spacing:-1.8px">' . $title . '</h1><p style="margin:0;color:#52769a;font-size:15px;line-height:1.7">' . $message . '</p></div>'
+        . $content
+        . '<div style="padding:24px 0 4px;text-align:center">' . $button . '</div>'
+        . $footer
+        . '<p style="margin:25px 0 0;text-align:center;color:#7892ad;font-size:10px;line-height:1.65">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#365f88">Cubis Shop</strong> · <a href="https://cubisshop.ro" style="color:#0874d9;text-decoration:none">cubisshop.ro</a></p>'
+        . '</td></tr></table></td></tr></table></body></html>';
 }
 
 function gtBuildOrderEmail(array $order, array $config, string $status): array {
@@ -255,23 +284,23 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
         if (!is_array($item)) continue;
         $imageUrl = gtEmailCompatibleImageUrl((string)($item['image_url'] ?? ''), $config);
         $image = $imageUrl !== ''
-            ? '<img src="' . gtEmailEscape($imageUrl) . '" width="64" height="64" alt="" style="display:block;width:64px;height:64px;object-fit:contain;border-radius:16px;background:#f7f2ed">'
-            : '<span style="display:block;width:64px;height:64px;line-height:64px;text-align:center;border-radius:16px;background:#302d33;color:#ffb77a;font-size:19px;font-weight:900">GT</span>';
+            ? '<img class="gt-product-image" src="' . gtEmailEscape($imageUrl) . '" width="76" height="76" alt="" style="display:block;width:76px;height:76px;object-fit:contain;border:1px solid #cfe3f4;border-radius:17px;background:#ffffff">'
+            : '<span style="display:block;width:76px;height:76px;line-height:76px;text-align:center;border:1px solid #cfe3f4;border-radius:17px;background:#eff8ff;color:#087ff5;font-size:19px;font-weight:900">CS</span>';
         $hasItemDiscount = $isProductPromotion && (float)($item['discount_total'] ?? 0) > 0;
         $unitPriceHtml = $hasItemDiscount
-            ? '<span style="text-decoration:line-through;color:#766f78">' . gtEmailMoney($item['unit_price'] ?? 0, $currency) . '</span> <strong style="color:#6ee7b7">' . gtEmailMoney($item['discounted_unit_price'] ?? 0, $currency) . '</strong>'
+            ? '<span style="text-decoration:line-through;color:#91a5b9">' . gtEmailMoney($item['unit_price'] ?? 0, $currency) . '</span> <strong style="color:#07834c">' . gtEmailMoney($item['discounted_unit_price'] ?? 0, $currency) . '</strong>'
             : gtEmailMoney($item['unit_price'] ?? 0, $currency);
         $linePriceHtml = $hasItemDiscount
-            ? '<span style="text-decoration:line-through;color:#766f78;font-size:10px;font-weight:600">' . gtEmailMoney($item['line_total'] ?? 0, $currency) . '</span> <strong style="color:#6ee7b7">' . gtEmailMoney($item['discounted_line_total'] ?? 0, $currency) . '</strong>'
+            ? '<span style="text-decoration:line-through;color:#91a5b9;font-size:10px;font-weight:600">' . gtEmailMoney($item['line_total'] ?? 0, $currency) . '</span> <strong style="color:#07834c">' . gtEmailMoney($item['discounted_line_total'] ?? 0, $currency) . '</strong>'
             : gtEmailMoney($item['line_total'] ?? 0, $currency);
         $itemsHtml .= '<tr>'
-            . '<td style="padding:14px 0;border-bottom:1px solid #39353d;width:76px;vertical-align:top">' . $image . '</td>'
-            . '<td style="padding:14px 0 14px 12px;border-bottom:1px solid #39353d;vertical-align:top;min-width:0">'
+            . '<td class="gt-product-cell" style="padding:15px 0;border-bottom:1px solid #dcebf7;width:88px;vertical-align:top">' . $image . '</td>'
+            . '<td style="padding:14px 0 14px 12px;border-bottom:1px solid #dcebf7;vertical-align:top;min-width:0">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">'
-            . '<tr><td style="padding:0;color:#fff8f3;font-size:14px;line-height:20px;font-weight:900;word-break:break-word;overflow-wrap:anywhere">' . gtEmailEscape($item['product_name'] ?? '') . '</td></tr>'
-            . '<tr><td style="padding:5px 0 0;color:#827b84;font-size:10px;line-height:14px">' . gtEmailEscape($item['product_sku'] ?? 'Fără SKU') . '</td></tr>'
-            . '<tr><td style="padding:5px 0 0;color:#9d959f;font-size:11px;line-height:16px">' . (int)($item['quantity'] ?? 0) . ' × ' . $unitPriceHtml . '</td></tr>'
-            . '<tr><td style="padding:7px 0 0;color:#fff8f3;font-size:13px;line-height:18px;font-weight:900">Total produs: <span style="color:#ffb77a">' . $linePriceHtml . '</span></td></tr>'
+            . '<tr><td style="padding:0;color:#062b5b;font-size:14px;line-height:20px;font-weight:900;word-break:break-word;overflow-wrap:anywhere">' . gtEmailEscape($item['product_name'] ?? '') . '</td></tr>'
+            . '<tr><td style="padding:5px 0 0;color:#7892ad;font-size:10px;line-height:14px">' . gtEmailEscape($item['product_sku'] ?? 'Fără SKU') . '</td></tr>'
+            . '<tr><td style="padding:7px 0 0;color:#5f7f9f;font-size:11px;line-height:16px"><span style="display:inline-block;padding:4px 8px;border-radius:999px;background:#e9f5ff;color:#0874d9;font-weight:900">' . (int)($item['quantity'] ?? 0) . ' buc.</span>&nbsp;&nbsp;×&nbsp;&nbsp;' . $unitPriceHtml . '</td></tr>'
+            . '<tr><td style="padding:8px 0 0;color:#062b5b;font-size:13px;line-height:18px;font-weight:900">Total produs: <span style="color:#087ff5">' . $linePriceHtml . '</span></td></tr>'
             . '</table></td></tr>';
     }
     $paymentLabel = ($order['payment_method'] ?? '') === 'card' ? 'Card online' : 'Ramburs la curier';
@@ -297,24 +326,24 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
     $subtotalLabel = ($isProductPromotion && $discountValue > 0 ? 'Subtotal după reducerile pe produse' : 'Subtotal') . ($hasVat ? ' (TVA inclus)' : '');
     $vatTotalLabel = $hasVat ? ' (TVA inclus)' : '';
     $discountRow = $discountValue > 0 && !$isProductPromotion
-        ? '<tr><td style="padding:6px 0;color:#6ee7b7">Reducere' . (!empty($order['promotion_code']) ? ' · ' . gtEmailEscape((string)$order['promotion_code']) : '') . '</td><td align="right" style="color:#6ee7b7">−' . gtEmailMoney($discountValue, $currency) . '</td></tr>'
+        ? '<tr><td style="padding:6px 0;color:#07834c">Reducere' . (!empty($order['promotion_code']) ? ' · ' . gtEmailEscape((string)$order['promotion_code']) : '') . '</td><td align="right" style="color:#07834c;font-weight:800">−' . gtEmailMoney($discountValue, $currency) . '</td></tr>'
         : '';
     $shippingCost = gtEmailMoney($order['shipping_cost'] ?? 0, $currency);
     $total = gtEmailMoney($order['total'] ?? 0, $currency);
     $customerType = ($order['customer_type'] ?? 'individual') === 'company' ? 'PJ' : 'PF';
-    $customerDataRows = '<tr><td style="padding:5px 0;color:#8f8790">Tip client</td><td align="right" style="color:#fff8f3;font-weight:900">' . $customerType . '</td></tr>';
+    $customerDataRows = '<tr><td style="padding:5px 0;color:#6b86a3">Tip client</td><td align="right" style="color:#062b5b;font-weight:900">' . $customerType . '</td></tr>';
     if ($customerType === 'PJ') {
-        $customerDataRows .= '<tr><td style="padding:5px 0;color:#8f8790">Denumire firmă</td><td align="right" style="color:#6ee7b7;font-weight:900">' . gtEmailEscape(gtOrderCustomerDisplayName($order)) . '</td></tr>'
-            . '<tr><td style="padding:5px 0;color:#8f8790">Persoană de contact</td><td align="right" style="color:#d8d1d9">' . gtEmailEscape($contactName) . '</td></tr>'
-            . '<tr><td style="padding:5px 0;color:#8f8790">CUI / CIF</td><td align="right" style="color:#d8d1d9">' . gtEmailEscape($order['company_cui'] ?? '') . '</td></tr>'
-            . '<tr><td style="padding:5px 0;color:#8f8790">Registrul Comerțului</td><td align="right" style="color:#d8d1d9">' . gtEmailEscape($order['company_registration_number'] ?? '') . '</td></tr>'
-            . '<tr><td style="padding:5px 0;color:#8f8790">Sediu social</td><td align="right" style="color:#d8d1d9">' . gtEmailEscape($order['company_address'] ?? '') . '</td></tr>';
+        $customerDataRows .= '<tr><td style="padding:5px 0;color:#6b86a3">Denumire firmă</td><td align="right" style="color:#07834c;font-weight:900">' . gtEmailEscape(gtOrderCustomerDisplayName($order)) . '</td></tr>'
+            . '<tr><td style="padding:5px 0;color:#6b86a3">Persoană de contact</td><td align="right" style="color:#365f88">' . gtEmailEscape($contactName) . '</td></tr>'
+            . '<tr><td style="padding:5px 0;color:#6b86a3">CUI / CIF</td><td align="right" style="color:#365f88">' . gtEmailEscape($order['company_cui'] ?? '') . '</td></tr>'
+            . '<tr><td style="padding:5px 0;color:#6b86a3">Registrul Comerțului</td><td align="right" style="color:#365f88">' . gtEmailEscape($order['company_registration_number'] ?? '') . '</td></tr>'
+            . '<tr><td style="padding:5px 0;color:#6b86a3">Sediu social</td><td align="right" style="color:#365f88">' . gtEmailEscape($order['company_address'] ?? '') . '</td></tr>';
     } else {
-        $customerDataRows .= '<tr><td style="padding:5px 0;color:#8f8790">Nume</td><td align="right" style="color:#d8d1d9">' . gtEmailEscape($contactName) . '</td></tr>';
+        $customerDataRows .= '<tr><td style="padding:5px 0;color:#6b86a3">Nume</td><td align="right" style="color:#365f88">' . gtEmailEscape($contactName) . '</td></tr>';
     }
-    $customerDataRows .= '<tr><td style="padding:5px 0;color:#8f8790">Telefon</td><td align="right" style="color:#d8d1d9">' . gtEmailEscape($order['customer_phone'] ?? '') . '</td></tr>';
+    $customerDataRows .= '<tr><td style="padding:5px 0;color:#6b86a3">Telefon</td><td align="right" style="color:#365f88">' . gtEmailEscape($order['customer_phone'] ?? '') . '</td></tr>';
     $deliveryAddress = trim((string)($order['address'] ?? '') . ', ' . (string)($order['city'] ?? '') . ', ' . (string)($order['county'] ?? ''), ', ');
-    $customerDataRows .= '<tr><td style="padding:9px 0 5px;border-top:1px solid #39353d;color:#8f8790">Livrare</td><td align="right" style="padding:9px 0 5px;border-top:1px solid #39353d;color:#d8d1d9">' . gtEmailEscape($deliveryAddress) . '</td></tr>';
+    $customerDataRows .= '<tr><td style="padding:9px 0 5px;border-top:1px solid #dcebf7;color:#6b86a3">Livrare</td><td align="right" style="padding:9px 0 5px;border-top:1px solid #dcebf7;color:#365f88">' . gtEmailEscape($deliveryAddress) . '</td></tr>';
     $timelineStatus = $status === 'modified' ? (string)($order['status'] ?? 'new') : $status;
     $timeline = gtEmailStatusTimeline($timelineStatus, (string)($order['payment_method'] ?? 'card'));
     $returnDecisionSummary = in_array($status, ['return_refused', 'return_confirmed', 'refunded'], true)
@@ -330,46 +359,46 @@ function gtBuildOrderEmail(array $order, array $config, string $status): array {
             if ($slug === '' || isset($reviewLinks[$slug])) continue;
             $reviewUrl = gtEmailEscape($websiteBaseUrl . '/magazin/produs/' . rawurlencode($slug) . '/#recenzii');
             $productName = gtEmailEscape((string)($item['product_name'] ?? 'Produs Cubis Shop'));
-            $reviewLinks[$slug] = '<a href="' . $reviewUrl . '" style="display:block;margin-top:9px;padding:12px 14px;border:1px solid #5a4937;border-radius:15px;background:#2b2118;color:#ffb77a;text-decoration:none;font-size:12px;font-weight:900">Evaluează ' . $productName . '&nbsp;&nbsp;→</a>';
+            $reviewLinks[$slug] = '<a href="' . $reviewUrl . '" style="display:block;margin-top:9px;padding:13px 14px;border:1px solid #b8dcf8;border-radius:15px;background:#ffffff;color:#0874d9;text-decoration:none;font-size:12px;font-weight:900">Evaluează ' . $productName . '&nbsp;&nbsp;→</a>';
         }
         if ($reviewLinks) {
-            $reviewRequestHtml = '<div style="margin-top:20px;padding:20px;border:1px solid #5a4937;border-radius:24px;background:#211a15"><span style="display:block;color:#ff9a32;font-size:9px;font-weight:900;letter-spacing:.12em">RECENZIE VERIFICATĂ</span><strong style="display:block;margin-top:7px;color:#fff8f3;font-size:15px">Cum ți s-au părut produsele?</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:11px;line-height:1.55">Experiența ta îi ajută pe ceilalți clienți să aleagă mai ușor. Numărul comenzii și e-mailul sunt folosite numai pentru verificarea achiziției.</p>' . implode('', $reviewLinks) . '</div>';
+            $reviewRequestHtml = '<div style="margin-top:20px;padding:20px;border:1px solid #cfe4f5;border-radius:24px;background:#f0f8ff"><span style="display:block;color:#0788f7;font-size:9px;font-weight:900;letter-spacing:.12em">RECENZIE VERIFICATĂ</span><strong style="display:block;margin-top:7px;color:#062b5b;font-size:15px">Cum ți s-au părut produsele?</strong><p style="margin:7px 0 0;color:#607e9c;font-size:11px;line-height:1.55">Experiența ta îi ajută pe ceilalți clienți să aleagă mai ușor. Numărul comenzii și e-mailul sunt folosite numai pentru verificarea achiziției.</p>' . implode('', $reviewLinks) . '</div>';
         }
     }
     $customerActionFooter = '';
     if (in_array($status, ['new', 'confirmed', 'processing'], true)) {
         $safeCancellationUrl = gtEmailEscape(gtEmailCancellationUrl($order, $config));
-        $customerActionFooter = '<p style="margin:17px 0 0;text-align:center;color:#716a72;font-size:9px;line-height:1.55">Nu mai dorești comanda? <a href="' . $safeCancellationUrl . '" style="color:#fb7185;text-decoration:underline;font-weight:800">Solicită anularea</a></p>';
+        $customerActionFooter = '<p style="margin:17px 0 0;text-align:center;color:#7892ad;font-size:10px;line-height:1.55">Nu mai dorești comanda? <a href="' . $safeCancellationUrl . '" style="color:#d72e5e;text-decoration:underline;font-weight:800">Solicită anularea</a></p>';
     } elseif ($status === 'completed') {
         $safeReturnUrl = gtEmailEscape(gtEmailReturnUrl($order, $config));
-        $customerActionFooter = '<p style="margin:17px 0 0;text-align:center;color:#716a72;font-size:9px;line-height:1.55">Ai nevoie să returnezi produsele? <a href="' . $safeReturnUrl . '" style="color:#f472b6;text-decoration:underline;font-weight:800">Solicită returul</a></p>';
+        $customerActionFooter = '<p style="margin:17px 0 0;text-align:center;color:#7892ad;font-size:10px;line-height:1.55">Ai nevoie să returnezi produsele? <a href="' . $safeReturnUrl . '" style="color:#0874d9;text-decoration:underline;font-weight:800">Solicită returul</a></p>';
     }
     $trackingButton = gtEmailTableButton($trackingUrl, 'Urmărește comanda');
     $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>@media(max-width:640px){.gt-wrap{padding:10px!important}.gt-shell{border-radius:28px!important}.gt-body{padding:22px 16px!important}.gt-title{font-size:32px!important}.gt-summary,.gt-timeline{padding:16px!important}.gt-action{display:block!important;text-align:center!important}.gt-status{display:none!important}.gt-next-icon{width:46px!important}.gt-next-copy{padding-left:10px!important}}</style></head>
-<body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+<style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table{border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt}img{border:0;outline:none}@media(max-width:600px){.gt-wrap{padding:10px 7px!important}.gt-shell{border-radius:24px!important}.gt-body{padding:23px 17px 27px!important}.gt-logo{width:145px!important}.gt-title{font-size:33px!important}.gt-summary,.gt-timeline,.gt-client{padding:17px!important}.gt-status{display:none!important}.gt-next-icon{width:52px!important}.gt-next-copy{padding-left:10px!important}.gt-product-image{width:64px!important;height:64px!important}.gt-product-cell{width:75px!important}}</style></head>
+<body data-gt-email="light-v1" bgcolor="#eaf5ff" style="margin:0;background:#eaf5ff;color:#062b5b;font-family:Arial,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">{$preheader}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td class="gt-wrap" style="padding:34px 16px" align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="gt-shell" style="width:100%;max-width:700px;background:#1d1b20;border:1px solid #3a363e;border-radius:38px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45)">
-<tr><td style="height:8px;background:{$statusColor}"></td></tr>
-<tr><td class="gt-body" style="padding:30px 34px 34px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:58px"><img src="{$safeLogoUrl}" width="54" height="54" alt="Cubis Shop" style="display:block;width:54px;height:54px;border-radius:18px"></td><td style="padding-left:12px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0;color:#fff8f3;font-size:17px;line-height:21px;font-weight:900;mso-line-height-rule:exactly">Cubis Shop</td></tr><tr><td style="padding:4px 0 0;color:#9f979f;font-size:9px;line-height:12px;font-weight:800;letter-spacing:.1em;mso-line-height-rule:exactly">MAGAZIN ONLINE</td></tr></table></td><td class="gt-status" align="right"><span style="display:inline-block;padding:10px 14px;border:1px solid {$statusColor}55;border-radius:999px;background:{$statusColor}18;color:{$statusColor};font-size:11px;font-weight:900">●&nbsp;&nbsp;{$statusLabel}</span></td></tr></table>
-<div style="padding:34px 0 24px"><span style="color:{$statusColor};font-size:10px;font-weight:900;letter-spacing:.14em">{$statusEyebrow}</span><h1 class="gt-title" style="margin:10px 0 13px;color:#fff8f3;font-size:44px;line-height:1.02;letter-spacing:-.055em">{$statusTitle}</h1><p style="margin:0;color:#b1a9b2;font-size:15px;line-height:1.65">{$greeting} {$statusMessage}</p></div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;border:1px solid {$statusColor}55;border-radius:24px;background:{$statusColor}12"><tr><td class="gt-next-icon" style="width:64px;padding:15px 0 15px 15px"><span style="display:block;width:48px;height:48px;line-height:48px;text-align:center;border-radius:17px;background:{$statusColor};color:#151116;font-size:15px;font-weight:1000">{$statusSymbol}</span></td><td class="gt-next-copy" style="padding:15px"><span style="display:block;color:{$statusColor};font-size:8px;font-weight:900;letter-spacing:.12em">CE URMEAZĂ</span><strong style="display:block;margin-top:4px;color:#fff8f3;font-size:14px">{$nextTitle}</strong><span style="display:block;margin-top:4px;color:#9d959f;font-size:11px;line-height:1.45">{$nextMessage}</span></td></tr></table>
-<div class="gt-summary" style="padding:24px;border:1px solid #403b43;border-radius:28px;background:#151318">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td><span style="display:block;color:#9d959f;font-size:9px;font-weight:900;letter-spacing:.12em">REZUMAT COMANDĂ</span><strong style="display:block;margin-top:6px;color:#ffb77a;font-size:17px;overflow-wrap:anywhere">{$orderNumber}</strong></td><td align="right"><span style="display:block;color:#9d959f;font-size:9px;font-weight:900;letter-spacing:.12em">DATA</span><strong style="display:block;margin-top:6px;color:#d8d1d9;font-size:12px">{$createdAt}</strong></td></tr></table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;table-layout:fixed">{$itemsHtml}</table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:17px;color:#aaa2ac;font-size:12px"><tr><td style="padding:6px 0">{$subtotalLabel}</td><td align="right">{$subtotal}</td></tr>{$discountRow}<tr><td style="padding:6px 0">Livrare · {$shippingName}</td><td align="right">{$shippingCost}</td></tr><tr><td style="padding:6px 0">Plată</td><td align="right">{$paymentText}</td></tr><tr><td style="padding:19px 0 0;border-top:1px solid #403b43;color:#fff8f3;font-size:15px;font-weight:900">Total de plată{$vatTotalLabel}</td><td align="right" style="padding:19px 0 0;border-top:1px solid #403b43;color:#ffb77a;font-size:24px;font-weight:1000">{$total}</td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eaf5ff" style="width:100%;background:#eaf5ff"><tr><td class="gt-wrap" style="padding:34px 14px" align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="gt-shell" bgcolor="#ffffff" style="width:100%;max-width:700px;background:#ffffff;border:1px solid #b9dcf7;border-radius:34px;overflow:hidden;box-shadow:0 24px 70px rgba(4,59,115,.14)">
+<tr><td style="height:7px;background:#0788f7;background-image:linear-gradient(90deg,#087ff5,#12c3df 72%,{$statusColor})"></td></tr>
+<tr><td class="gt-body" style="padding:30px 32px 34px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td><img class="gt-logo" src="{$safeLogoUrl}" width="165" alt="Cubis Shop" style="display:block;width:165px;max-width:100%;height:auto"></td><td class="gt-status" align="right"><span style="display:inline-block;padding:9px 13px;border:1px solid #acd9f8;border-radius:999px;background:#f0f8ff;color:#0874d9;font-size:11px;font-weight:900">●&nbsp;&nbsp;{$statusLabel}</span></td></tr></table>
+<div style="padding:34px 0 22px"><span style="display:block;color:{$statusColor};font-size:10px;font-weight:900;letter-spacing:.15em">{$statusEyebrow}</span><h1 class="gt-title" style="margin:9px 0 12px;color:#062b5b;font-size:43px;line-height:1.04;letter-spacing:-1.9px">{$statusTitle}</h1><p style="margin:0;color:#52769a;font-size:15px;line-height:1.7">{$greeting} {$statusMessage}</p></div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f9ff" style="margin-bottom:19px;border:1px solid #c8e5f8;border-radius:22px;background:#f0f9ff"><tr><td class="gt-next-icon" width="64" style="width:64px;padding:15px 0 15px 15px"><span style="display:block;width:48px;height:48px;line-height:48px;text-align:center;border-radius:16px;background:{$statusColor};color:#ffffff;font-size:16px;font-weight:900">{$statusSymbol}</span></td><td class="gt-next-copy" style="padding:15px"><span style="display:block;color:#0874d9;font-size:9px;font-weight:900;letter-spacing:.12em">CE URMEAZĂ</span><strong style="display:block;margin-top:5px;color:#062b5b;font-size:14px">{$nextTitle}</strong><span style="display:block;margin-top:4px;color:#6080a0;font-size:11px;line-height:1.5">{$nextMessage}</span></td></tr></table>
+<div class="gt-summary" style="padding:23px;border:1px solid #d5e8f7;border-radius:25px;background:#f8fbfe">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td><span style="display:block;color:#6889a8;font-size:9px;font-weight:900;letter-spacing:.13em">REZUMATUL COMENZII</span><strong style="display:block;margin-top:5px;color:#087ff5;font-size:17px;overflow-wrap:anywhere">{$orderNumber}</strong></td><td align="right"><span style="display:block;color:#6889a8;font-size:9px;font-weight:900;letter-spacing:.13em">DATA</span><strong style="display:block;margin-top:5px;color:#365f88;font-size:12px">{$createdAt}</strong></td></tr></table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;table-layout:fixed">{$itemsHtml}</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:15px;color:#54789b;font-size:12px"><tr><td style="padding:6px 0">{$subtotalLabel}</td><td align="right">{$subtotal}</td></tr>{$discountRow}<tr><td style="padding:6px 0">Livrare · {$shippingName}</td><td align="right">{$shippingCost}</td></tr><tr><td style="padding:8px 0 5px">Metoda de plată</td><td align="right" style="padding:8px 0 5px"><span style="display:inline-block;padding:7px 10px;border:1px solid #b9dcf7;border-radius:999px;background:#eaf6ff;color:#0874d9;font-size:11px;font-weight:900">{$paymentText}</span></td></tr><tr><td style="padding:18px 0 0;border-top:1px solid #cfe2f1;color:#062b5b;font-size:15px;font-weight:900">Total de plată{$vatTotalLabel}</td><td align="right" style="padding:18px 0 0;border-top:1px solid #cfe2f1;color:#087ff5;font-size:27px;font-weight:900">{$total}</td></tr></table>
 </div>
+<div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
+<p style="margin:8px 0 0;color:#7892ad;font-size:10px;line-height:1.55;text-align:center">Acces securizat, direct la statusul comenzii tale.</p>
 {$returnDecisionSummary}
-<div style="margin-top:20px;padding:20px;border:1px solid #403b43;border-radius:24px;background:#1a181d"><span style="display:block;margin-bottom:10px;color:#a49ca6;font-size:9px;font-weight:900;letter-spacing:.12em">DATE CLIENT ȘI FACTURARE</span><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:11px">{$customerDataRows}</table></div>
-<div class="gt-timeline" style="margin-top:20px;padding:20px;border:1px solid #403b43;border-radius:28px;background:#211f24"><span style="display:block;margin-bottom:13px;color:#a49ca6;font-size:9px;font-weight:900;letter-spacing:.12em">EVOLUȚIA COMENZII</span>{$timeline}</div>
+<div class="gt-client" style="margin-top:20px;padding:20px;border:1px solid #cfe4f5;border-radius:23px;background:#ffffff"><span style="display:block;margin-bottom:10px;color:#5f82a4;font-size:9px;font-weight:900;letter-spacing:.12em">DATE CLIENT ȘI LIVRARE</span><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:11px">{$customerDataRows}</table></div>
+<div class="gt-timeline" style="margin-top:18px;padding:20px;border:1px solid #cfe4f5;border-radius:25px;background:#f4faff"><span style="display:block;margin-bottom:13px;color:#5f82a4;font-size:9px;font-weight:900;letter-spacing:.12em">EVOLUȚIA COMENZII</span>{$timeline}</div>
 {$reviewRequestHtml}
-<div style="padding:22px 0 6px;text-align:center">{$trackingButton}</div>
-<div style="margin-top:15px;padding:15px 17px;border:1px solid #4a4035;border-radius:20px;background:#272018;color:#a9a1a9;font-size:11px;line-height:1.55"><strong style="display:block;margin-bottom:4px;color:#fff8f3">Acces direct și securizat</strong>Butonul deschide direct comanda, fără formular. Dacă intri manual pe pagina de urmărire, folosește codul <strong style="color:#ffb77a">{$orderNumber}</strong> și adresa de e-mail din comandă.</div>
 {$customerActionFooter}
-<p style="margin:25px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.65">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
+<p style="margin:25px 0 0;text-align:center;color:#7892ad;font-size:10px;line-height:1.65">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#365f88">Cubis Shop</strong> · <a href="https://cubisshop.ro" style="color:#0874d9;text-decoration:none">cubisshop.ro</a></p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return ['subject' => $subject, 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
@@ -492,7 +521,7 @@ function gtBuildPasswordResetEmail(array $customer, array $config, string $token
     $firstName = trim(explode(' ', trim((string)($customer['full_name'] ?? '')), 2)[0] ?? '');
     $greeting = $firstName === '' ? 'Salut!' : 'Salut, ' . gtEmailEscape($firstName) . '!';
     $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table{border-collapse:separate!important;mso-table-lspace:0pt;mso-table-rspace:0pt}img{border:0;outline:none;text-decoration:none}@media(max-width:620px){.cs-wrap{padding:12px 8px!important}.cs-card{border-radius:24px!important}.cs-body{padding:26px 20px 28px!important}.cs-title{font-size:32px!important}.cs-info td{display:block!important;width:auto!important;padding:7px 0!important}.cs-button a{padding:17px 18px!important}}</style></head>
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table{border-collapse:separate!important;mso-table-lspace:0pt;mso-table-rspace:0pt}img{border:0;outline:none;text-decoration:none}@media(max-width:600px){.cs-wrap{padding:12px 8px!important}.cs-card{border-radius:24px!important}.cs-body{padding:26px 20px 28px!important}.cs-title{font-size:32px!important}.cs-info td{display:block!important;width:auto!important;padding:7px 0!important}.cs-button a{padding:17px 18px!important}}</style></head>
 <body data-gt-email="light-v1" bgcolor="#eff7ff" style="margin:0;background:#eff7ff;color:#0b2c5a;font-family:Arial,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Linkul tău securizat Cubis Shop este valabil 30 de minute.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eff7ff" style="width:100%;background:#eff7ff"><tr><td class="cs-wrap" align="center" style="padding:34px 16px">
@@ -570,37 +599,26 @@ function gtBuildOrderCancellationEmail(array $order, array $config, array $detai
     $number = gtEmailEscape((string)($order['order_number'] ?? ''));
     $reason = gtEmailEscape((string)($order['customer_cancellation_reason'] ?? 'Nespecificat'));
     $trackingUrl = gtEmailTrackingUrl($order, $config);
-    $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi comanda anulată', '#fb7185', '#211217');
+    $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi comanda anulată');
     $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $isPaidCard = (string)($order['payment_method'] ?? '') === 'card' && (string)($order['refund_status'] ?? '') === 'pending';
     $refundMessage = $isPaidCard
-        ? 'Rambursarea va fi efectuată în cel mult <strong style="color:#fff8f3">15 zile calendaristice</strong>, în aceeași metodă de plată confirmată în momentul achiziției.'
+        ? 'Rambursarea va fi efectuată în cel mult <strong style="color:#062b5b">15 zile calendaristice</strong>, în aceeași metodă de plată confirmată în momentul achiziției.'
         : 'Comanda cu plata ramburs a fost oprită și nu mai ai nimic de achitat pentru ea.';
     $invoiceAction = (string)($details['invoice_action'] ?? $order['cancellation_invoice_action'] ?? 'none');
     if ($invoiceAction === 'deleted_latest_unsent') {
         $fiscalMessage = 'Factura netrimisă în SPV a fost eliminată în siguranță, iar numărul eliberat poate fi folosit de următoarea factură.';
     } elseif ($invoiceAction === 'return_invoice_created') {
         $returnNumber = gtEmailEscape((string)($details['return_invoice']['display_number'] ?? ''));
-        $fiscalMessage = 'A fost emisă factura de retur' . ($returnNumber !== '' ? ' <strong style="color:#ffb77a">' . $returnNumber . '</strong>' : '') . '. Documentul îți este trimis separat pe e-mail.';
+        $fiscalMessage = 'A fost emisă factura de retur' . ($returnNumber !== '' ? ' <strong style="color:#087ff5">' . $returnNumber . '</strong>' : '') . '. Documentul îți este trimis separat pe e-mail.';
     } else {
         $fiscalMessage = 'Nu fusese emisă nicio factură pentru această comandă, așadar nu va fi creat niciun document fiscal.';
     }
-    $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">Anularea comenzii {$number} a fost confirmată.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:30px 14px" align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #49363b;border-radius:34px;background:#1d1b20">
-<tr><td style="height:7px;background:#fb7185"></td></tr><tr><td style="padding:28px 30px 32px">
-<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="Cubis Shop" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">CONFIRMARE ANULARE</span></td></tr></table>
-<div style="padding:30px 0 19px"><span style="color:#fb7185;font-size:10px;font-weight:900;letter-spacing:.13em">COMANDĂ ANULATĂ</span><h1 style="margin:9px 0 12px;font-size:38px;line-height:1.04;letter-spacing:-.045em">Am oprit comanda.</h1><p style="margin:0;color:#b5adb6;font-size:14px;line-height:1.65">Comanda <strong style="color:#ffb77a">{$number}</strong> a fost anulată și nu va mai fi pregătită sau predată curierului.</p></div>
-<div style="padding:17px;border:1px solid #52383f;border-radius:20px;background:#28191d"><span style="display:block;color:#fb7185;font-size:9px;font-weight:900;letter-spacing:.1em">MOTIVUL ANULĂRII</span><p style="margin:7px 0 0;color:#f1e8ed;font-size:13px;line-height:1.55">{$reason}</p></div>
-<div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#171519"><strong style="display:block;color:#fff8f3;font-size:13px">Plată și rambursare</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">{$refundMessage}</p></div>
-<div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#171519"><strong style="display:block;color:#fff8f3;font-size:13px">Documente fiscale</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">{$fiscalMessage}</p></div>
-<div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
-<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
-</td></tr></table></td></tr></table></body></html>
-HTML;
+    $message = 'Comanda <strong style="color:#087ff5">' . $number . '</strong> a fost anulată și nu va mai fi pregătită sau predată curierului.';
+    $content = '<div style="padding:18px;border:1px solid #ffd1dc;border-radius:21px;background:#fff4f7"><span style="display:block;color:#d72e5e;font-size:9px;font-weight:900;letter-spacing:.11em">MOTIVUL ANULĂRII</span><p style="margin:7px 0 0;color:#8a3650;font-size:13px;line-height:1.6">' . $reason . '</p></div>'
+        . '<div style="margin-top:13px;padding:18px;border:1px solid #cfe4f5;border-radius:21px;background:#f8fbfe"><strong style="display:block;color:#062b5b;font-size:13px">Plată și rambursare</strong><p style="margin:7px 0 0;color:#607e9c;font-size:12px;line-height:1.65">' . $refundMessage . '</p></div>'
+        . '<div style="margin-top:13px;padding:18px;border:1px solid #cfe4f5;border-radius:21px;background:#ffffff"><strong style="display:block;color:#062b5b;font-size:13px">Documente fiscale</strong><p style="margin:7px 0 0;color:#607e9c;font-size:12px;line-height:1.65">' . $fiscalMessage . '</p></div>';
+    $html = gtEmailSpecialStatusDocument($logoUrl, 'Anularea comenzii ' . $number . ' a fost confirmată.', 'Comandă anulată', 'COMANDĂ OPRITĂ', 'Am oprit comanda.', $message, '#e83f66', $content, $trackingButton);
     return ['subject' => 'Comanda ' . (string)($order['order_number'] ?? '') . ' a fost anulată', 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
 }
 
@@ -638,25 +656,14 @@ function gtBuildOrderReturnRequestEmail(array $order, array $config): array {
     $submittedAt = $submittedRaw !== '' ? gtEmailEscape((new DateTimeImmutable($submittedRaw))->format('d.m.Y, H:i:s')) : '—';
     $requestEvidenceTitle = $isWithdrawal ? 'CONFIRMAREA RETRAGERII' : 'CONFIRMAREA SOLICITĂRII';
     $trackingUrl = gtEmailTrackingUrl($order, $config);
-    $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi solicitarea', '#f472b6', '#24131e');
+    $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi solicitarea');
     $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
-    $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">Am primit solicitarea de retur pentru comanda {$orderNumber}.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:30px 14px" align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #50394b;border-radius:34px;background:#1d1b20">
-<tr><td style="height:7px;background:#f472b6"></td></tr><tr><td style="padding:28px 30px 32px">
-<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="Cubis Shop" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">RETUR ÎN VERIFICARE</span></td></tr></table>
-<div style="padding:30px 0 19px"><span style="color:#f472b6;font-size:10px;font-weight:900;letter-spacing:.13em">SOLICITARE PRIMITĂ</span><h1 style="margin:9px 0 12px;font-size:38px;line-height:1.04;letter-spacing:-.045em">Am primit solicitarea ta de retur.</h1><p style="margin:0;color:#b5adb6;font-size:14px;line-height:1.65">{$greeting} Cererea pentru comanda <strong style="color:#ffb77a">{$orderNumber}</strong> a fost înregistrată și urmează să fie verificată de echipa noastră.</p></div>
-<div style="padding:17px;border:1px solid #56384f;border-radius:20px;background:#281923"><span style="display:block;color:#f472b6;font-size:9px;font-weight:900;letter-spacing:.1em">MOTIVUL RETURULUI</span><p style="margin:7px 0 0;color:#f1e8ed;font-size:13px;line-height:1.55">{$reason}</p></div>
-<div style="margin-top:13px;padding:17px;border:1px solid #56384f;border-radius:20px;background:#211f24"><span style="display:block;color:#f472b6;font-size:9px;font-weight:900;letter-spacing:.1em">{$requestEvidenceTitle}</span><p style="margin:7px 0 0;color:#f1e8ed;font-size:13px;line-height:1.55">{$statement}</p><p style="margin:8px 0 0;color:#aaa2ac;font-size:11px">Înregistrată la data și ora: <strong style="color:#fff8f3">{$submittedAt}</strong></p></div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:13px;border:1px solid #403b43;border-radius:20px;background:#171519;color:#aaa2ac;font-size:12px"><tr><td style="padding:17px 17px 6px">Titular cont</td><td align="right" style="padding:17px 17px 6px;color:#fff8f3;font-weight:800">{$holder}</td></tr><tr><td style="padding:6px 17px">IBAN</td><td align="right" style="padding:6px 17px;color:#d8d1d9;font-weight:700;overflow-wrap:anywhere">{$iban}</td></tr><tr><td style="padding:6px 17px">Cost retur curier</td><td align="right" style="padding:6px 17px;color:#fb7185;font-weight:800">−{$returnCost}</td></tr><tr><td style="padding:14px 17px 17px;border-top:1px solid #403b43;color:#fff8f3;font-weight:900">Sumă estimată de restituit</td><td align="right" style="padding:14px 17px 17px;border-top:1px solid #403b43;color:#6ee7b7;font-size:18px;font-weight:1000">{$refundAmount}</td></tr></table>
-<div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#211f24"><strong style="display:block;color:#fff8f3;font-size:13px">Ce urmează?</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">Verificăm solicitarea și îți comunicăm pașii de predare a produselor. Suma de mai sus este estimativă și include scăderea costului de retur prin curier configurat pentru comanda ta.</p></div>
-<div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
-<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
-</td></tr></table></td></tr></table></body></html>
-HTML;
+    $message = $greeting . ' Cererea pentru comanda <strong style="color:#087ff5">' . $orderNumber . '</strong> a fost înregistrată și urmează să fie verificată de echipa noastră.';
+    $content = '<div style="padding:18px;border:1px solid #cfe4f5;border-radius:21px;background:#f4faff"><span style="display:block;color:#0874d9;font-size:9px;font-weight:900;letter-spacing:.11em">MOTIVUL RETURULUI</span><p style="margin:7px 0 0;color:#365f88;font-size:13px;line-height:1.6">' . $reason . '</p></div>'
+        . '<div style="margin-top:13px;padding:18px;border:1px solid #cfe4f5;border-radius:21px;background:#ffffff"><span style="display:block;color:#0874d9;font-size:9px;font-weight:900;letter-spacing:.11em">' . $requestEvidenceTitle . '</span><p style="margin:7px 0 0;color:#365f88;font-size:13px;line-height:1.6">' . $statement . '</p><p style="margin:8px 0 0;color:#7892ad;font-size:11px">Înregistrată la: <strong style="color:#062b5b">' . $submittedAt . '</strong></p></div>'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:13px;border:1px solid #d5e8f7;border-radius:21px;background:#f8fbfe;color:#54789b;font-size:12px"><tr><td style="padding:17px 17px 6px">Titular cont</td><td align="right" style="padding:17px 17px 6px;color:#062b5b;font-weight:800">' . $holder . '</td></tr><tr><td style="padding:6px 17px">IBAN</td><td align="right" style="padding:6px 17px;color:#365f88;font-weight:700;overflow-wrap:anywhere">' . $iban . '</td></tr><tr><td style="padding:6px 17px">Cost retur curier</td><td align="right" style="padding:6px 17px;color:#d72e5e;font-weight:800">−' . $returnCost . '</td></tr><tr><td style="padding:15px 17px 17px;border-top:1px solid #cfe2f1;color:#062b5b;font-weight:900">Sumă estimată de restituit</td><td align="right" style="padding:15px 17px 17px;border-top:1px solid #cfe2f1;color:#07834c;font-size:20px;font-weight:900">' . $refundAmount . '</td></tr></table>'
+        . '<div style="margin-top:13px;padding:18px;border:1px solid #cfe4f5;border-radius:21px;background:#f0f8ff"><strong style="display:block;color:#062b5b;font-size:13px">Ce urmează?</strong><p style="margin:7px 0 0;color:#607e9c;font-size:12px;line-height:1.65">Verificăm solicitarea și îți comunicăm pașii de predare a produselor. Suma afișată este estimativă și include costul de retur configurat pentru comanda ta.</p></div>';
+    $html = gtEmailSpecialStatusDocument($logoUrl, 'Am primit solicitarea de retur pentru comanda ' . $orderNumber . '.', 'Retur în verificare', 'SOLICITARE PRIMITĂ', 'Am primit solicitarea ta de retur.', $message, '#087ff5', $content, $trackingButton);
     return ['subject' => 'Am primit solicitarea de retur · ' . (string)($order['order_number'] ?? ''), 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
 }
 
@@ -684,28 +691,17 @@ function gtBuildOrderReturnConfirmedEmail(array $order, array $config): array {
     $greeting = $firstName !== '' ? 'Salut, ' . gtEmailEscape($firstName) . '!' : 'Salut!';
     $refundAmount = gtEmailMoney($order['return_refund_amount'] ?? 0, (string)($order['currency'] ?? 'RON'));
     $trackingUrl = gtEmailTrackingUrl($order, $config);
-    $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi comanda', '#2dd4bf', '#10201e');
+    $trackingButton = gtEmailTableButton($trackingUrl, 'Vezi comanda');
     $logoUrl = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $fiscalMessage = !empty($order['return_invoice_id'])
         ? 'Factura de retur este emisă automat și îți este trimisă separat pe e-mail, în format PDF.'
         : 'Comanda nu avea o factură pozitivă emisă, așadar confirmarea returului nu generează acum niciun document fiscal.';
     $returnDecisionSummary = gtEmailReturnDecisionSummary($order);
-    $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:transparent;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">Returul comenzii {$orderNumber} a fost confirmat.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:transparent"><tr><td style="padding:30px 14px" align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:650px;overflow:hidden;border:1px solid #315955;border-radius:34px;background:#1d1b20">
-<tr><td style="height:7px;background:#2dd4bf"></td></tr><tr><td style="padding:28px 30px 32px">
-<table role="presentation" width="100%"><tr><td style="width:58px"><img src="{$logoUrl}" width="52" height="52" alt="Cubis Shop" style="display:block;border-radius:17px"></td><td><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#9f979f;font-size:9px;font-weight:800;letter-spacing:.1em">CONFIRMARE RETUR</span></td></tr></table>
-<div style="padding:30px 0 19px"><span style="color:#5eead4;font-size:10px;font-weight:900;letter-spacing:.13em">RETUR CONFIRMAT</span><h1 style="margin:9px 0 12px;font-size:38px;line-height:1.04;letter-spacing:-.045em">Returul tău a fost aprobat.</h1><p style="margin:0;color:#b5adb6;font-size:14px;line-height:1.65">{$greeting} Am confirmat returul pentru comanda <strong style="color:#ffb77a">{$orderNumber}</strong>. Echipa noastră continuă verificarea produselor și procesarea restituirii.</p></div>
-{$returnDecisionSummary}
-<div style="padding:18px;border:1px solid #315955;border-radius:20px;background:#172421"><span style="display:block;color:#5eead4;font-size:9px;font-weight:900;letter-spacing:.1em">SUMĂ ESTIMATĂ DE RESTITUIT</span><strong style="display:block;margin-top:8px;color:#a7f3d0;font-size:24px">{$refundAmount}</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">Valoarea finală este procesată după verificarea returului. Acest mesaj confirmă aprobarea returului, nu finalizarea rambursării.</p></div>
-<div style="margin-top:13px;padding:17px;border:1px solid #403b43;border-radius:20px;background:#171519"><strong style="display:block;color:#fff8f3;font-size:13px">Documente fiscale</strong><p style="margin:7px 0 0;color:#aaa2ac;font-size:12px;line-height:1.6">{$fiscalMessage}</p></div>
-<div style="padding:23px 0 4px;text-align:center">{$trackingButton}</div>
-<p style="margin:22px 0 0;text-align:center;color:#756e77;font-size:10px;line-height:1.6">Ai nevoie de ajutor? Răspunde direct la acest mesaj.<br><strong style="color:#aaa2ac">Cubis Shop</strong> · cubisshop.ro</p>
-</td></tr></table></td></tr></table></body></html>
-HTML;
+    $message = $greeting . ' Am confirmat returul pentru comanda <strong style="color:#087ff5">' . $orderNumber . '</strong>. Echipa noastră continuă verificarea produselor și procesarea restituirii.';
+    $content = $returnDecisionSummary
+        . '<div style="margin-top:13px;padding:19px;border:1px solid #b9e5cf;border-radius:21px;background:#effcf5"><span style="display:block;color:#07834c;font-size:9px;font-weight:900;letter-spacing:.11em">SUMĂ ESTIMATĂ DE RESTITUIT</span><strong style="display:block;margin-top:8px;color:#07834c;font-size:26px">' . $refundAmount . '</strong><p style="margin:7px 0 0;color:#4d8068;font-size:12px;line-height:1.65">Valoarea finală este procesată după verificarea returului. Acest mesaj confirmă aprobarea returului, nu finalizarea rambursării.</p></div>'
+        . '<div style="margin-top:13px;padding:18px;border:1px solid #cfe4f5;border-radius:21px;background:#ffffff"><strong style="display:block;color:#062b5b;font-size:13px">Documente fiscale</strong><p style="margin:7px 0 0;color:#607e9c;font-size:12px;line-height:1.65">' . $fiscalMessage . '</p></div>';
+    $html = gtEmailSpecialStatusDocument($logoUrl, 'Returul comenzii ' . $orderNumber . ' a fost confirmat.', 'Retur confirmat', 'RETUR APROBAT', 'Returul tău a fost aprobat.', $message, '#10a978', $content, $trackingButton);
     return ['subject' => 'Retur confirmat · ' . (string)($order['order_number'] ?? ''), 'html' => gtEmailLightDocument($html), 'tracking_url' => $trackingUrl];
 }
 

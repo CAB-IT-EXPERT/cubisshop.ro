@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+if (!function_exists('mb_substr')) { function mb_substr(string $value, int $start, ?int $length = null): string { return $length === null ? substr($value, $start) : substr($value, $start, $length); } }
 
 require_once __DIR__ . '/../order-emails.php';
 require_once __DIR__ . '/../newsletter.php';
@@ -35,7 +36,7 @@ newsletterAssert(str_contains($email['html'], 'Ana'), 'Salutul personalizat lips
 newsletterAssert(str_contains($email['html'], $product['images'][0]['url']), 'Imaginea produsului lipsește.');
 newsletterAssert(str_contains($email['html'], '129,00 lei'), 'Prețul produsului lipsește sau este formatat greșit.');
 newsletterAssert(str_contains($email['html'], 'Vezi produsul'), 'CTA-ul produsului lipsește.');
-newsletterAssert(str_contains($email['html'], 'color:#ff5d63'), 'Linkul roșu de dezabonare lipsește.');
+newsletterAssert(str_contains($email['html'], 'color:#d72e5e'), 'Linkul roșu de dezabonare lipsește.');
 newsletterAssert($email['product_url'] === 'https://cubisshop.ro/magazin/produs/cauciuc-tubeless-kukirin-g2', 'URL-ul produsului este greșit.');
 newsletterAssert(str_contains($email['unsubscribe_url'], str_repeat('a', 64)), 'Tokenul de dezabonare lipsește din URL.');
 

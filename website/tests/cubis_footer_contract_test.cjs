@@ -24,7 +24,7 @@ vm.runInContext(core.slice(core.indexOf('function shellFooter'), core.indexOf('c
 context.filters = { categories: [{ id: 'root & one', name: 'Categorie <test>' }, { id: 'child', parent_id: 'root & one', name: 'Subcategorie' }] };
 context.config = { company: { legal_name: 'Cubis & Company', email: 'support@example.com', phone: '+40 123 456', address: 'Strada Test' } };
 const footer = vm.runInContext('shellFooter(filters, config)', context);
-for (const route of ['/livrare-si-plata', '/politica-de-retur', '/termeni-si-conditii', '/politica-de-confidentialitate', '/contact', '/urmarire-comanda', '/solicita-retur', '/garantii-si-reclamatii', '/politica-cookies']) {
+for (const route of ['/livrare-si-plata', '/politica-de-retur', '/termeni-si-conditii', '/politica-de-confidentialitate', '/contact', '/urmarire-comanda', '/solicita-retur', '/garantii-si-reclamatii', '/politica-cookies', '/plata-si-facturare', '/siguranta-produselor', '/solutionarea-litigiilor', '/conditii-b2b', '/accesibilitate']) {
   assert.ok(footer.includes(`href="${route}"`), `preserve ${route}`);
 }
 assert.match(footer, /data-cookie-settings/);

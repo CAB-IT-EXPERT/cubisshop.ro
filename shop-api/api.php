@@ -5300,7 +5300,7 @@ function createPublicOrder(PDO $db, array $body, array $config): array {
             mb_substr(trim((string)($body['county'] ?? '')), 0, 120) ?: null,
             mb_substr(trim((string)($body['postal_code'] ?? '')), 0, 30) ?: null,
             mb_substr(trim((string)($body['customer_notes'] ?? '')), 0, 3000) ?: null,
-            '2026-09-05', '2026-09-05', $newsletterOptIn ? 1 : 0, $newsletterOptIn ? date('Y-m-d H:i:s') : null,
+            '2026-10-13', '2026-10-13', $newsletterOptIn ? 1 : 0, $newsletterOptIn ? date('Y-m-d H:i:s') : null,
             $shippingId, (string)$shipping['name'], max(0.0, round((float)($shipping['return_cost'] ?? 0), 2)),
             $subtotal, $discountTotal, $promotion['id'], $promotion['code'], $promotion['scope'], $shippingCost, $total, $vatPayer ? 1 : 0, $vatRate, $vatTotal, $netTotal, 'RON', $trackingToken
         ]);

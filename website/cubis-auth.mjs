@@ -250,6 +250,15 @@ async function completeGoogleLogin(response) {
 
 async function initializeGoogle() {
   if (!googleHost) return;
+  // Google OAuth treats localhost and 127.0.0.1 as different JavaScript
+  // origins. Local previews use the registered localhost origin so opening the
+  // storefront through the numeric loopback address cannot trigger error 400.
+  if (location.hostname === "127.0.0.1") {
+    const canonicalLocalUrl = new URL(location.href);
+    canonicalLocalUrl.hostname = "localhost";
+    location.replace(canonicalLocalUrl.href);
+    return;
+  }
   try {
     const config = await customerApi.authConfig();
     const clientId = String(config?.google_client_id || "").trim();

@@ -53,6 +53,6 @@ orderItemAdditionAssert(str_contains((string)$email['subject'], 'Comanda ta a fo
 orderItemAdditionAssert(str_contains((string)$email['html'], 'Produs adăugat'), 'Sumarul e-mailului nu include denumirea produsului.');
 orderItemAdditionAssert(str_contains((string)$email['html'], 'SKU-ADD'), 'Sumarul e-mailului nu include codul produsului.');
 orderItemAdditionAssert(str_contains((string)$email['html'], 'test-product.webp'), 'Sumarul e-mailului nu include imaginea produsului.');
-orderItemAdditionAssert(str_contains((string)$email['html'], '2 ×'), 'Sumarul e-mailului nu include cantitatea produsului.');
+orderItemAdditionAssert(str_contains((string)$email['html'], '2 buc.'), 'Sumarul e-mailului nu include cantitatea produsului.');
 
 echo "order_item_addition_contract_test: ok\n";

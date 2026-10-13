@@ -1,0 +1,192 @@
+.cs-legal-page { background: #f7fbff; }
+.cs-legal-main { position: relative; overflow: hidden; padding-bottom: 78px; background: radial-gradient(circle at 88% 4%, rgba(20,153,255,.12), transparent 25rem), linear-gradient(180deg, #fff 0, #f7fbff 34rem, #f7fbff 100%); }
+.cs-legal-main::before { position: absolute; top: 60px; right: -290px; width: 580px; height: 580px; border: 70px solid rgba(7,134,248,.04); border-radius: 50%; content: ""; pointer-events: none; }
+.cs-legal-breadcrumb { display: flex; align-items: center; gap: 9px; padding-top: 24px; color: #69809b; font-size: 12px; }
+.cs-legal-breadcrumb a:hover { color: var(--cs-blue-700); }
+.cs-legal-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: center; gap: 56px; min-height: 330px; padding: 50px 0 54px; }
+.cs-legal-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 15px; color: var(--cs-blue-700); font-size: 11px; font-weight: 850; letter-spacing: .13em; }
+.cs-legal-hero__eyebrow::before { width: 8px; height: 8px; border-radius: 50%; background: var(--cs-blue-600); box-shadow: 0 0 0 7px rgba(7,134,248,.1); content: ""; }
+.cs-legal-hero h1 { max-width: 840px; margin: 0; color: var(--cs-navy-950); font-size: clamp(42px, 5.4vw, 76px); line-height: .98; letter-spacing: -.06em; text-wrap: balance; }
+.cs-legal-hero h1 em { color: var(--cs-blue-600); font-style: normal; }
+.cs-legal-hero__lead { max-width: 760px; margin: 22px 0 0; color: #617995; font-size: clamp(16px, 1.5vw, 20px); line-height: 1.65; text-wrap: pretty; }
+.cs-legal-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.cs-legal-meta span { padding: 7px 11px; border: 1px solid #d4e3f2; border-radius: 999px; color: #58718f; background: rgba(255,255,255,.76); font-size: 10px; font-weight: 700; }
+.cs-legal-hero__mark { position: relative; display: grid; width: 218px; height: 218px; place-items: center; justify-self: end; border: 1px solid rgba(7,134,248,.17); border-radius: 50%; color: var(--cs-blue-700); background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(234,248,255,.85)); box-shadow: 0 28px 64px rgba(16,72,126,.13); }
+.cs-legal-hero__mark::before, .cs-legal-hero__mark::after { position: absolute; border: 1px solid rgba(7,134,248,.12); border-radius: 50%; content: ""; }
+.cs-legal-hero__mark::before { inset: 20px; }
+.cs-legal-hero__mark::after { inset: -26px; }
+.cs-legal-hero__mark .cs-icon { width: 76px; height: 76px; stroke-width: 1.35; }
+.cs-legal-shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 30px; align-items: start; }
+.cs-legal-nav { position: sticky; top: 146px; display: grid; gap: 4px; max-height: calc(100vh - 170px); overflow: auto; padding: 18px; border: 1px solid #dbe8f4; border-radius: 18px; background: rgba(255,255,255,.92); box-shadow: var(--cs-shadow-soft); backdrop-filter: blur(18px); }
+.cs-legal-nav > strong { margin: 2px 8px 9px; color: var(--cs-blue-700); font-size: 10px; letter-spacing: .12em; }
+.cs-legal-nav a { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 9px; color: #607895; font-size: 12px; font-weight: 650; line-height: 1.35; }
+.cs-legal-nav a::before { width: 5px; height: 5px; flex: 0 0 5px; border-radius: 50%; background: #bdd1e4; content: ""; }
+.cs-legal-nav a:hover, .cs-legal-nav a:focus-visible { color: var(--cs-blue-700); background: #edf8ff; }
+.cs-legal-nav a:hover::before, .cs-legal-nav a:focus-visible::before { background: var(--cs-blue-600); }
+.cs-legal-content { display: grid; gap: 16px; min-width: 0; }
+.cs-legal-card { position: relative; min-width: 0; overflow: hidden; padding: clamp(24px, 3.1vw, 42px); border: 1px solid #dce8f3; border-radius: 20px; background: rgba(255,255,255,.95); box-shadow: 0 14px 44px rgba(19,64,108,.075); }
+.cs-legal-card::before { position: absolute; top: 0; left: 38px; width: 78px; height: 3px; border-radius: 0 0 4px 4px; background: linear-gradient(90deg, var(--cs-blue-700), #36bdff); content: ""; }
+.cs-legal-card h2 { max-width: 850px; margin: 0 0 14px; color: var(--cs-navy-900); font-size: clamp(22px, 2.2vw, 31px); line-height: 1.2; letter-spacing: -.035em; text-wrap: balance; }
+.cs-legal-card h3 { margin: 24px 0 8px; color: #103a6d; font-size: 16px; }
+.cs-legal-card p, .cs-legal-card li { color: #607691; line-height: 1.75; }
+.cs-legal-card p { margin: 10px 0 0; }
+.cs-legal-card p:first-of-type { margin-top: 0; }
+.cs-legal-card ul, .cs-legal-card ol { margin: 13px 0 0; padding-left: 21px; }
+.cs-legal-card li + li { margin-top: 7px; }
+.cs-legal-card strong { color: #173e6b; }
+.cs-legal-card a:not(.cs-legal-action) { color: var(--cs-blue-700); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.cs-legal-callout { margin-top: 20px; padding: 17px 18px; border: 1px solid #bfe0f8; border-radius: 13px; color: #456989; background: #eef9ff; }
+.cs-legal-callout strong { display: block; margin-bottom: 3px; color: #073d77; }
+.cs-legal-action { display: inline-flex; min-height: 47px; align-items: center; justify-content: center; gap: 10px; margin: 20px 10px 0 0; padding: 12px 18px; border: 1px solid var(--cs-blue-700); border-radius: 999px; color: #fff; background: linear-gradient(135deg, var(--cs-blue-700), var(--cs-blue-500)); box-shadow: 0 9px 24px rgba(0,106,230,.2); font-size: 12px; font-weight: 800; }
+.cs-legal-action.is-secondary { color: var(--cs-blue-700); background: #fff; box-shadow: none; }
+.cs-legal-action:hover { transform: translateY(-1px); }
+.cs-legal-profile { padding: clamp(24px, 3.1vw, 42px); }
+.cs-legal-profile__heading > span { display: block; margin-bottom: 7px; color: var(--cs-blue-700); font-size: 10px; font-weight: 850; letter-spacing: .13em; }
+.cs-legal-profile__heading h2 { margin-bottom: 8px; }
+.cs-legal-profile__heading p { max-width: 760px; }
+.cs-legal-profile__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 22px 0 0; }
+.cs-legal-profile__grid > div { min-width: 0; padding: 14px 15px; border: 1px solid #e0eaf4; border-radius: 12px; background: #f8fbff; }
+.cs-legal-profile__grid dt { color: #778ba2; font-size: 10px; }
+.cs-legal-profile__grid dd { margin: 4px 0 0; color: #143b6a; font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
+.cs-legal-live-grid { display: grid; gap: 12px; margin-top: 20px; }
+.cs-legal-shipping-card { padding: 19px; border: 1px solid #d9e8f4; border-radius: 15px; background: linear-gradient(145deg, #fbfdff, #f1f9ff); }
+.cs-legal-shipping-card__head { display: flex; align-items: center; gap: 12px; }
+.cs-legal-shipping-card__head > span { display: grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; border-radius: 12px; color: var(--cs-blue-700); background: #e5f5ff; }
+.cs-legal-shipping-card__head .cs-icon { width: 24px; height: 24px; }
+.cs-legal-shipping-card__head strong, .cs-legal-shipping-card__head small { display: block; }
+.cs-legal-shipping-card__head strong { color: #113a69; }
+.cs-legal-shipping-card__head small { margin-top: 2px; color: #66809a; font-size: 11px; }
+.cs-legal-shipping-card > p { margin: 12px 0 0; font-size: 12px; }
+.cs-legal-shipping-card dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0 0; }
+.cs-legal-shipping-card dl > div { padding: 11px 12px; border: 1px solid #deebf6; border-radius: 10px; background: #fff; }
+.cs-legal-shipping-card dt { color: #788da3; font-size: 9px; }
+.cs-legal-shipping-card dd { margin: 3px 0 0; color: #0a4e91; font-size: 13px; font-weight: 850; }
+.cs-legal-payments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.cs-legal-payments > article { display: flex; gap: 14px; padding: 18px; border: 1px solid #dce8f3; border-radius: 14px; background: #f8fbff; }
+.cs-legal-payments > article > span { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border-radius: 50%; color: var(--cs-blue-700); background: #e7f6ff; }
+.cs-legal-payments .cs-icon { width: 22px; height: 22px; }
+.cs-legal-payments strong { display: block; }
+.cs-legal-payments p { margin-top: 5px; font-size: 12px; line-height: 1.55; }
+.cs-legal-live-empty { padding: 18px; border: 1px dashed #bdd3e8; border-radius: 13px; background: #f8fbff; }
+.cs-legal-live-empty p { margin-top: 5px; }
+.cs-legal-data-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.cs-legal-data-grid > div { padding: 15px; border: 1px solid #dce8f3; border-radius: 12px; background: #f8fbff; }
+.cs-legal-data-grid small, .cs-legal-data-grid strong { display: block; }
+.cs-legal-data-grid small { color: #778ba2; font-size: 10px; }
+.cs-legal-data-grid strong { margin-top: 4px; }
+.cs-legal-source-list { display: grid; gap: 9px; margin-top: 17px; }
+.cs-legal-source-list a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 15px; border: 1px solid #dce8f3; border-radius: 11px; background: #f8fbff; text-decoration: none !important; }
+.cs-legal-source-list a::after { content: "↗"; }
+
+/* Formular public de retur */
+.cs-return-layout { display: grid; grid-template-columns: minmax(250px, .72fr) minmax(0, 1.55fr); gap: 24px; align-items: start; }
+.cs-return-assurance { position: sticky; top: 146px; padding: 28px; border: 1px solid #d9e8f4; border-radius: 20px; color: #dcebfb; background: linear-gradient(145deg, #073a69, #04254d); box-shadow: var(--cs-shadow); }
+.cs-return-assurance .cs-legal-hero__eyebrow { color: #58c7ff; }
+.cs-return-assurance h2 { margin: 0; color: #fff; font-size: clamp(24px, 2.5vw, 34px); line-height: 1.18; letter-spacing: -.04em; }
+.cs-return-assurance ul { display: grid; gap: 16px; margin: 25px 0; padding: 0; list-style: none; }
+.cs-return-assurance li { padding: 14px 0 0; border-top: 1px solid rgba(125,204,255,.18); }
+.cs-return-assurance strong, .cs-return-assurance span { display: block; }
+.cs-return-assurance strong { color: #fff; font-size: 13px; }
+.cs-return-assurance span { margin-top: 4px; color: #b9d1e8; font-size: 11px; line-height: 1.55; }
+.cs-return-assurance > a { color: #70d1ff; font-size: 12px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.cs-return-panel { min-width: 0; }
+.cs-return-step { padding: clamp(24px, 4vw, 44px); border: 1px solid #dce8f3; border-radius: 20px; background: #fff; box-shadow: 0 16px 52px rgba(16,65,111,.09); }
+.cs-return-step > header { display: flex; align-items: flex-start; gap: 16px; padding-bottom: 25px; border-bottom: 1px solid #e2ebf4; }
+.cs-return-step > header > span { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 14px; color: #fff; background: linear-gradient(135deg, var(--cs-blue-700), var(--cs-blue-500)); font-weight: 850; }
+.cs-return-step > header small { display: block; color: var(--cs-blue-700); font-size: 9px; font-weight: 850; letter-spacing: .12em; }
+.cs-return-step > header h2 { margin: 3px 0 0; color: var(--cs-navy-900); font-size: clamp(23px, 3vw, 34px); line-height: 1.15; letter-spacing: -.04em; }
+.cs-return-step > header p { margin: 6px 0 0; color: #6a8098; font-size: 12px; }
+.cs-return-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
+.cs-return-fields label, .cs-return-field { display: grid; gap: 7px; color: #294f78; font-size: 11px; font-weight: 800; }
+.cs-return-fields input, .cs-return-field select, .cs-return-field textarea { width: 100%; min-height: 50px; padding: 11px 13px; border: 1px solid #c7d9e9; border-radius: 11px; outline: 0; color: #0d3767; background: #fbfdff; font-size: 13px; font-weight: 600; }
+.cs-return-field { margin-top: 18px; }
+.cs-return-field textarea { resize: vertical; }
+.cs-return-fields input:focus, .cs-return-field select:focus, .cs-return-field textarea:focus { border-color: var(--cs-blue-600); box-shadow: 0 0 0 3px rgba(7,134,248,.12); }
+.cs-return-privacy { display: flex; gap: 12px; align-items: center; margin-top: 17px; padding: 13px 15px; border: 1px solid #d8e8f5; border-radius: 12px; background: #f4faff; }
+.cs-return-privacy > span { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 50%; color: var(--cs-blue-700); background: #e1f3ff; }
+.cs-return-privacy .cs-icon { width: 19px; height: 19px; }
+.cs-return-privacy p { margin: 0; color: #607b96; font-size: 10px; line-height: 1.5; }
+.cs-return-privacy strong { display: block; color: #173f6b; }
+.cs-return-error { min-height: 18px; margin: 14px 0 0; color: #d93955; font-size: 12px; font-weight: 700; }
+.cs-return-step button:disabled { cursor: wait; opacity: .62; }
+.cs-return-deadline { display: flex; gap: 12px; align-items: center; margin: 22px 0; padding: 15px; border: 1px solid #aee4d0; border-radius: 13px; background: #effbf7; }
+.cs-return-deadline > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border-radius: 50%; color: #fff; background: var(--cs-green); font-weight: 900; }
+.cs-return-deadline strong { color: #087554; }
+.cs-return-deadline p { margin: 3px 0 0; color: #53806f; font-size: 11px; }
+.cs-return-step fieldset { margin: 0; padding: 0; border: 0; }
+.cs-return-step legend { margin-bottom: 10px; color: #173f6b; font-size: 12px; font-weight: 850; }
+.cs-return-products { display: grid; gap: 9px; }
+.cs-return-product { display: grid; grid-template-columns: 1px 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px; border: 1px solid #d9e6f2; border-radius: 12px; background: #fbfdff; cursor: pointer; }
+.cs-return-product > input { position: absolute; opacity: 0; }
+.cs-return-product__check { display: grid; width: 27px; height: 27px; place-items: center; border: 1px solid #b9ccdf; border-radius: 8px; color: transparent; background: #fff; }
+.cs-return-product > input:checked + .cs-return-product__check { border-color: var(--cs-blue-700); color: #fff; background: var(--cs-blue-700); }
+.cs-return-product > input:focus-visible + .cs-return-product__check { outline: 3px solid rgba(7,134,248,.2); outline-offset: 2px; }
+.cs-return-product strong, .cs-return-product small { display: block; }
+.cs-return-product strong { color: #133d6a; font-size: 12px; }
+.cs-return-product small { margin-top: 3px; color: #6b8199; font-size: 10px; }
+.cs-return-product select { min-height: 38px; padding: 7px 9px; border: 1px solid #c7d8e8; border-radius: 9px; background: #fff; font-size: 11px; }
+.cs-return-consent { position: relative; display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: start; gap: 10px; margin-top: 20px; cursor: pointer; }
+.cs-return-consent input { position: absolute; opacity: 0; }
+.cs-return-consent > span { display: grid; width: 24px; height: 24px; place-items: center; border: 1px solid #b9ccdf; border-radius: 7px; background: #fff; }
+.cs-return-consent input:checked + span { border-color: var(--cs-blue-700); background: var(--cs-blue-700); }
+.cs-return-consent input:checked + span::after { color: #fff; content: "✓"; font-weight: 900; }
+.cs-return-consent p { margin: 0; color: #667d96; font-size: 10px; line-height: 1.55; }
+.cs-return-consent strong { display: block; color: #173f6b; }
+.cs-return-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 22px; padding: 17px; border: 1px solid #d7e7f4; border-radius: 13px; background: #f4faff; }
+.cs-return-summary div { min-width: 0; }
+.cs-return-summary small, .cs-return-summary strong { display: block; }
+.cs-return-summary small { color: #70869d; font-size: 9px; }
+.cs-return-summary strong { margin-top: 4px; color: #0c4e90; font-size: 14px; }
+.cs-return-summary > span { color: #91a7bc; font-weight: 850; }
+.cs-return-note { color: #71869c; font-size: 10px; }
+.cs-return-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 15px; }
+.cs-return-actions > button:first-child { min-height: 44px; padding: 9px 15px; border: 1px solid #c8d8e7; border-radius: 999px; color: #355f87; background: #fff; font-size: 11px; font-weight: 800; }
+.cs-return-actions .cs-legal-action { margin: 0; }
+.cs-return-success { text-align: center; }
+.cs-return-success > span { display: grid; width: 68px; height: 68px; margin: 0 auto 18px; place-items: center; border-radius: 50%; color: #fff; background: var(--cs-green); font-size: 32px; font-weight: 900; }
+.cs-return-success > small { color: var(--cs-green); font-size: 10px; font-weight: 850; letter-spacing: .13em; }
+.cs-return-success h2 { margin: 7px 0; color: var(--cs-navy-900); font-size: 34px; letter-spacing: -.04em; }
+.cs-return-success p { max-width: 580px; margin: 0 auto; color: #627b95; }
+
+@media (max-width: 900px) {
+  .cs-return-layout { grid-template-columns: 1fr; }
+  .cs-return-assurance { position: static; }
+}
+
+@media (max-width: 620px) {
+  .cs-return-step { padding: 22px 17px; }
+  .cs-return-fields { grid-template-columns: 1fr; }
+  .cs-return-product { grid-template-columns: 1px 28px minmax(0, 1fr); }
+  .cs-return-product select { grid-column: 2 / -1; width: 100%; }
+  .cs-return-summary { grid-template-columns: 1fr; }
+  .cs-return-summary > span { display: none; }
+  .cs-return-actions { align-items: stretch; flex-direction: column-reverse; }
+  .cs-return-actions > button { width: 100%; }
+}
+
+@media (max-width: 960px) {
+  .cs-legal-hero { grid-template-columns: minmax(0, 1fr) 200px; gap: 28px; }
+  .cs-legal-hero__mark { width: 170px; height: 170px; }
+  .cs-legal-shell { grid-template-columns: 1fr; }
+  .cs-legal-nav { position: static; display: flex; max-height: none; overflow-x: auto; padding: 10px; scrollbar-width: none; }
+  .cs-legal-nav::-webkit-scrollbar { display: none; }
+  .cs-legal-nav > strong { display: none; }
+  .cs-legal-nav a { flex: 0 0 auto; white-space: nowrap; }
+}
+
+@media (max-width: 680px) {
+  .cs-legal-main { padding-bottom: 46px; }
+  .cs-legal-breadcrumb { padding-top: 16px; }
+  .cs-legal-hero { display: block; min-height: 0; padding: 38px 0 35px; }
+  .cs-legal-hero h1 { font-size: clamp(38px, 13vw, 58px); }
+  .cs-legal-hero__lead { margin-top: 17px; font-size: 15px; }
+  .cs-legal-hero__mark { display: none; }
+  .cs-legal-card, .cs-legal-profile { padding: 24px 19px; border-radius: 16px; }
+  .cs-legal-card::before { left: 20px; }
+  .cs-legal-profile__grid, .cs-legal-payments, .cs-legal-data-grid { grid-template-columns: 1fr; }
+  .cs-legal-shipping-card dl { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-legal-action { transition: none; }
+}

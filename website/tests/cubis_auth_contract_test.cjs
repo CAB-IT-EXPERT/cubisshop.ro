@@ -31,6 +31,9 @@ assert.match(script, /STORAGE_KEYS\.customerProfile/, "successful auth must save
 assert.match(script, /requested\.startsWith\("\/"\)/, "post-auth redirects must be restricted to local paths");
 assert.match(script, /Autentificarea Google este dezactivată până la configurarea contului Cubis Shop\./, "disabled Google state must be explained honestly");
 assert.ok(script.indexOf("await customerApi.authConfig()") < script.indexOf("await ensureGoogleScript()"), "Google script must load only after Cubis auth config");
+assert.match(script, /location\.hostname === "127\.0\.0\.1"/, "numeric loopback previews must be detected before Google authentication");
+assert.match(script, /canonicalLocalUrl\.hostname = "localhost"/, "numeric loopback previews must use the registered localhost OAuth origin");
+assert.match(script, /location\.replace\(canonicalLocalUrl\.href\)/, "local OAuth origin normalization must preserve the current route through a replace navigation");
 
 assert.match(css, /grid-template-columns: minmax\(420px, \.92fr\) minmax\(520px, 1\.08fr\)/, "desktop auth must use the requested split layout");
 assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.cs-auth-story \{ display: none;/, "mobile auth must focus on the form");

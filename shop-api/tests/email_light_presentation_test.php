@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+if (!function_exists('mb_strtolower')) { function mb_strtolower(string $value): string { return strtolower($value); } }
+if (!function_exists('mb_substr')) { function mb_substr(string $value, int $start, ?int $length = null): string { return $length === null ? substr($value, $start) : substr($value, $start, $length); } }
 require_once __DIR__ . '/../order-emails.php';
 require_once __DIR__ . '/../order-admin-notifications.php';
 require_once __DIR__ . '/../newsletter.php';
@@ -33,4 +35,6 @@ $partial=gtBuildOrderReturnConfirmedEmail($order,$config)['html'];
 emailDesignAssert(str_contains($partial,'APROBAT PARȚIAL')&&str_contains($partial,'Motiv exact.'),'Preserve partial decisions');
 $return=GtrotsInvoiceService::buildEmail(['series'=>'GT','invoice_number'=>'1','currency'=>'RON','total'=>-129,'document_status'=>'return'],$config)['html'];
 emailDesignAssert(!str_contains($return,'corectează integral')&&str_contains($return,'Document atașat'),'Return document must not claim a full correction for a partial return');
+$smartBillSource=(string)file_get_contents(dirname(__DIR__).'/smartbill-service.php');
+emailDesignAssert(str_contains($smartBillSource,'GtrotsInvoiceService::buildEmail($invoice, $config)')&&str_contains($smartBillSource,"'provider' => 'cubis_smtp'"),'SmartBill invoices must use the Cubis Shop template and sender');
 echo 'email_light_presentation_test: OK ('.count($all)." render variants)\n";

@@ -252,23 +252,23 @@ function shopNewsletterProductEmail(array $config, array $subscriber, array $pro
     $safeUnsubscribeUrl = gtEmailEscape($unsubscribeUrl);
     $safeLogo = gtEmailEscape((string)($config['order_email_logo_url'] ?? 'https://cubisshop.ro/assets/cubis-shop-logo.png'));
     $imageBlock = $imageUrl !== ''
-        ? '<img src="' . gtEmailEscape($imageUrl) . '" width="520" alt="' . $safeTitle . '" style="display:block;width:100%;height:auto;max-height:410px;object-fit:contain;background:#f8f5f1;border-radius:26px">'
-        : '<div style="padding:72px 20px;text-align:center;border-radius:26px;background:#211d1a;color:#ff9a2f;font-size:52px">GT</div>';
+        ? '<img src="' . gtEmailEscape($imageUrl) . '" width="520" alt="' . $safeTitle . '" style="display:block;width:100%;height:auto;max-height:410px;object-fit:contain;background:#f4faff;border-radius:23px">'
+        : '<div style="padding:72px 20px;text-align:center;border-radius:23px;background:#eff8ff;color:#087ff5;font-size:52px;font-weight:900">CS</div>';
     $html = <<<HTML
-<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:#0b0a0a;color:#fff8f3;font-family:Roboto,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased">
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}table{border-spacing:0;mso-table-lspace:0pt;mso-table-rspace:0pt}@media(max-width:600px){.cs-wrap{padding:10px 7px!important}.cs-shell{border-radius:24px!important}.cs-body{padding:23px 17px 27px!important}.cs-logo{width:145px!important}.cs-title{font-size:31px!important}}</style></head>
+<body data-gt-email="light-v1" bgcolor="#eaf5ff" style="margin:0;background:#eaf5ff;color:#062b5b;font-family:Arial,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">A apărut ceva nou în Cubis Shop: {$safeTitle}.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0a0a"><tr><td style="padding:28px 12px" align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:620px;background:#181615;border:1px solid #3b3028;border-radius:34px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.5)">
-<tr><td style="height:7px;background:#ff8500"></td></tr>
-<tr><td style="padding:27px 27px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="width:56px"><img src="{$safeLogo}" width="52" height="52" alt="Cubis Shop" style="display:block;width:52px;height:52px;border-radius:17px"></td><td style="padding-left:12px"><strong style="display:block;color:#fff8f3;font-size:17px">Cubis Shop</strong><span style="display:block;margin-top:4px;color:#ff9a2f;font-size:9px;font-weight:900;letter-spacing:.13em">NOU ÎN MAGAZIN</span></td></tr></table></td></tr>
-<tr><td style="padding:18px 27px 28px"><p style="margin:0;color:#c4bbb4;font-size:14px;line-height:1.6">{$greeting} Am adăugat un produs nou care s-ar putea să-ți fie util.</p>
-<div style="margin-top:21px;padding:9px;border:1px solid #40362f;border-radius:31px;background:#100f0e">{$imageBlock}</div>
-<h1 style="margin:23px 0 0;color:#fff8f3;font-size:29px;line-height:1.12;letter-spacing:-.035em">{$safeTitle}</h1>
-<p style="margin:12px 0 0;color:#aaa09a;font-size:14px;line-height:1.65">{$safeDescription}</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:21px"><tr><td style="padding:16px 18px;border:1px solid #4b3828;border-radius:19px;background:#251a12"><span style="display:block;color:#a89d95;font-size:9px;font-weight:900;letter-spacing:.12em">PREȚ G-TROTS</span><strong style="display:block;margin-top:5px;color:#ff9a2f;font-size:24px">{$priceLabel}</strong></td></tr></table>
-<div style="padding:23px 0 8px;text-align:center"><a href="{$safeProductUrl}" style="display:inline-block;min-width:210px;padding:17px 27px;border-radius:18px;background:#ff8500;color:#ffffff;text-decoration:none;font-size:14px;font-weight:900;box-shadow:0 13px 32px rgba(255,133,0,.25)">Vezi produsul&nbsp;&nbsp;→</a></div>
-<p style="margin:18px 0 0;padding-top:18px;border-top:1px solid #302b28;color:#77706b;font-size:10px;line-height:1.6;text-align:center">Primești acest mesaj deoarece ai ales noutăți și oferte Cubis Shop la checkout.<br><a href="{$safeUnsubscribeUrl}" style="display:inline-block;margin-top:7px;color:#ff5d63;text-decoration:underline;font-weight:800">Dezabonare</a></p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eaf5ff" style="width:100%;background:#eaf5ff"><tr><td class="cs-wrap" style="padding:34px 14px" align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="cs-shell" bgcolor="#ffffff" style="width:100%;max-width:620px;background:#ffffff;border:1px solid #b9dcf7;border-radius:34px;overflow:hidden;box-shadow:0 24px 70px rgba(4,59,115,.14)">
+<tr><td style="height:7px;background:#0788f7;background-image:linear-gradient(90deg,#087ff5,#12c3df)"></td></tr>
+<tr><td class="cs-body" style="padding:30px 30px 34px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td><img class="cs-logo" src="{$safeLogo}" width="165" alt="Cubis Shop" style="display:block;width:165px;max-width:100%;height:auto"></td><td align="right"><span style="display:inline-block;padding:9px 13px;border:1px solid #acd9f8;border-radius:999px;background:#f0f8ff;color:#0874d9;font-size:11px;font-weight:900">Nou în magazin</span></td></tr></table>
+<div style="padding:31px 0 20px"><p style="margin:0;color:#52769a;font-size:15px;line-height:1.7">{$greeting} Am adăugat un produs nou care s-ar putea să-ți fie util.</p></div>
+<div style="padding:9px;border:1px solid #cfe4f5;border-radius:29px;background:#f8fbfe">{$imageBlock}</div>
+<h1 class="cs-title" style="margin:23px 0 0;color:#062b5b;font-size:31px;line-height:1.12;letter-spacing:-1.1px">{$safeTitle}</h1>
+<p style="margin:12px 0 0;color:#607e9c;font-size:14px;line-height:1.7">{$safeDescription}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:21px"><tr><td style="padding:17px 18px;border:1px solid #cfe4f5;border-radius:19px;background:#f0f8ff"><span style="display:block;color:#6889a8;font-size:9px;font-weight:900;letter-spacing:.12em">PREȚ CUBIS SHOP</span><strong style="display:block;margin-top:5px;color:#087ff5;font-size:26px">{$priceLabel}</strong></td></tr></table>
+<div style="padding:24px 0 8px;text-align:center"><a href="{$safeProductUrl}" style="display:inline-block;min-width:210px;padding:17px 27px;border-radius:17px;background:#087ff5;background-image:linear-gradient(100deg,#087ff5,#12c3df);color:#ffffff;text-decoration:none;font-size:14px;font-weight:900;box-shadow:0 12px 28px rgba(8,127,245,.22)">Vezi produsul&nbsp;&nbsp;→</a></div>
+<p style="margin:18px 0 0;padding-top:18px;border-top:1px solid #dcebf7;color:#7892ad;font-size:10px;line-height:1.6;text-align:center">Primești acest mesaj deoarece ai ales noutăți și oferte Cubis Shop la checkout.<br><a href="{$safeUnsubscribeUrl}" style="display:inline-block;margin-top:7px;color:#d72e5e;text-decoration:underline;font-weight:800">Dezabonare</a></p>
 </td></tr></table></td></tr></table></body></html>
 HTML;
     return [

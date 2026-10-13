@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#073a69"><meta name="robots" content="noindex,follow">
+  <meta name="description" content="Verifică o comandă Cubis Shop și trimite online solicitarea de retragere sau retur pentru produsele eligibile.">
+  <link rel="canonical" href="https://cubisshop.ro/solicita-retur"><link rel="icon" href="/assets/cubis-shop-icon.png?v=20261012" type="image/png"><link rel="apple-touch-icon" href="/assets/cubis-shop-icon.png?v=20261012">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/cubis-storefront.css?v=20261013-legal-1"><link rel="stylesheet" href="/cubis-legal.css?v=20261013-legal-1">
+  <title>Solicită un retur | Cubis Shop</title>
+</head>
+<body class="cs-page cs-legal-page cs-return-request-page"><div data-site-header class="cs-shell-placeholder"></div>
+  <main id="main" class="cs-legal-main"><div class="cs-container">
+    <nav class="cs-legal-breadcrumb" aria-label="Breadcrumb"><a href="/">Acasă</a><span>›</span><a href="/politica-de-retur">Politica de retur</a><span>›</span><span aria-current="page">Solicită retur</span></nav>
+    <section class="cs-legal-hero" aria-labelledby="return-title"><div><p class="cs-legal-hero__eyebrow">RETUR ONLINE · SIMPLU ȘI TRANSPARENT</p><h1 id="return-title">Retrageți-vă din <em>contract aici</em></h1><p class="cs-legal-hero__lead">Verificăm în siguranță comanda, apoi alegi exact produsele și cantitățile care se întorc.</p><div class="cs-legal-meta"><span>1. Verifică</span><span>2. Selectează</span><span>3. Confirmă</span></div></div><div class="cs-legal-hero__mark" data-legal-icon="rotate" aria-hidden="true"></div></section>
+    <section class="cs-return-layout" aria-label="Solicitare retur">
+      <aside class="cs-return-assurance"><p class="cs-legal-hero__eyebrow">PROCES DOCUMENTAT</p><h2>Returul ajunge direct în aplicațiile Cubis Shop.</h2><ul><li><strong>Verificare exactă</strong><span>Numărul comenzii și e-mailul trebuie să corespundă.</span></li><li><strong>Selecție pe cantități</strong><span>Poți returna unul, mai multe sau toate produsele.</span></li><li><strong>Cost transparent</strong><span>Vezi tariful returului și estimarea înainte de trimitere.</span></li></ul><a href="/politica-de-retur">Consultă politica de retur →</a></aside>
+      <div class="cs-return-panel">
+        <form class="cs-return-step" data-return-verify novalidate>
+          <header><span>01</span><div><small>PASUL ÎNTÂI</small><h2>Găsește comanda</h2><p>Introdu datele folosite la checkout.</p></div></header>
+          <div class="cs-return-fields"><label><span>Număr comandă *</span><input name="order_number" required autocomplete="off" spellcheck="false" placeholder="CS-20261013-AB12CD34"></label><label><span>E-mail comandă *</span><input name="email" type="email" required autocomplete="email" placeholder="client@exemplu.ro"></label></div>
+          <div class="cs-return-privacy"><span data-legal-icon="lock" aria-hidden="true"></span><p><strong>Verificare privată</strong>Datele comenzii sunt afișate numai dacă identificarea reușește.</p></div>
+          <p class="cs-return-error" data-return-verify-error role="alert" tabindex="-1"></p>
+          <button class="cs-legal-action" type="submit" data-return-verify-submit>Verifică eligibilitatea →</button>
+        </form>
+        <form class="cs-return-step" data-return-configure hidden novalidate>
+          <header><span>02</span><div><small>COMANDĂ VERIFICATĂ</small><h2>Alege ce se întoarce</h2><p data-return-order></p></div></header>
+          <div class="cs-return-deadline" data-return-deadline></div>
+          <fieldset><legend>Produse și cantități</legend><div class="cs-return-products" data-return-products></div></fieldset>
+          <label class="cs-return-field"><span>Motivul solicitării <b data-return-reason-required></b></span><select name="reason_choice"><option value="">Nu doresc să declar un motiv</option><option>Produsul nu corespunde nevoilor mele</option><option>Am comandat din greșeală</option><option>Alt motiv</option></select></label>
+          <label class="cs-return-field" data-return-reason-details hidden><span>Detalii *</span><textarea name="reason_detail" rows="3" maxlength="1000" placeholder="Descrie pe scurt situația"></textarea></label>
+          <div class="cs-return-fields"><label><span>Titular cont *</span><input name="bank_account_holder" required maxlength="180" autocomplete="name"></label><label><span>IBAN pentru rambursare *</span><input name="bank_iban" required maxlength="34" autocomplete="off" spellcheck="false" placeholder="RO49AAAA1B31007593840000"></label></div>
+          <label class="cs-return-consent"><input name="refund_consent" type="checkbox" required><span aria-hidden="true"></span><p><strong>Sunt de acord cu rambursarea în IBAN-ul indicat.</strong>Declar că datele sunt corecte și că pot primi suma aprobată în acest cont.</p></label>
+          <div class="cs-return-summary"><div><small>Produse + livrare eligibilă</small><strong data-return-selected>0,00 RON</strong></div><span>−</span><div><small data-return-cost-label>Cost direct retur</small><strong data-return-cost>0,00 RON</strong></div><span>=</span><div><small>Estimare restituire</small><strong data-return-estimate>0,00 RON</strong></div></div>
+          <p class="cs-return-note">Valoarea finală include numai produsele și cantitățile acceptate după verificare.</p>
+          <p class="cs-return-error" data-return-configure-error role="alert" tabindex="-1"></p>
+          <div class="cs-return-actions"><button type="button" data-return-back>← Înapoi</button><button class="cs-legal-action" type="submit" data-return-submit>Confirmă retragerea →</button></div>
+        </form>
+        <section class="cs-return-step cs-return-success" data-return-success hidden tabindex="-1"><span>✓</span><small>SOLICITARE ÎNREGISTRATĂ</small><h2>Am primit cererea ta.</h2><p>Confirmarea, conținutul declarației, data și ora înregistrării au fost trimise pe e-mail. Produsele vor fi verificate individual.</p><a class="cs-legal-action" href="/">Înapoi la Cubis Shop</a></section>
+      </div>
+    </section>
+  </div></main>
+  <div data-site-footer class="cs-footer-placeholder"></div><script type="module" src="/cubis-return.mjs?v=20261013-legal-1"></script>
+</body></html>

@@ -27,7 +27,7 @@ function actionButtons({ primaryHref = "/magazin", primaryLabel = "Continuă cum
   if (trackingHref) {
     return `<div class="cs-payment-result__actions"><a class="is-primary" href="${escapeHtml(trackingHref)}">${icon("package")}<span>Urmărește comanda</span><span aria-hidden="true">→</span></a><a href="/magazin">Continuă cumpărăturile</a></div>`;
   }
-  const secondary = account ? '<a href="/cont#orders">Vezi comenzile</a>' : '<a href="/contact">Ai nevoie de ajutor?</a>';
+  const secondary = account ? '<a href="/cont#orders">Urmărește comanda</a>' : '<a href="/contact">Ai nevoie de ajutor?</a>';
   return `<div class="cs-payment-result__actions"><a class="is-primary" href="${escapeHtml(primaryHref)}">${escapeHtml(primaryLabel)} <span aria-hidden="true">→</span></a>${secondary}</div>`;
 }
 
@@ -74,7 +74,10 @@ async function confirmPayment() {
       return;
     }
     const order = result.order || {};
-    const trackingHref = safeTrackingHref(order.trackingUrl);
+    const stored = storedCheckout();
+    const trackingHref = safeTrackingHref(order.trackingUrl)
+      || safeTrackingHref(stored.tracking_url)
+      || trackingHrefFromToken(stored.tracking_token);
     commerce.clearCart();
     sessionStorage.setItem(STORAGE_KEYS.checkout, JSON.stringify({
       order_number: order.orderNumber || params.get("comanda") || "",
@@ -82,6 +85,7 @@ async function confirmPayment() {
       payment_status: order.paymentStatus || result.payment_status,
       total: order.total || 0,
       tracking_url: trackingHref,
+      tracking_token: stored.tracking_token || "",
     }));
     render({ type: "success", eyebrow: "Plată confirmată", title: "Comanda ta este confirmată!", copy: `Am înregistrat plata și am trimis detaliile comenzii la ${order.customerEmail || "adresa ta de e-mail"}.`, orderNumber: order.orderNumber || params.get("comanda") || "", total: Number(order.total || 0), trackingHref });
   } catch (error) {

@@ -17,7 +17,34 @@ function relative(absolute) {
 
 const files = walk(websiteRoot);
 const htmlFiles = files.filter((file) => path.extname(file) === ".html").map(relative).sort();
-assert.deepEqual(htmlFiles, ["404.html", "checkout.html", "cont-nou.html", "cont.html", "contact.html", "cos.html", "favorite.html", "index.html", "login.html", "magazin.html", "plata-esuata.html", "plata-finalizata.html", "produs.html", "resetare-parola.html"]);
+assert.deepEqual(htmlFiles, [
+  "404.html",
+  "accesibilitate.html",
+  "checkout.html",
+  "conditii-b2b.html",
+  "cont-nou.html",
+  "cont.html",
+  "contact.html",
+  "cos.html",
+  "favorite.html",
+  "garantii-si-reclamatii.html",
+  "index.html",
+  "livrare-si-plata.html",
+  "login.html",
+  "magazin.html",
+  "plata-esuata.html",
+  "plata-finalizata.html",
+  "plata-si-facturare.html",
+  "politica-cookies.html",
+  "politica-de-confidentialitate.html",
+  "politica-de-retur.html",
+  "produs.html",
+  "resetare-parola.html",
+  "siguranta-produselor.html",
+  "solicita-retur.html",
+  "solutionarea-litigiilor.html",
+  "termeni-si-conditii.html",
+]);
 
 const assetFiles = files
   .filter((file) => relative(file).startsWith("assets/"))

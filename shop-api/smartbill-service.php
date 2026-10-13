@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/order-emails.php';
+require_once __DIR__ . '/invoice-service.php';
+
 /**
  * SmartBill V1 + V3 integration for Cubis Shop.
  *
@@ -949,19 +952,19 @@ final class CubisSmartBillService
             throw new InvalidArgumentException('Comanda nu are o adresă de e-mail validă.');
         }
         try {
-            $response = self::v1($db, $config, 'POST', '/document/send', [], [
-                'companyVatCode' => self::cif($config),
-                'seriesName' => (string)$invoice['series'],
-                'number' => (string)$invoice['invoice_number'],
-                'type' => 'factura',
-                'to' => $recipient,
-            ], false);
-            $status = $response['status'] ?? null;
-            if (!is_array($status) || (int)($status['code'] ?? 1) !== 0) {
-                throw new RuntimeException(self::safeError((string)($status['message'] ?? 'SmartBill nu a confirmat trimiterea e-mailului.')));
+            $stored = self::archiveInvoicePdf($db, $config, $invoice, false);
+            $pdf = file_get_contents((string)$stored['path']);
+            if (!is_string($pdf) || !str_starts_with($pdf, '%PDF-')) {
+                throw new RuntimeException('PDF-ul SmartBill arhivat nu a putut fi citit pentru e-mail.');
             }
+            $email = GtrotsInvoiceService::buildEmail($invoice, $config);
+            gtSmtpSend($config, $recipient, (string)$email['subject'], (string)$email['html'], [[
+                'file_name' => (string)$stored['file_name'],
+                'mime_type' => 'application/pdf',
+                'content' => $pdf,
+            ]]);
             $db->prepare('UPDATE shop_invoices SET email_sent_at = NOW(), email_last_error = NULL WHERE id = ?')->execute([(string)$invoice['id']]);
-            return ['sent' => true, 'recipient' => $recipient, 'provider' => 'smartbill'];
+            return ['sent' => true, 'recipient' => $recipient, 'provider' => 'cubis_smtp', 'document_provider' => 'smartbill'];
         } catch (Throwable $error) {
             $safe = self::safeError($error->getMessage());
             $db->prepare('UPDATE shop_invoices SET email_last_error = ? WHERE id = ?')->execute([$safe, (string)$invoice['id']]);

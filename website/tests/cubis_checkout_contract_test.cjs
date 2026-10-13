@@ -7,6 +7,7 @@ const read = file => fs.readFileSync(path.join(root, file), "utf8");
 const checkout = read("checkout.html");
 const script = read("cubis-checkout.mjs");
 const payment = read("cubis-payment-result.mjs");
+const styles = read("cubis-checkout.css");
 const stripe = fs.readFileSync(path.resolve(root, "..", "shop-api", "stripe.php"), "utf8");
 const api = fs.readFileSync(path.resolve(root, "..", "shop-api", "api.php"), "utf8");
 
@@ -17,6 +18,10 @@ assert.match(checkout, /data-payment-methods/);
 assert.match(checkout, /name="accept_terms"/);
 assert.match(checkout, /data-checkout-summary-title|checkout-summary-title/);
 assert.doesNotMatch(checkout, /G-Trots|GTrots|g-trots/i);
+assert.match(styles, /\.cs-checkout-product__copy strong[^}]*font-size:\s*13px/, "checkout product names must remain readable");
+assert.match(styles, /\.cs-checkout-totals > div[^}]*font-size:\s*13px/, "checkout totals must remain readable");
+assert.match(styles, /\.cs-checkout-consents em[^}]*font-size:\s*11px/, "checkout consent copy must remain readable");
+assert.match(styles, /\.cs-checkout-submit-note[^}]*font-size:\s*10px/, "checkout verification note must remain readable");
 
 assert.match(script, /checkoutApi\.products/);
 assert.match(script, /checkoutApi\.promotionQuote/);

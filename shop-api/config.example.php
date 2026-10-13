@@ -73,23 +73,25 @@ return [
     'google_search_console_verification' => $env('CUBIS_GOOGLE_SEARCH_CONSOLE_VERIFICATION'),
 
     // Transactional e-mail is disabled until Cubis SMTP is configured.
-    'order_email_from' => $env('CUBIS_ORDER_EMAIL_FROM'),
+    // Both customer and internal messages are sent from the public contact
+    // mailbox; internal order notifications are delivered to the office inbox.
+    'order_email_from' => $env('CUBIS_ORDER_EMAIL_FROM', 'contact@cubisshop.ro'),
     'order_email_from_name' => $env('CUBIS_ORDER_EMAIL_FROM_NAME', 'Cubis Shop'),
-    'order_email_reply_to' => $env('CUBIS_ORDER_EMAIL_REPLY_TO'),
+    'order_email_reply_to' => $env('CUBIS_ORDER_EMAIL_REPLY_TO', 'contact@cubisshop.ro'),
     'order_email_logo_url' => $env('CUBIS_ORDER_EMAIL_LOGO_URL', 'https://cubisshop.ro/assets/cubis-shop-logo.png'),
     'smtp_host' => $env('CUBIS_SMTP_HOST'),
     'smtp_port' => (int)$env('CUBIS_SMTP_PORT', '465'),
     'smtp_encryption' => $env('CUBIS_SMTP_ENCRYPTION', 'ssl'),
-    'smtp_username' => $env('CUBIS_SMTP_USERNAME'),
+    'smtp_username' => $env('CUBIS_SMTP_USERNAME', 'contact@cubisshop.ro'),
     'smtp_password' => $env('CUBIS_SMTP_PASSWORD'),
-    'admin_order_notification_recipient' => $env('CUBIS_ADMIN_ORDER_RECIPIENT'),
-    'admin_order_email_from' => $env('CUBIS_ADMIN_EMAIL_FROM'),
+    'admin_order_notification_recipient' => $env('CUBIS_ADMIN_ORDER_RECIPIENT', 'office@cubisshop.ro'),
+    'admin_order_email_from' => $env('CUBIS_ADMIN_EMAIL_FROM', 'contact@cubisshop.ro'),
     'admin_order_email_from_name' => $env('CUBIS_ADMIN_EMAIL_FROM_NAME', 'Cubis Shop · Comenzi'),
-    'admin_order_email_reply_to' => $env('CUBIS_ADMIN_EMAIL_REPLY_TO'),
+    'admin_order_email_reply_to' => $env('CUBIS_ADMIN_EMAIL_REPLY_TO', 'contact@cubisshop.ro'),
     'admin_order_smtp_host' => $env('CUBIS_ADMIN_SMTP_HOST'),
     'admin_order_smtp_port' => (int)$env('CUBIS_ADMIN_SMTP_PORT', '465'),
     'admin_order_smtp_encryption' => $env('CUBIS_ADMIN_SMTP_ENCRYPTION', 'ssl'),
-    'admin_order_smtp_username' => $env('CUBIS_ADMIN_SMTP_USERNAME'),
+    'admin_order_smtp_username' => $env('CUBIS_ADMIN_SMTP_USERNAME', 'contact@cubisshop.ro'),
     'admin_order_smtp_password' => $env('CUBIS_ADMIN_SMTP_PASSWORD'),
 
     // ANAF/SPV remains implemented but disabled. Preserve the fiscal workflow;

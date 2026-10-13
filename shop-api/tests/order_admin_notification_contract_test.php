@@ -53,7 +53,7 @@ adminNotificationAssert(substr_count($email['html'], '>Vezi comanda') === 1, 'E-
 adminNotificationAssert($email['open_url'] === 'https://cubisshop.ro/shop-api/deschide-comanda.php?order=82e456ee-f436-4bbb-bd88-85906a33a5a2', 'Linkul unic către aplicație nu este corect.');
 adminNotificationAssert(str_contains($email['html'], 'table-layout:fixed') && str_contains($email['html'], 'Total produs:'), 'Produsele din e-mailul intern nu folosesc layoutul mobil compact.');
 adminNotificationAssert(str_contains($email['html'], '/email-image.php?file=test.webp'), 'Imaginea WebP din e-mailul intern nu este convertită pentru Outlook.');
-adminNotificationAssert(str_contains($email['html'], 'mso-line-height-rule:exactly') && str_contains($email['html'], 'bgcolor="#ff8500"'), 'E-mailul intern nu folosește structura compatibilă cu Outlook.');
+adminNotificationAssert(str_contains($email['html'], 'mso-line-height-rule:exactly') && str_contains($email['html'], 'bgcolor="#087ff5"') && str_contains($email['html'], 'data-gt-email="light-v1"'), 'E-mailul intern nu folosește noua structură Cubis compatibilă cu Outlook.');
 adminNotificationAssert(!str_contains($email['html'], '>Reducere</td>'), 'Reducerea zero nu trebuie afișată în e-mailul intern.');
 
 $customerEmail = gtBuildOrderEmail($order, $config, 'new');
@@ -61,7 +61,7 @@ adminNotificationAssert(str_contains($customerEmail['html'], 'table-layout:fixed
 adminNotificationAssert(str_contains($customerEmail['html'], 'SE-CMM087') && str_contains($customerEmail['html'], 'Total produs:'), 'E-mailul clientului nu păstrează clar SKU-ul și valoarea produsului.');
 adminNotificationAssert(!str_contains($customerEmail['html'], 'white-space:nowrap'), 'E-mailul clientului nu trebuie să forțeze coloana separată de preț pe telefon.');
 adminNotificationAssert(str_contains($customerEmail['html'], '/email-image.php?file=test.webp'), 'Imaginea WebP din e-mailul clientului nu este convertită pentru Outlook.');
-adminNotificationAssert(str_contains($customerEmail['html'], 'mso-line-height-rule:exactly') && str_contains($customerEmail['html'], 'bgcolor="#ff8500"'), 'E-mailul clientului nu folosește structura compatibilă cu Outlook.');
+adminNotificationAssert(str_contains($customerEmail['html'], 'mso-line-height-rule:exactly') && str_contains($customerEmail['html'], 'bgcolor="#087ff5"') && str_contains($customerEmail['html'], 'data-gt-email="light-v1"'), 'E-mailul clientului nu folosește noua structură Cubis compatibilă cu Outlook.');
 
 $smtp = gtAdminOrderNotificationSmtpConfig($config);
 adminNotificationAssert($smtp['smtp_host'] === 'mail.example.test' && $smtp['smtp_username'] === 'sender@example.test', 'Contul SMTP intern nu este separat corect.');

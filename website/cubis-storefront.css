@@ -948,11 +948,42 @@ html.cs-newsletter-modal-open, html.cs-newsletter-modal-open body { overflow: hi
 .cs-footer__assurance .cs-icon { width: 28px; height: 28px; stroke-width: 2.2; }
 .cs-footer__assurance h3 { margin: 0 0 4px; color: #fff; font-size: 14px; line-height: 1.3; }
 .cs-footer__assurance p { margin: 0; color: #bed1e8; font-size: 12px; line-height: 1.5; }
-.cs-footer__security > a { justify-self: start; color: #abc7e7; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+.cs-footer__legal-links { display: grid; gap: 5px; margin-top: 2px; padding: 10px; border: 1px solid rgba(105,194,255,.18); border-radius: 18px; background: linear-gradient(145deg, rgba(20,128,211,.13), rgba(3,37,74,.2)); box-shadow: inset 0 1px rgba(255,255,255,.04); }
+.cs-footer__legal-links > strong { padding: 4px 8px 7px; color: #78cffd; font-size: 10px; font-weight: 800; line-height: 1.3; letter-spacing: .09em; text-transform: uppercase; }
+.cs-footer__legal-links > a { display: flex; min-height: 39px; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border: 1px solid transparent; border-radius: 11px; color: #d7e9fc; background: rgba(255,255,255,.035); font-size: 12px; font-weight: 600; line-height: 1.35; transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease; }
+.cs-footer__legal-links > a:hover { border-color: rgba(82,189,255,.24); color: #fff; background: rgba(16,153,237,.13); transform: translateX(3px); }
+.cs-footer__legal-links > a .cs-icon { flex: 0 0 14px; width: 14px; height: 14px; color: #24b8ff; stroke-width: 2.4; }
 .cs-footer__bottom { border-top: 1px solid #028fe32b; background: #001a3540; }
 .cs-footer__bottom > div { display: flex; min-height: 88px; align-items: center; justify-content: space-between; gap: 25px; color: #b7cde6; font-size: 14px; }
 .cs-footer__bottom a.cs-footer__designer { flex-shrink: 0; font-size: 14px; }
 .cs-footer__bottom .cs-footer__designer img { width: 42px; height: 42px; }
+
+/* Preferințe cookie — componentă comună tuturor paginilor publice */
+body.cs-cookie-open { overflow: hidden; }
+.cs-cookie-layer { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: end center; padding: 24px; background: rgba(2, 21, 45, .56); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.cs-cookie-dialog { position: relative; width: min(720px, 100%); max-height: min(760px, calc(100dvh - 48px)); overflow: auto; padding: 30px; border: 1px solid #d5e5f5; border-radius: 22px; color: var(--cs-text); background: #fff; box-shadow: 0 28px 90px rgba(0, 24, 58, .28); }
+.cs-cookie-close { position: absolute; top: 14px; right: 14px; display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--cs-line); border-radius: 50%; color: #476887; background: #f7fbff; font-size: 24px; line-height: 1; }
+.cs-cookie-brand { display: flex; align-items: center; gap: 13px; padding-right: 34px; }
+.cs-cookie-brand img { width: 52px; height: 52px; border-radius: 12px; }
+.cs-cookie-brand small { display: block; margin-bottom: 2px; color: var(--cs-blue-700); font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.cs-cookie-brand h2 { margin: 0; color: var(--cs-navy-900); font-size: clamp(20px, 4vw, 28px); line-height: 1.15; letter-spacing: -.035em; }
+.cs-cookie-dialog > p { margin: 20px 0 0; color: #5f7691; font-size: 14px; line-height: 1.65; }
+.cs-cookie-categories { display: grid; gap: 10px; margin-top: 20px; }
+.cs-cookie-category { display: grid; grid-template-columns: minmax(0, 1fr) 46px; align-items: center; gap: 18px; padding: 15px 16px; border: 1px solid var(--cs-line); border-radius: 13px; background: #f8fbff; cursor: pointer; }
+.cs-cookie-category strong, .cs-cookie-category small { display: block; }
+.cs-cookie-category strong { color: var(--cs-navy-900); font-size: 13px; }
+.cs-cookie-category small { margin-top: 3px; color: #6d8098; font-size: 11px; line-height: 1.45; }
+.cs-cookie-category input { position: absolute; opacity: 0; pointer-events: none; }
+.cs-cookie-category i { position: relative; display: block; width: 46px; height: 26px; border: 1px solid #b8cade; border-radius: 99px; background: #dae5ef; transition: .18s ease; }
+.cs-cookie-category i::after { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 2px 7px #173d6530; content: ""; transition: .18s ease; }
+.cs-cookie-category input:checked + i { border-color: var(--cs-blue-700); background: var(--cs-blue-700); }
+.cs-cookie-category input:checked + i::after { transform: translateX(20px); }
+.cs-cookie-category input:focus-visible + i { outline: 3px solid rgba(20,153,255,.28); outline-offset: 2px; }
+.cs-cookie-category input:disabled + i { opacity: .72; }
+.cs-cookie-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.cs-cookie-actions button { min-height: 44px; flex: 1 1 150px; padding: 10px 16px; border: 1px solid #c6d7e8; border-radius: 999px; color: #143a68; background: #fff; font-size: 12px; font-weight: 800; }
+.cs-cookie-actions button.is-primary { border-color: var(--cs-blue-700); color: #fff; background: linear-gradient(135deg, var(--cs-blue-700), var(--cs-blue-500)); box-shadow: 0 8px 22px rgba(0,106,230,.22); }
+.cs-cookie-dialog > a { display: inline-block; margin-top: 17px; color: var(--cs-blue-700); font-size: 11px; font-weight: 750; text-decoration: underline; text-underline-offset: 3px; }
 
 @media (max-width: 1280px) {
   .cs-container { width: min(calc(100% - 34px), var(--cs-container)); }
@@ -1285,10 +1316,16 @@ html.cs-newsletter-modal-open, html.cs-newsletter-modal-open body { overflow: hi
   .cs-footer__assurance > span { flex-basis: 55px; width: 55px; height: 55px; }
   .cs-footer__assurance h3 { font-size: 14px; }
   .cs-footer__assurance p { font-size: 12px; }
+  .cs-footer__legal-links { gap: 6px; margin: 1px 0 22px; padding: 10px; border-radius: 16px; }
+  .cs-footer__legal-links > a { min-height: 46px; padding: 10px 12px; font-size: 13px; }
   .cs-footer__bottom > div { min-height: 86px; gap: 15px; font-size: 11px; }
   .cs-footer__bottom > div > span { max-width: 51%; }
   .cs-footer__bottom a.cs-footer__designer { flex-shrink: 1; gap: 6px; font-size: 11px; }
   .cs-footer__bottom .cs-footer__designer img { width: 29px; height: 29px; }
+  .cs-cookie-layer { padding: 0; place-items: end stretch; }
+  .cs-cookie-dialog { width: 100%; max-height: calc(100dvh - 12px); padding: 24px 18px calc(20px + env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0; }
+  .cs-cookie-actions { flex-direction: column; }
+  .cs-cookie-actions button { flex-basis: auto; width: 100%; }
 }
 
 @media (min-width: 769px) and (max-width: 1100px) {
