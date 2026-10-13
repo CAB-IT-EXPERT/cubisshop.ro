@@ -32,7 +32,7 @@ assert.match(script, /"status", "cod"/);
 
 assert.match(stripe, /\/plata-finalizata\?session_id=\{CHECKOUT_SESSION_ID\}/);
 assert.match(stripe, /\/plata-esuata\?comanda=/);
-assert.match(api, /stripeRestoreOrderStock\(\$db, \(string\)\$order\['id'\], 'Sesiunea Stripe nu a putut fi creata\.'/);
+assert.match(api, /stripeDiscardUnpaidCheckout\(\$db, \(string\)\$order\['id'\], 'Sesiunea Stripe nu a putut fi creata\.'/);
 assert.match(payment, /checkoutApi\.stripeStatus/);
 assert.match(payment, /checkoutApi\.cancelStripe/);
 assert.match(payment, /commerce\.clearCart\(\)/);

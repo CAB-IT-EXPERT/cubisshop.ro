@@ -6183,7 +6183,7 @@ try {
                 $order['stripe_checkout_session_id'] = $stripeSession['id'];
                 $order['stripe_checkout_url'] = $stripeSession['url'];
             } catch (Throwable $error) {
-                stripeRestoreOrderStock($db, (string)$order['id'], 'Sesiunea Stripe nu a putut fi creata.');
+                stripeDiscardUnpaidCheckout($db, (string)$order['id'], 'Sesiunea Stripe nu a putut fi creata.');
                 error_log('[Cubis Shop Stripe checkout] ' . $error->getMessage());
                 throw new InvalidArgumentException('Plata cu cardul nu a putut fi initializata. Incearca din nou.');
             }
@@ -6217,7 +6217,7 @@ try {
         $stmt = $db->prepare('SELECT * FROM shop_orders WHERE order_number = ? AND stripe_payment_token = ? AND payment_method = "card" LIMIT 1');
         $stmt->execute([$orderNumber, $token]);
         $order = $stmt->fetch();
-        if (!$order) jsonResponse(['error' => 'Comanda Stripe nu a fost gasita.'], 404);
+        if (!$order) jsonResponse(['cancelled' => true, 'already_removed' => true]);
         $sessionId = trim((string)($order['stripe_checkout_session_id'] ?? ''));
         if ($sessionId !== '') {
             $session = stripeRequest($config, 'GET', 'checkout/sessions/' . rawurlencode($sessionId));
@@ -6229,7 +6229,7 @@ try {
                 stripeRequest($config, 'POST', 'checkout/sessions/' . rawurlencode($sessionId) . '/expire', []);
             }
         }
-        stripeRestoreOrderStock($db, (string)$order['id'], 'Clientul a revenit din Stripe fara finalizarea platii.');
+        stripeDiscardUnpaidCheckout($db, (string)$order['id'], 'Clientul a revenit din Stripe fara finalizarea platii.');
         jsonResponse(['cancelled' => true]);
     }
 

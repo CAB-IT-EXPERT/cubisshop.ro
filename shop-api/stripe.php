@@ -549,25 +549,57 @@ function stripeCreateCheckoutSession(PDO $db, array $config, array $order, array
     return ['id' => $sessionId, 'url' => $checkoutUrl];
 }
 
-function stripeRestoreOrderStock(PDO $db, string $orderId, string $reason): void {
+function stripeDiscardUnpaidCheckout(PDO $db, string $orderId, string $reason): bool {
     $db->beginTransaction();
     try {
         $stmt = $db->prepare('SELECT * FROM shop_orders WHERE id = ? FOR UPDATE');
         $stmt->execute([$orderId]);
         $order = $stmt->fetch();
-        if (!$order || $order['status'] === 'cancelled' || $order['payment_status'] === 'paid') {
+        if (!$order) {
             $db->commit();
-            return;
+            return true;
         }
-        // Crearea unei comenzi și a sesiunii Checkout nu descarcă stocul.
-        // Descărcarea online/contabilă este făcută o singură dată de factura
-        // emisă după plata confirmată. O sesiune neplătită nu are, deci, nimic
-        // de repus în stoc; incrementarea de aici ar fabrica marfă la fiecare
-        // anulare sau webhook `expired` retrimis.
-        $db->prepare('UPDATE shop_orders SET status = "cancelled", payment_status = "failed", admin_notes = CONCAT_WS("\n", NULLIF(admin_notes, ""), ?) WHERE id = ?')->execute([mb_substr($reason, 0, 500), $orderId]);
+        // Numai tentativa Stripe inițială, neplătită, poate fi eliminată. O
+        // comandă ramburs, plătită sau deja intrată în fluxul operațional/fiscal
+        // rămâne întotdeauna în registrul de comenzi.
+        if ((string)$order['payment_method'] !== 'card'
+            || (string)$order['payment_status'] === 'paid'
+            || !empty($order['stripe_paid_at'])
+            || !in_array((string)$order['status'], ['new', 'cancelled'], true)) {
+            $db->commit();
+            return false;
+        }
+        // O sesiune Stripe neplătită nu descarcă stocul. Înainte de ștergere
+        // blocăm defensiv orice tentativă care a produs deja documente, mișcări
+        // ori comunicări operaționale; acestea se supun regulilor fiscale/SPV.
+        $protectedTables = [
+            'shop_invoices',
+            'shop_shipping_notes',
+            'shop_nir_documents',
+            'shop_inventory_movements',
+            'shop_order_return_items',
+            'shop_product_reviews',
+            'shop_order_admin_notifications',
+            'shop_invoice_automation_runs',
+        ];
+        foreach ($protectedTables as $table) {
+            $dependent = $db->prepare("SELECT COUNT(*) FROM {$table} WHERE order_id = ?");
+            $dependent->execute([$orderId]);
+            if ((int)$dependent->fetchColumn() > 0) {
+                throw new RuntimeException('Tentativa Stripe neplătită are date operaționale dependente și nu poate fi eliminată automat.');
+            }
+        }
         releasePromotionUsage($db, $orderId);
-        recordOrderStatusHistory($db, $orderId, (string)$order['status'], 'cancelled', 'Stripe', 'not_requested');
+        $db->prepare('DELETE FROM shop_order_status_history WHERE order_id = ?')->execute([$orderId]);
+        $db->prepare('DELETE FROM shop_order_items WHERE order_id = ?')->execute([$orderId]);
+        $deleted = $db->prepare('DELETE FROM shop_orders WHERE id = ? AND payment_method = "card" AND payment_status <> "paid" AND stripe_paid_at IS NULL');
+        $deleted->execute([$orderId]);
+        if ($deleted->rowCount() !== 1) {
+            throw new RuntimeException('Tentativa Stripe neplătită nu a putut fi eliminată în siguranță.');
+        }
         $db->commit();
+        error_log('[Cubis Shop Stripe] ' . mb_substr($reason, 0, 500));
+        return true;
     } catch (Throwable $error) {
         if ($db->inTransaction()) $db->rollBack();
         throw $error;
@@ -753,7 +785,7 @@ function stripeProcessWebhook(PDO $db, array $config, string $payload, string $s
             stripeApplyCheckoutSession($db, $session, $config);
         } elseif (in_array($eventType, ['checkout.session.async_payment_failed', 'checkout.session.expired'], true)) {
             $orderId = trim((string)($session['metadata']['cubisshop_order_id'] ?? $session['client_reference_id'] ?? ''));
-            if ($orderId !== '') stripeRestoreOrderStock($db, $orderId, 'Plata Stripe a esuat sau sesiunea a expirat.');
+            if ($orderId !== '') stripeDiscardUnpaidCheckout($db, $orderId, 'Plata Stripe a esuat sau sesiunea a expirat.');
         }
         $db->prepare('UPDATE shop_stripe_events SET status = "processed", processed_at = NOW(), last_error = NULL WHERE id = ?')->execute([$eventId]);
     } catch (Throwable $error) {
