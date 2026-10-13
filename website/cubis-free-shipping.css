@@ -1,0 +1,34 @@
+/* Free shipping announcement configured from the administration apps */
+.cs-free-shipping-bar { position: relative; isolation: isolate; height: 44px; overflow: hidden; color: #fff; background: linear-gradient(105deg, #006ae6 0%, #0786f8 42%, #09bfd5 72%, #006ae6 100%); border-bottom: 1px solid rgba(0, 67, 145, .2); box-shadow: 0 6px 22px rgba(0, 106, 230, .17); }
+.cs-free-shipping-bar::before { position: absolute; inset: 0; z-index: -1; content: ""; background: radial-gradient(circle at 50% 150%, rgba(255,255,255,.34), transparent 46%), linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); pointer-events: none; }
+.cs-free-shipping-bar::after { position: absolute; top: -104px; right: 8%; width: 128px; height: 128px; border: 1px solid rgba(255,255,255,.34); border-radius: 50%; box-shadow: 0 0 0 22px rgba(255,255,255,.055), 0 0 0 44px rgba(255,255,255,.035); content: ""; animation: cs-free-shipping-orbit 8s linear infinite; pointer-events: none; }
+.cs-free-shipping-bar__shell { position: relative; z-index: 1; display: flex; height: 100%; align-items: center; gap: 14px; }
+.cs-free-shipping-bar__badge { display: flex; height: 30px; flex: 0 0 auto; align-items: center; gap: 8px; padding: 3px 12px 3px 5px; border: 1px solid rgba(255,255,255,.42); border-radius: 999px; background: rgba(255,255,255,.16); }
+.cs-free-shipping-bar__badge > .cs-icon { width: 22px; height: 22px; padding: 4px; border-radius: 50%; color: #006ae6; background: #fff; stroke-width: 2; box-shadow: 0 3px 10px rgba(0, 64, 145, .2); animation: cs-free-shipping-badge 2.6s ease-in-out infinite; }
+.cs-free-shipping-bar__badge b { font-size: 10px; font-weight: 900; letter-spacing: .075em; text-transform: uppercase; white-space: nowrap; }
+.cs-free-shipping-bar__viewport { min-width: 0; height: 100%; flex: 1; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 30px, #000 calc(100% - 20px), transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 30px, #000 calc(100% - 20px), transparent); }
+.cs-free-shipping-bar__track { position: relative; display: block; width: 100%; height: 100%; --cs-shipping-cycle: max(720px, 70vw); --cs-shipping-duration: 18s; }
+.cs-free-shipping-bar__track > span { position: absolute; top: 50%; left: 0; display: block; width: max-content; color: #fff; font-size: clamp(12px, 11px + .15vw, 14px); font-weight: 800; letter-spacing: .012em; white-space: nowrap; text-shadow: 0 2px 10px rgba(0, 54, 130, .25); animation: cs-free-shipping-wrap-a var(--cs-shipping-duration) linear infinite; will-change: transform; }
+.cs-free-shipping-bar__track > span::before { margin-right: 11px; color: #dffbff; content: "✦"; }
+.cs-free-shipping-bar__track > span + span { animation-name: cs-free-shipping-wrap-b; }
+@keyframes cs-free-shipping-wrap-a { from { transform: translate3d(0, -50%, 0); } to { transform: translate3d(var(--cs-shipping-cycle), -50%, 0); } }
+@keyframes cs-free-shipping-wrap-b { from { transform: translate3d(calc(-1 * var(--cs-shipping-cycle)), -50%, 0); } to { transform: translate3d(0, -50%, 0); } }
+@keyframes cs-free-shipping-badge { 0%, 62%, 100% { transform: rotate(0) scale(1); } 70% { transform: rotate(-12deg) scale(1.13); } 80% { transform: rotate(10deg) scale(1.15); } 90% { transform: rotate(-4deg) scale(1.05); } }
+@keyframes cs-free-shipping-orbit { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+  .cs-free-shipping-bar { height: 43px; }
+  .cs-free-shipping-bar__shell { width: calc(100% - 16px); gap: 8px; }
+  .cs-free-shipping-bar__badge { width: 32px; height: 32px; justify-content: center; padding: 0; }
+  .cs-free-shipping-bar__badge b { display: none; }
+  .cs-free-shipping-bar__badge > .cs-icon { width: 24px; height: 24px; }
+  .cs-free-shipping-bar__viewport { mask-image: linear-gradient(90deg, transparent, #000 18px, #000 100%); -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 100%); }
+  .cs-free-shipping-bar__track { --cs-shipping-cycle: max(500px, 125vw); --cs-shipping-duration: 15s; }
+  .cs-free-shipping-bar__track > span { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-free-shipping-bar__track > span, .cs-free-shipping-bar__badge > .cs-icon, .cs-free-shipping-bar::after { animation: none; }
+  .cs-free-shipping-bar__track > span { transform: translateY(-50%); }
+  .cs-free-shipping-bar__track > span + span { display: none; }
+}

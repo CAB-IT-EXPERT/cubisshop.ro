@@ -598,12 +598,40 @@ function mobileCategoryBranch(nodes, depth = 0, ancestry = new Set(), branchId =
   }).join("")}</ul>`;
 }
 
-function shellHeader(active, filters, config) {
+function freeShippingBanner(rows) {
+  const methods = (Array.isArray(rows) ? rows : rows ? [rows] : [])
+    .filter(method => Number(method?.free_above) > 0)
+    .sort((left, right) => Number(left.free_above) - Number(right.free_above))
+    .slice(0, 1);
+  const method = methods[0];
+  if (!method) return "";
+  if (!document.querySelector('link[data-cs-free-shipping-styles]')) {
+    const styles = document.createElement("link");
+    styles.rel = "stylesheet";
+    styles.href = "/cubis-free-shipping.css?v=20261013-1";
+    styles.dataset.csFreeShippingStyles = "";
+    document.head.append(styles);
+  }
+  const threshold = Number(method.free_above);
+  const minimum = Math.floor(threshold) + 1;
+  const amount = minimum.toLocaleString("ro-RO", { maximumFractionDigits: 0 });
+  const eta = String(method.eta_label || "").trim();
+  const message = `Livrare gratuită la comenzile de minimum ${amount} lei${eta ? ` · ${eta}` : ""}`;
+  return `<section class="cs-free-shipping-bar" role="status" aria-label="Livrare gratuită disponibilă" data-free-shipping-threshold="${escapeHtml(threshold)}">
+    <div class="cs-container cs-free-shipping-bar__shell">
+      <span class="cs-free-shipping-bar__badge" aria-hidden="true">${icon("truck")}<b>Livrare gratuită</b></span>
+      <span class="cs-free-shipping-bar__viewport"><span class="cs-free-shipping-bar__track"><span>${escapeHtml(message)}</span><span aria-hidden="true">${escapeHtml(message)}</span></span></span>
+    </div>
+  </section>`;
+}
+
+function shellHeader(active, filters, config, freeShippingMethods = []) {
   const categoryRoots = categoryTree(filters?.categories);
   const customer = readJson(STORAGE.customerProfile, null);
   const favoritesHref = "/favorite";
   return `<a class="cs-skip-link" href="#main">Sari la conținut</a>
     ${PREVIEW_DEMO ? `<div class="cs-demo-banner" role="status"><strong>PREVIEW DEMO</strong><span>Date locale izolate · ${PREVIEW_STATE === "full" ? "catalog complet" : PREVIEW_STATE === "one" ? "un produs" : PREVIEW_STATE === "empty" ? "catalog gol" : "eroare simulată"}</span><a href="${previewUrl("/?previewState=full")}">Homepage</a><a href="${previewUrl("/magazin?previewState=full")}">Magazin</a></div>` : ""}
+    ${freeShippingBanner(freeShippingMethods)}
     <header class="cs-header">
       <div class="cs-container cs-header__main">
         <button class="cs-mobile-menu" type="button" data-mobile-menu-open aria-label="Deschide meniul" aria-expanded="false" aria-haspopup="dialog" aria-controls="cs-mobile-menu-panel">${icon("menu")}</button>
@@ -931,12 +959,17 @@ export async function initShell({ active = "" } = {}) {
   const footer = document.querySelector("[data-site-footer]");
   let filters = { categories: [], brands: [], manufacturers: [] };
   let config = { company: {}, payments: {}, shipping_methods: [] };
+  let freeShippingMethods = [];
   try {
-    [filters, config] = await Promise.all([data.filters(), data.config()]);
+    [filters, config, freeShippingMethods] = await Promise.all([
+      data.filters(),
+      data.config(),
+      api("publicFreeShippingBanners", { auth: false, cache: "no-store" }),
+    ]);
   } catch {
     // Shell-ul rămâne navigabil și fără configurarea API.
   }
-  if (header) header.innerHTML = shellHeader(active, filters, config);
+  if (header) header.innerHTML = shellHeader(active, filters, config, freeShippingMethods);
   if (footer) footer.innerHTML = shellFooter(filters, config);
   bindFooterSections();
   bindShellInteractions();
