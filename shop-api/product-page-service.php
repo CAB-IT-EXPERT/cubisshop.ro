@@ -80,7 +80,7 @@ function shopFreeShippingMinimum($freeAbove): ?float {
     if ($freeAbove === null || $freeAbove === '' || !is_numeric($freeAbove)) return null;
     $threshold = (float)$freeAbove;
     if (!is_finite($threshold) || $threshold <= 0) return null;
-    return floor($threshold) + 1.0;
+    return round($threshold, 2);
 }
 
 function shopFreeShippingEligible(float $subtotal, $freeAbove): bool {

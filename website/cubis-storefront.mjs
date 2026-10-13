@@ -613,8 +613,7 @@ function freeShippingBanner(rows) {
     document.head.append(styles);
   }
   const threshold = Number(method.free_above);
-  const minimum = Math.floor(threshold) + 1;
-  const amount = minimum.toLocaleString("ro-RO", { maximumFractionDigits: 0 });
+  const amount = threshold.toLocaleString("ro-RO", { maximumFractionDigits: 2 });
   const eta = String(method.eta_label || "").trim();
   const message = `Livrare gratuită la comenzile de minimum ${amount} lei${eta ? ` · ${eta}` : ""}`;
   return `<section class="cs-free-shipping-bar" role="status" aria-label="Livrare gratuită disponibilă" data-free-shipping-threshold="${escapeHtml(threshold)}">
