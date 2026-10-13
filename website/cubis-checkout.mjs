@@ -7,7 +7,6 @@ const form = document.querySelector("[data-checkout-form]");
 const elements = {
   loading: document.querySelector("[data-checkout-loading]"),
   empty: document.querySelector("[data-checkout-empty]"),
-  success: document.querySelector("[data-checkout-success]"),
   products: document.querySelector("[data-checkout-products]"),
   shippingMethods: document.querySelector("[data-shipping-methods]"),
   paymentMethods: document.querySelector("[data-payment-methods]"),
@@ -294,17 +293,6 @@ function showSubmitError(message) {
   elements.error.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function renderSuccess(order) {
-  form.hidden = true;
-  document.querySelector(".cs-checkout-hero").hidden = true;
-  document.querySelector(".cs-checkout-breadcrumb").hidden = true;
-  elements.success.hidden = false;
-  const orderNumber = String(order?.order_number || "");
-  const accountAction = state.authenticated ? `<a href="/cont#orders">Vezi comenzile mele</a>` : `<a href="/magazin">Continuă cumpărăturile</a>`;
-  elements.success.innerHTML = `<span class="cs-checkout-success__icon">${icon("check")}</span><small>Comandă înregistrată</small><h2>Îți mulțumim!</h2><p>Comanda ta a fost trimisă cu succes. Vei primi confirmarea și detaliile următoare pe e-mail.</p><div class="cs-checkout-success__order"><span>Numărul comenzii</span><strong>${escapeHtml(orderNumber)}</strong></div><div class="cs-checkout-success__actions">${accountAction}<a href="/contact">Ai nevoie de ajutor?</a></div>`;
-  elements.success.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 function orderPayload() {
   const fields = new FormData(form);
   return {
@@ -379,8 +367,17 @@ form.addEventListener("submit", async event => {
       location.assign(order.stripe_checkout_url);
       return;
     }
+    const orderNumber = String(order?.order_number || "").trim();
+    const paymentMethod = String(order?.payment_method || form.elements.payment_method.value || "").trim();
+    if (paymentMethod !== "cash_on_delivery" || !orderNumber) {
+      throw new Error("Comanda a fost înregistrată, dar răspunsul de confirmare este incomplet. Contactează-ne înainte de a retrimite formularul.");
+    }
+    const resultUrl = new URL("/plata-finalizata", location.origin);
+    resultUrl.searchParams.set("comanda", orderNumber);
+    resultUrl.searchParams.set("metoda", "cash_on_delivery");
+    resultUrl.searchParams.set("status", "cod");
     commerce.clearCart();
-    renderSuccess(order);
+    location.assign(`${resultUrl.pathname}${resultUrl.search}`);
   } catch (error) {
     showSubmitError(error?.message || "Comanda nu a putut fi trimisă. Verifică datele și încearcă din nou.");
     elements.submit.disabled = false;

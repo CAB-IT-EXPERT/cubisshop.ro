@@ -8,6 +8,7 @@ const checkout = read("checkout.html");
 const script = read("cubis-checkout.mjs");
 const payment = read("cubis-payment-result.mjs");
 const stripe = fs.readFileSync(path.resolve(root, "..", "shop-api", "stripe.php"), "utf8");
+const api = fs.readFileSync(path.resolve(root, "..", "shop-api", "api.php"), "utf8");
 
 assert.match(checkout, /data-checkout-form/);
 assert.match(checkout, /name="customer_type"/);
@@ -25,12 +26,21 @@ assert.match(script, /name="payment_method"/);
 assert.match(script, /return_base_url:\s*location\.origin/);
 assert.match(script, /stripe_checkout_url/);
 assert.match(script, /commerce\.clearCart\(\)/);
+assert.match(script, /new URL\("\/plata-finalizata"/);
+assert.match(script, /"cash_on_delivery"/);
+assert.match(script, /"status", "cod"/);
 
 assert.match(stripe, /\/plata-finalizata\?session_id=\{CHECKOUT_SESSION_ID\}/);
 assert.match(stripe, /\/plata-esuata\?comanda=/);
+assert.match(api, /stripeRestoreOrderStock\(\$db, \(string\)\$order\['id'\], 'Sesiunea Stripe nu a putut fi creata\.'/);
 assert.match(payment, /checkoutApi\.stripeStatus/);
 assert.match(payment, /checkoutApi\.cancelStripe/);
 assert.match(payment, /commerce\.clearCart\(\)/);
+assert.match(payment, /Comanda ta a fost înregistrată!/);
+assert.match(payment, /Așteptăm confirmarea plății/);
+assert.match(payment, /Plata a fost anulată/);
+assert.match(payment, /Plata nu a putut fi finalizată/);
+assert.equal(fs.existsSync(path.join(root, "comanda-plasata.html")), false);
 
 for (const page of ["plata-finalizata.html", "plata-esuata.html"]) {
   const source = read(page);

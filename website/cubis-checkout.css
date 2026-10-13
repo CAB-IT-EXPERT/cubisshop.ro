@@ -205,15 +205,17 @@
 .cs-payment-result::after { width: 190px; height: 190px; bottom: -135px; left: -55px; border: 36px solid rgba(8,124,240,.06); }
 .cs-payment-result > * { position: relative; z-index: 1; }
 .cs-payment-result.is-cancelled { border-color: #cfe0ef; background: linear-gradient(145deg, #fff, #f1f8ff); }
+.cs-payment-result.is-pending { border-color: #bcdcf6; background: linear-gradient(145deg, #fff, #f0f8ff); }
 .cs-payment-result.is-error { border-color: #f0c5cd; background: linear-gradient(145deg, #fff, #fff5f7); }
 .cs-payment-result__loading { display: grid; justify-items: center; gap: 12px; }
 .cs-payment-result .cs-spinner { width: 48px; height: 48px; border: 5px solid #dcecf8; border-top-color: var(--co-primary); border-radius: 50%; animation: co-spin .75s linear infinite; }
 .cs-payment-result__icon { display: grid; width: 86px; height: 86px; margin-bottom: 12px; place-items: center; color: #fff; border-radius: 28px; background: linear-gradient(135deg, #08aa77, #10c995); box-shadow: 0 17px 34px rgba(5,150,105,.24); }
 .cs-payment-result.is-cancelled .cs-payment-result__icon { background: linear-gradient(135deg, var(--co-primary), var(--co-cyan)); box-shadow: 0 17px 34px rgba(8,124,240,.22); }
+.cs-payment-result.is-pending .cs-payment-result__icon { background: linear-gradient(135deg, #087cf0, #17bde3); box-shadow: 0 17px 34px rgba(8,124,240,.22); }
 .cs-payment-result.is-error .cs-payment-result__icon { background: linear-gradient(135deg, #e83d5b, #fa7188); box-shadow: 0 17px 34px rgba(232,61,91,.2); }
 .cs-payment-result__icon svg { width: 43px; height: 43px; }
 .cs-payment-result small { color: var(--co-success); font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
-.cs-payment-result.is-cancelled small { color: var(--co-primary); }.cs-payment-result.is-error small { color: var(--co-danger); }
+.cs-payment-result.is-cancelled small, .cs-payment-result.is-pending small { color: var(--co-primary); }.cs-payment-result.is-error small { color: var(--co-danger); }
 .cs-payment-result h1 { max-width: 650px; margin: 0; color: var(--co-ink); font-size: clamp(34px, 5vw, 54px); line-height: 1.02; letter-spacing: -.06em; }
 .cs-payment-result p { max-width: 600px; margin: 4px 0 0; color: var(--co-muted); font-size: 14px; line-height: 1.7; }
 .cs-payment-result__receipt { display: flex; align-items: center; gap: 18px; margin: 17px 0 3px; padding: 13px 16px; border: 1px solid #cce4da; border-radius: 14px; background: #fff; font-size: 12px; }
