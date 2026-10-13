@@ -716,6 +716,9 @@ function stripePublicOrderReceipt(PDO $db, array $config, array $order): array {
     if ($estimatedDeliveryDate === '') $estimatedDeliveryDate = (new DateTimeImmutable((string)($order['created_at'] ?? 'now')))->modify('+7 days')->format('Y-m-d');
     return [
         'orderNumber' => (string)$order['order_number'],
+        'trackingUrl' => !empty($order['tracking_token'])
+            ? '/urmarire-comanda?token=' . rawurlencode((string)$order['tracking_token'])
+            : '',
         'customerEmail' => (string)($order['customer_email'] ?? ''),
         'deliveryCountry' => 'RO',
         'estimatedDeliveryDate' => $estimatedDeliveryDate,

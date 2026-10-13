@@ -13,17 +13,30 @@ function storedCheckout() {
   }
 }
 
-function actionButtons({ primaryHref = "/magazin", primaryLabel = "Continuă cumpărăturile", account = false } = {}) {
+function trackingHrefFromToken(value) {
+  const token = String(value || "").trim();
+  return /^[A-Za-z0-9_-]{32,128}$/.test(token) ? `/urmarire-comanda?token=${encodeURIComponent(token)}` : "";
+}
+
+function safeTrackingHref(value) {
+  const href = String(value || "").trim();
+  return /^\/urmarire-comanda\?token=[A-Za-z0-9_-]{32,128}$/.test(href) ? href : "";
+}
+
+function actionButtons({ primaryHref = "/magazin", primaryLabel = "Continuă cumpărăturile", account = false, trackingHref = "" } = {}) {
+  if (trackingHref) {
+    return `<div class="cs-payment-result__actions"><a class="is-primary" href="${escapeHtml(trackingHref)}">${icon("package")}<span>Urmărește comanda</span><span aria-hidden="true">→</span></a><a href="/magazin">Continuă cumpărăturile</a></div>`;
+  }
   const secondary = account ? '<a href="/cont#orders">Vezi comenzile</a>' : '<a href="/contact">Ai nevoie de ajutor?</a>';
   return `<div class="cs-payment-result__actions"><a class="is-primary" href="${escapeHtml(primaryHref)}">${escapeHtml(primaryLabel)} <span aria-hidden="true">→</span></a>${secondary}</div>`;
 }
 
-function render({ type, eyebrow, title, copy, orderNumber = "", total = null, primaryHref = "/magazin", primaryLabel = "Continuă cumpărăturile", showAccount = true }) {
+function render({ type, eyebrow, title, copy, orderNumber = "", total = null, primaryHref = "/magazin", primaryLabel = "Continuă cumpărăturile", showAccount = true, trackingHref = "" }) {
   const authenticated = Boolean(localStorage.getItem(STORAGE_KEYS.customerToken));
   card.className = `cs-payment-result is-${type}`;
   card.setAttribute("aria-busy", "false");
   const resultIcon = type === "success" ? "check" : type === "cancelled" || type === "pending" ? "rotate" : "info";
-  card.innerHTML = `<span class="cs-payment-result__icon">${icon(resultIcon)}</span><small>${escapeHtml(eyebrow)}</small><h1>${escapeHtml(title)}</h1><p>${escapeHtml(copy)}</p>${orderNumber ? `<div class="cs-payment-result__receipt"><span>Comanda <strong>${escapeHtml(orderNumber)}</strong></span>${total !== null ? `<b>${money(total)}</b>` : ""}</div>` : ""}${actionButtons({ primaryHref, primaryLabel, account: authenticated && showAccount })}`;
+  card.innerHTML = `<span class="cs-payment-result__icon">${icon(resultIcon)}</span><small>${escapeHtml(eyebrow)}</small><h1>${escapeHtml(title)}</h1><p>${escapeHtml(copy)}</p>${orderNumber ? `<div class="cs-payment-result__receipt"><span>Comanda <strong>${escapeHtml(orderNumber)}</strong></span>${total !== null ? `<b>${money(total)}</b>` : ""}</div>` : ""}${actionButtons({ primaryHref, primaryLabel, account: authenticated && showAccount, trackingHref })}`;
 }
 
 function confirmCashOnDelivery() {
@@ -34,6 +47,7 @@ function confirmCashOnDelivery() {
   }
   const stored = storedCheckout();
   const storedMatches = String(stored.order_number || "") === orderNumber;
+  const trackingHref = storedMatches ? trackingHrefFromToken(stored.tracking_token) : "";
   commerce.clearCart();
   render({
     type: "success",
@@ -42,6 +56,7 @@ function confirmCashOnDelivery() {
     copy: "Plata se face la livrare, direct curierului. Am trimis pe e-mail confirmarea și detaliile comenzii.",
     orderNumber,
     total: storedMatches && Number(stored.total) > 0 ? Number(stored.total) : null,
+    trackingHref,
   });
 }
 
@@ -59,14 +74,16 @@ async function confirmPayment() {
       return;
     }
     const order = result.order || {};
+    const trackingHref = safeTrackingHref(order.trackingUrl);
     commerce.clearCart();
     sessionStorage.setItem(STORAGE_KEYS.checkout, JSON.stringify({
       order_number: order.orderNumber || params.get("comanda") || "",
       payment_method: order.paymentMethod || "card",
       payment_status: order.paymentStatus || result.payment_status,
       total: order.total || 0,
+      tracking_url: trackingHref,
     }));
-    render({ type: "success", eyebrow: "Plată confirmată", title: "Comanda ta este confirmată!", copy: `Am înregistrat plata și am trimis detaliile comenzii la ${order.customerEmail || "adresa ta de e-mail"}.`, orderNumber: order.orderNumber || params.get("comanda") || "", total: Number(order.total || 0) });
+    render({ type: "success", eyebrow: "Plată confirmată", title: "Comanda ta este confirmată!", copy: `Am înregistrat plata și am trimis detaliile comenzii la ${order.customerEmail || "adresa ta de e-mail"}.`, orderNumber: order.orderNumber || params.get("comanda") || "", total: Number(order.total || 0), trackingHref });
   } catch (error) {
     render({ type: "pending", eyebrow: "Verificare temporar indisponibilă", title: "Confirmarea plății întârzie", copy: error?.message || "Încearcă din nou peste câteva momente. Coșul nu a fost șters.", orderNumber: params.get("comanda") || "", primaryHref: `${location.pathname}${location.search}`, primaryLabel: "Verifică din nou" });
   }

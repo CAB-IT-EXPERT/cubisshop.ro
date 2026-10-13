@@ -40,6 +40,12 @@ assert.match(payment, /Comanda ta a fost înregistrată!/);
 assert.match(payment, /Așteptăm confirmarea plății/);
 assert.match(payment, /Plata a fost anulată/);
 assert.match(payment, /Plata nu a putut fi finalizată/);
+assert.match(payment, /Urmărește comanda/);
+assert.match(payment, /stored\.tracking_token/);
+assert.match(payment, /order\.trackingUrl/);
+assert.match(payment, /\/urmarire-comanda\?token=/);
+assert.match(stripe, /'trackingUrl'/);
+assert.match(stripe, /\/urmarire-comanda\?token=/);
 assert.equal(fs.existsSync(path.join(root, "comanda-plasata.html")), false);
 
 for (const page of ["plata-finalizata.html", "plata-esuata.html"]) {
